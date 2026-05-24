@@ -1,0 +1,119 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base typography */
+body {
+  @apply font-body text-base font-regular leading-normal text-text-dark bg-white antialiased;
+}
+
+/* Display headlines */
+.text-display-xl {
+  @apply font-display text-6xl font-light leading-tight tracking-tight;
+}
+
+.text-display-lg {
+  @apply font-display text-5xl font-light leading-tight tracking-tight;
+}
+
+.text-display-md {
+  @apply font-display text-4xl font-regular leading-snug;
+}
+
+/* Section headlines */
+.text-heading-lg {
+  @apply font-body text-3xl font-semibold leading-snug;
+}
+
+.text-heading-md {
+  @apply font-body text-2xl font-semibold leading-snug;
+}
+
+.text-heading-sm {
+  @apply font-body text-xl font-medium leading-snug;
+}
+
+/* Body text */
+.text-body-lg {
+  @apply font-body text-md font-regular leading-relaxed;
+}
+
+.text-body {
+  @apply font-body text-base font-regular leading-normal;
+}
+
+.text-body-sm {
+  @apply font-body text-sm font-regular leading-normal;
+}
+
+/* Labels */
+.text-label {
+  @apply font-ui text-xs font-semibold tracking-widest uppercase;
+}
+
+/* Stats */
+.text-stat {
+  @apply font-display text-4xl font-medium leading-none;
+}
+
+/* Buttons */
+.btn {
+  @apply font-ui text-base font-medium rounded-pill px-8 py-3 inline-flex items-center gap-2 transition-all duration-base cursor-pointer border-none;
+}
+
+.btn-primary {
+  @apply bg-teal-700 text-white shadow-md hover:bg-teal-600 hover:shadow-lg hover:-translate-y-0.5;
+}
+
+.btn-outline {
+  @apply bg-transparent text-teal-700 border-2 border-teal-700 hover:bg-teal-700 hover:text-white;
+}
+
+.btn-ghost-light {
+  @apply bg-transparent text-white border-2 border-white border-opacity-50 hover:bg-white hover:bg-opacity-10 hover:border-white;
+}
+
+/* Cards */
+.card {
+  @apply bg-cream-500 rounded-lg p-8 shadow-card transition-all duration-base hover:shadow-lg hover:-translate-y-0.5;
+}
+
+.card-dark {
+  @apply bg-teal-800 text-white;
+}
+
+/* Tags */
+.tag {
+  @apply font-ui text-xs font-medium tracking-wide rounded-pill px-3 py-1 bg-teal-100 text-teal-800;
+}
+
+/* Input fields */
+.input {
+  @apply font-body text-base text-text-dark bg-white border-2 border-cream-700 rounded-md px-4 py-3 w-full transition-all duration-fast placeholder-text-muted focus:outline-none focus:border-teal-700 focus:ring-4 focus:ring-teal-700 focus:ring-opacity-15;
+}
+
+/* Dividers */
+.divider {
+  @apply border-0 border-t border-cream-700 my-8;
+}
+
+.divider-dark {
+  @apply border-white border-opacity-15;
+}
+
+/* Utility helpers */
+.bg-primary { @apply bg-teal-800; }
+.bg-secondary { @apply bg-blue-grey-300; }
+.bg-surface { @apply bg-cream-500; }
+.text-light { @apply text-white; }
+.text-dark { @apply text-text-dark; }
+.text-muted { @apply text-text-muted; }
+.text-accent { @apply text-gold; }
+.text-teal { @apply text-teal-700; }
+
+/* Container */
+.container {
+  @apply w-full max-w-content mx-auto px-6 md:px-10 lg:px-16;
+}
