@@ -34,7 +34,7 @@ export default function WaitlistForm() {
       if (response.ok) {
         // Track conversion event for analytics
         if (typeof window !== 'undefined' && (window as any).gtag) {
-          window.gtag('event', 'waitlist_signup', {
+          (window as any).gtag('event', 'waitlist_signup', {
             email: email,
           });
         }
