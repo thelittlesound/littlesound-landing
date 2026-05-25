@@ -40,7 +40,7 @@ export default function Hero() {
               <div className="text-6xl mb-4">📸</div>
               <p className="font-semibold">Hero Image</p>
               <p className="text-sm mt-2">Pacific Northwest family moment</p>
-              <p className="text-xs text-text-muted mt-4">(Replace with actual image)</p>
+              <img src="/images/hero.jpg" alt="Little Sound family activities" className="w-full h-auto rounded-lg" />
             </div>
           </div>
         </div>
