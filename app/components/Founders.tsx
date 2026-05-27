@@ -1,15 +1,23 @@
+import Image from 'next/image';
+
 export default function Founders() {
   return (
     <section className="bg-[#0D5C6E] py-24 px-6 md:px-10 lg:px-16">
       <div className="max-w-[1280px] mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 
-          {/* Image placeholder — replace with real photo */}
+          {/* Founders photo */}
           <div className="hidden lg:flex flex-col items-start gap-3">
-            <div className="w-full aspect-[4/3] rounded-[20px] bg-white/10 border border-white/15 flex items-center justify-center">
-              <span className="text-6xl opacity-40">👨‍👩‍👧‍👦</span>
+            <div className="w-full aspect-[4/3] rounded-[20px] overflow-hidden relative">
+              <Image
+                src="/images/founders.png"
+                alt="Kelly and Evan Sherman, founders of Little Sound"
+                fill
+                className="object-cover"
+                sizes="(max-width: 1280px) 50vw, 640px"
+              />
             </div>
-            <p className="text-white/35 text-[13px] pl-1">The Sherman Family · Seattle</p>
+            <p className="text-white/35 text-[13px] pl-1">Kelly & Evan Sherman · Seattle</p>
           </div>
 
           {/* Content */}
