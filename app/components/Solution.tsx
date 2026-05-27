@@ -1,81 +1,81 @@
 export default function Solution() {
-  const features = [
+  const steps = [
     {
-      number: '1',
-      title: 'Discover',
-      description: 'Browse activities by age, interest, location, and budget—all in one place.',
+      num: '01',
+      icon: '🗺️',
+      title: 'Tell Us About Your Family',
+      body: 'Ages, interests, your neighborhood, your budget, your schedule. Takes two minutes. You\'ll never fill out another intake form again.',
+      honest: 'No fluff. No five-page onboarding. Just the essentials.',
     },
     {
-      number: '2',
-      title: 'Compare',
-      description: 'Read real reviews, check instructor bios, and compare pricing side-by-side.',
+      num: '02',
+      icon: '🌲',
+      title: 'We Find the Best Options',
+      body: 'Personalized picks based on your actual family — verified providers, real reviews, and current availability. No guesswork.',
+      honest: 'We check credentials so you don\'t have to.',
     },
     {
-      number: '3',
-      title: 'Book & Manage',
-      description: 'One-click booking, integrated calendar, and all payments in one dashboard.',
+      num: '03',
+      icon: '☕',
+      title: 'Book and Actually Relax',
+      body: 'One-click booking. Calendar sync. Payment in one place. Your Sunday night is yours again.',
+      honest: 'Go make some coffee. You\'ve earned it.',
     },
   ];
 
   return (
-    <section className="py-24 bg-blue-grey-100">
-      <div className="container">
-        <div className="text-center mb-16">
-          <span className="text-label text-teal-700 mb-4 block">The Solution</span>
-          <h2 className="text-heading-lg mb-6">
-            Everything you need in one platform.
-          </h2>
-          <p className="text-body-lg text-text-mid max-w-2xl mx-auto">
-            Discover, compare, and book activities—without the overwhelm. All in one beautiful, intuitive platform built for busy parents.
-          </p>
-        </div>
+    <section className="bg-[#0D5C6E] py-24 px-6 md:px-10 lg:px-16 relative overflow-hidden">
+      {/* Subtle wave decoration */}
+      <svg
+        className="absolute bottom-0 right-0 opacity-5 pointer-events-none"
+        width="400" height="300" viewBox="0 0 400 300" fill="none"
+      >
+        <path d="M50,150 Q100,80 150,150 Q200,220 250,150 Q300,80 350,150" stroke="white" strokeWidth="2" fill="none"/>
+        <path d="M50,180 Q100,110 150,180 Q200,250 250,180 Q300,110 350,180" stroke="white" strokeWidth="2" fill="none"/>
+        <path d="M50,210 Q100,140 150,210 Q200,280 250,210 Q300,140 350,210" stroke="white" strokeWidth="2" fill="none"/>
+      </svg>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-          {features.map((feature, index) => (
-            <div key={index} className="text-center">
-              <div className="bg-teal-700 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6 shadow-lg">
-                <span className="text-stat">{feature.number}</span>
-              </div>
-              <h3 className="text-heading-sm mb-4">{feature.title}</h3>
-              <p className="text-body text-text-mid leading-relaxed">
-                {feature.description}
+      <div className="max-w-[1280px] mx-auto relative z-10">
+
+        {/* Eyebrow */}
+        <p className="text-xs font-bold uppercase tracking-widest text-[#C4A882] mb-4">
+          How It Works
+        </p>
+
+        {/* Headline */}
+        <h2 className="font-['Cormorant_Garamond'] text-[clamp(34px,4vw,52px)] font-light leading-[1.15] tracking-tight text-white mb-4 max-w-[540px]">
+          Less clicks.<br />
+          <em className="italic text-[#C4A882]">More living.</em>
+        </h2>
+
+        <p className="text-[17px] text-white/50 leading-relaxed max-w-[480px] mb-14">
+          We do the research. You get the time back. Here's how it works once you're in.
+        </p>
+
+        {/* Steps */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-[860px]">
+          {steps.map((step) => (
+            <div
+              key={step.num}
+              className="bg-white/5 border border-white/10 rounded-[20px] p-9"
+            >
+              <p className="font-['Cormorant_Garamond'] text-[52px] font-semibold text-white/8 leading-none mb-4">
+                {step.num}
+              </p>
+              <span className="text-[26px] mb-4 block">{step.icon}</span>
+              <h3 className="font-['Cormorant_Garamond'] text-[20px] font-semibold text-white/90 mb-3">
+                {step.title}
+              </h3>
+              <p className="text-[14px] leading-[1.8] text-white/45 mb-4">
+                {step.body}
+              </p>
+              <p className="text-[13px] italic text-[#A8C8D8] font-['Cormorant_Garamond']">
+                {step.honest}
               </p>
             </div>
           ))}
         </div>
 
-        {/* Feature highlight */}
-        <div className="mt-20 bg-white rounded-2xl p-12 shadow-card">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            <div>
-              <h3 className="text-heading-md mb-6">Built by parents, for parents.</h3>
-              <p className="text-body-lg text-text-mid mb-6">
-                We know what families need because we've lived it. Little Sound was built to solve the exact problems we experienced.
-              </p>
-              <ul className="space-y-4">
-                <li className="flex items-start gap-3">
-                  <span className="text-gold text-xl mt-1">✓</span>
-                  <span className="text-body">Personalized recommendations based on your family's interests</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-gold text-xl mt-1">✓</span>
-                  <span className="text-body">Real safety checks and verified instructor credentials</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-gold text-xl mt-1">✓</span>
-                  <span className="text-body">Seattle-first launch—starting with our community</span>
-                </li>
-              </ul>
-            </div>
-            <div className="bg-gradient-to-br from-cream-300 to-cream-500 rounded-2xl aspect-square flex items-center justify-center">
-              <div className="text-center text-teal-700 p-8">
-                <div className="text-6xl mb-4">🎯</div>
-                <p className="font-semibold">Feature Image</p>
-                <p className="text-sm mt-2">App screenshot or feature demo</p>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </section>
   );
