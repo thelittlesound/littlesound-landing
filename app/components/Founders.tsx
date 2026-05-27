@@ -13,7 +13,7 @@ export default function Founders() {
                 src="/images/founders.png"
                 alt="Kelly and Evan Sherman, founders of Little Sound"
                 fill
-                className="object-cover"
+                className="object-cover object-top"
                 sizes="(max-width: 1280px) 50vw, 640px"
               />
             </div>
