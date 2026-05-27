@@ -2,7 +2,7 @@ export default function Solution() {
   const steps = [
     {
       num: '01',
-      icon: '🗺️',
+      icon: '✏️',
       title: 'Tell Us About Your Family',
       body: 'Ages, interests, your neighborhood, your budget, your schedule. Takes two minutes. You\'ll never fill out another intake form again.',
       honest: 'No fluff. No five-page onboarding. Just the essentials.',
