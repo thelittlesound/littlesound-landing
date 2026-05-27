@@ -8,12 +8,12 @@ export default function Founders() {
 
           {/* Founders photo */}
           <div className="hidden lg:flex flex-col items-start gap-3">
-            <div className="w-full aspect-[4/3] rounded-[20px] overflow-hidden relative">
+            <div className="w-full aspect-[3/4] rounded-[20px] overflow-hidden relative">
               <Image
                 src="/images/founders.png"
                 alt="Kelly and Evan Sherman, founders of Little Sound"
                 fill
-                className="object-cover object-top"
+                className="object-cover object-center"
                 sizes="(max-width: 1280px) 50vw, 640px"
               />
             </div>
