@@ -1,22 +1,22 @@
 export default function Problem() {
   const problems = [
     {
-      icon: '🌧️',
-      title: 'The Sunday Night Spiral',
-      body: 'You meant to figure out summer camps in January. It\'s now March, you\'re on your fourth website, and the good ones are already full.',
-      realTalk: '"We\'ve been there. Twice. That\'s why we built this."',
+      icon: '🏃',
+      title: 'The Camp & Activity Marathon',
+      body: 'Every season it\'s the same. Hours of searching, comparing, and second-guessing — before you\'ve booked a single thing.',
+      realTalk: '"We counted. 6 sites. That\'s too many."',
     },
     {
-      icon: '📱',
-      title: 'The App Graveyard',
-      body: 'One app for payments. One for schedules. Emails from three different providers. A Google doc you made and never finished. Sound familiar?',
-      realTalk: '"There\'s a better way. One place. Everything."',
+      icon: '🌀',
+      title: 'The Booking Black Hole',
+      body: 'Payment here. Schedule there. Confirmation buried in your inbox. Nothing talks to anything else.',
+      realTalk: '"One place. That\'s all it should take."',
     },
     {
-      icon: '😬',
-      title: 'The Waitlist Surprise',
-      body: 'You finally found the perfect camp. Verified credentials. Great reviews. Perfect schedule. Already full. Join the waitlist — for next year.',
-      realTalk: '"Little Sound shows you what\'s actually open, right now."',
+      icon: '⏰',
+      title: 'The Always-Full Problem',
+      body: 'You found the perfect one. Great reviews. Right age group. Right price. Waitlist only. Try again next year.',
+      realTalk: '"Little Sound shows you what\'s open right now."',
     },
   ];
 
@@ -31,12 +31,12 @@ export default function Problem() {
 
         {/* Headline */}
         <h2 className="font-['Cormorant_Garamond'] text-[clamp(34px,4vw,52px)] font-light leading-[1.15] tracking-tight text-[#1C3A4A] mb-4 max-w-[640px]">
-          It's not that you don't care.<br />
-          It's that it takes <em className="italic text-[#1A7A8A]">forever.</em>
+          It shouldn't take<br />
+          <em className="italic text-[#1A7A8A]">this long.</em>
         </h2>
 
         <p className="text-[17px] text-[#3A5A6A] leading-relaxed max-w-[520px] mb-14">
-          Nobody tells you that parenting in Seattle means a part-time job just keeping up with activities. We've been there. Here's what it actually looks like.
+          6 websites. 14 tabs. 3 group chats. And you still don't know if there's a spot left.
         </p>
 
         {/* Cards */}
