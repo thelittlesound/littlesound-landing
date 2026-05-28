@@ -27,6 +27,53 @@ export default function Hero() {
     }
   };
 
+  const activities = [
+    {
+      icon: '⚽',
+      bg: '#D6EEF2',
+      name: 'Fremont Youth Soccer',
+      provider: 'Seattle FC Academy',
+      detail: 'Ages 7–12 · $280/wk · 0.6 mi',
+      rating: '4.9',
+      reviews: '124',
+      tag: 'Open',
+      tagColor: 'bg-emerald-100 text-emerald-700',
+    },
+    {
+      icon: '🎨',
+      bg: '#F5EFE0',
+      name: 'Phinney Arts Studio',
+      provider: 'Phinney Ridge Arts',
+      detail: 'Ages 6–14 · $95/mo · 1.1 mi',
+      rating: '4.8',
+      reviews: '89',
+      tag: '2 spots left',
+      tagColor: 'bg-amber-100 text-amber-700',
+    },
+    {
+      icon: '🔬',
+      bg: '#EBF2F8',
+      name: 'Burke Museum STEM',
+      provider: 'Burke Museum',
+      detail: 'Ages 8–12 · $310/wk · 2.3 mi',
+      rating: '4.7',
+      reviews: '56',
+      tag: 'Open',
+      tagColor: 'bg-emerald-100 text-emerald-700',
+    },
+    {
+      icon: '🎭',
+      bg: '#F0EBF8',
+      name: 'Seattle Children\'s Theatre',
+      provider: 'SCT Drama Camp',
+      detail: 'Ages 6–16 · $250/wk · 3.1 mi',
+      rating: '4.9',
+      reviews: '201',
+      tag: 'Filling fast',
+      tagColor: 'bg-red-100 text-red-600',
+    },
+  ];
+
   return (
     <section className="min-h-screen bg-[#0D5C6E] pt-24 pb-16 px-6 md:px-10 lg:px-16 flex items-center">
       <div className="max-w-[1280px] mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
@@ -42,22 +89,23 @@ export default function Hero() {
           </div>
 
           {/* Headline */}
-          <h1
-            className="font-['Cormorant_Garamond'] text-[clamp(44px,5.5vw,72px)] font-light leading-[1.1] tracking-tight text-white mb-6"
-          >
-            Your kids deserve<br />
-            more of <em className="italic text-[#C4A882]">your time.</em>
+          <h1 className="font-['Cormorant_Garamond'] text-[clamp(44px,5.5vw,72px)] font-light leading-[1.1] tracking-tight text-white mb-6">
+            Finding the right activity<br />
+            shouldn't be a <em className="italic text-[#C4A882]">second job.</em>
           </h1>
 
           {/* Subhead */}
           <p className="text-white/70 text-lg leading-relaxed max-w-[460px] mb-5">
-            Little Sound finds, compares, and books kids' activities in Seattle — so your Sunday nights belong to your family again.
+            More time with your kids. Less time searching.
           </p>
 
-          {/* Founder hook */}
-          <p className="border-l-2 border-[#C4A882]/50 pl-4 text-white/60 italic text-[15px] leading-relaxed font-['Cormorant_Garamond'] max-w-[460px] mb-10">
-            "I didn't build a company because I had a brilliant idea. I built it because I was sick of spending Sunday evenings on five different websites instead of with my kids." — Kelly, co-founder & Seattle mom of two
-          </p>
+          {/* Emotional stat hook */}
+          <div className="border-l-2 border-[#C4A882]/50 pl-4 mb-10 max-w-[420px]">
+            <p className="text-white/80 text-[15px] leading-relaxed font-['Cormorant_Garamond'] italic">
+              "Parents spend 8+ hours every season searching for activities across dozens of sites. That time belongs to your family."
+            </p>
+            <p className="text-[#C4A882] text-[12px] mt-2 font-semibold">— Kelly Sherman, Co-founder & Seattle mom of two</p>
+          </div>
 
           {/* Form */}
           {status === 'success' ? (
@@ -100,41 +148,94 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* Right — app mockup */}
+        {/* Right — Skyscanner-style search results mockup */}
         <div className="hidden lg:flex justify-center items-center">
-          <div className="w-[300px] bg-white rounded-[28px] shadow-2xl overflow-hidden border border-white/10 animate-[float_7s_ease-in-out_infinite]">
-            {/* Card header */}
-            <div className="bg-[#0A4A5A] px-5 py-5">
-              <p className="text-white/50 text-[11px] mb-1">Good morning, Kelly 👋</p>
-              <p className="text-white font-['Cormorant_Garamond'] text-[17px] font-semibold">Activities near Fremont</p>
-              <div className="mt-3 bg-white/10 rounded-xl px-3 py-2 text-[11px] text-white/55 flex items-center gap-2">
-                🌧️ Rainy weekend ahead — great time to book indoors
+          <div className="w-[420px] bg-white rounded-[24px] shadow-2xl overflow-hidden border border-white/10 animate-[float_7s_ease-in-out_infinite]">
+
+            {/* Search bar header */}
+            <div className="bg-[#0A4A5A] px-5 pt-5 pb-4">
+              <div className="flex items-center gap-2 bg-white/10 rounded-xl px-3 py-2.5 mb-3">
+                <span className="text-white/50 text-[12px]">🔍</span>
+                <span className="text-white/70 text-[12px]">Activities near Fremont, Seattle</span>
+              </div>
+              {/* Filter pills */}
+              <div className="flex gap-2 overflow-x-auto pb-1">
+                {[
+                  { label: 'Age: 9', active: true },
+                  { label: 'All Categories', active: false },
+                  { label: 'Under $300/wk', active: true },
+                  { label: 'Within 3 mi', active: false },
+                ].map((f) => (
+                  <span
+                    key={f.label}
+                    className={`whitespace-nowrap text-[10px] font-semibold px-3 py-1.5 rounded-full flex-shrink-0 ${
+                      f.active
+                        ? 'bg-[#C4A882] text-white'
+                        : 'bg-white/10 text-white/60'
+                    }`}
+                  >
+                    {f.label}
+                  </span>
+                ))}
               </div>
             </div>
-            {/* Card body */}
-            <div className="px-4 py-4">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-[#7A9AAA] mb-3">
-                Recommended for Maya, age 9
+
+            {/* Results meta */}
+            <div className="px-4 pt-3 pb-2 flex items-center justify-between border-b border-[#E8DFC8]">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-[#7A9AAA]">
+                24 results near Fremont
               </p>
-              {[
-                { icon: '⚽', bg: '#D6EEF2', name: 'Fremont Youth Soccer', detail: 'Ages 7–12 · $280/wk · 0.6 mi', tag: 'Open', tagColor: 'bg-[#D6EEF2] text-[#0D5C6E]' },
-                { icon: '🎨', bg: '#F5EFE0', name: 'Phinney Arts Studio', detail: 'Ages 6–14 · $95/mo · 1.1 mi', tag: '2 left', tagColor: 'bg-amber-100 text-amber-700' },
-                { icon: '🔬', bg: '#EBF2F8', name: 'Burke Museum STEM', detail: 'Ages 8–12 · $310/wk · 2.3 mi', tag: 'Open', tagColor: 'bg-[#D6EEF2] text-[#0D5C6E]' },
-              ].map((item) => (
-                <div key={item.name} className="flex items-center gap-3 bg-[#F5EFE0] border border-[#E8DFC8] rounded-[13px] px-3 py-2.5 mb-2">
-                  <div className="w-9 h-9 rounded-[9px] flex items-center justify-center text-base flex-shrink-0" style={{ background: item.bg }}>
+              <div className="flex items-center gap-1 text-[10px] text-[#1A7A8A] font-semibold">
+                Sort: Best Match ▾
+              </div>
+            </div>
+
+            {/* Results list */}
+            <div className="px-4 py-3 space-y-2.5">
+              {activities.map((item) => (
+                <div
+                  key={item.name}
+                  className="flex items-center gap-3 bg-[#F5EFE0] border border-[#E8DFC8] rounded-[14px] px-3 py-3 cursor-pointer hover:border-[#1A7A8A]/30 transition-colors"
+                >
+                  {/* Icon */}
+                  <div
+                    className="w-10 h-10 rounded-[10px] flex items-center justify-center text-lg flex-shrink-0"
+                    style={{ background: item.bg }}
+                  >
                     {item.icon}
                   </div>
+
+                  {/* Info */}
                   <div className="flex-1 min-w-0">
                     <p className="text-[12px] font-semibold text-[#1C3A4A] truncate">{item.name}</p>
-                    <p className="text-[10px] text-[#7A9AAA]">{item.detail}</p>
+                    <p className="text-[10px] text-[#7A9AAA] truncate">{item.provider}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-[10px] text-[#C4A882] font-semibold">★ {item.rating}</span>
+                      <span className="text-[10px] text-[#7A9AAA]">({item.reviews})</span>
+                      <span className="text-[10px] text-[#7A9AAA]">· {item.detail.split('·')[2]}</span>
+                    </div>
                   </div>
-                  <span className={`text-[10px] font-semibold px-2 py-1 rounded-full whitespace-nowrap ${item.tagColor}`}>
-                    {item.tag}
-                  </span>
+
+                  {/* Right col */}
+                  <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+                    <span className={`text-[10px] font-semibold px-2 py-1 rounded-full whitespace-nowrap ${item.tagColor}`}>
+                      {item.tag}
+                    </span>
+                    <span className="text-[11px] font-bold text-[#1C3A4A]">
+                      {item.detail.split('·')[1].trim()}
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>
+
+            {/* Bottom CTA */}
+            <div className="px-4 pb-4">
+              <div className="bg-[#0D5C6E] rounded-[12px] px-4 py-3 text-center">
+                <p className="text-white text-[12px] font-semibold">See all 24 activities →</p>
+              </div>
+            </div>
+
           </div>
         </div>
 
