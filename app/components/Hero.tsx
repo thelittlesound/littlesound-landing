@@ -90,8 +90,8 @@ export default function Hero() {
 
           {/* Headline */}
           <h1 className="font-['Cormorant_Garamond'] text-[clamp(44px,5.5vw,72px)] font-light leading-[1.1] tracking-tight text-white mb-6">
-            Finding the right activity<br />
-            shouldn't be a <em className="italic text-[#C4A882]">second job.</em>
+            The hard part,<br />
+            <em className="italic text-[#C4A882]">handled.</em>
           </h1>
 
           {/* Subhead */}
