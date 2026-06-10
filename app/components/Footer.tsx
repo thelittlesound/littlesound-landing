@@ -45,9 +45,9 @@ export default function Footer() {
               Legal
             </h4>
             <ul className="space-y-3 text-sm">
-              <li><a href="#" className="text-blue-grey-300 hover:text-white transition">Privacy Policy</a></li>
-              <li><a href="#" className="text-blue-grey-300 hover:text-white transition">Terms of Service</a></li>
-              <li><a href="#" className="text-blue-grey-300 hover:text-white transition">Cookie Policy</a></li>
+              <li><a href="/privacy" className="text-blue-grey-300 hover:text-white transition">Privacy Policy</a></li>
+<li><a href="/terms" className="text-blue-grey-300 hover:text-white transition">Terms of Service</a></li>
+<li><a href="#" className="text-blue-grey-300 hover:text-white transition">Cookie Policy</a></li>
             </ul>
           </div>
         </div>
