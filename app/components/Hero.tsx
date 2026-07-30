@@ -102,16 +102,16 @@ export default function Hero() {
           {/* Emotional stat hook */}
           <div className="border-l-2 border-[#C4A882]/50 pl-4 mb-10 max-w-[420px]">
             <p className="text-white/80 text-[15px] leading-relaxed font-['Cormorant_Garamond'] italic">
-              "Parents spend 8+ hours every season searching for activities across dozens of sites. That time belongs to your family."
+              &ldquo;Parents spend 8+ hours every season searching for activities across dozens of sites. That time belongs to your family.&rdquo;
             </p>
-            <p className="text-[#C4A882] text-[12px] mt-2 font-semibold">— Kelly Sherman, Co-founder & Seattle mom of two</p>
+            <p className="text-[#C4A882] text-[12px] mt-2 font-semibold">&mdash; Kelly Sherman, Co-founder &amp; Seattle mom of two</p>
           </div>
 
           {/* Form */}
           {status === 'success' ? (
             <div className="bg-white/10 border border-white/20 rounded-2xl px-6 py-5 max-w-[460px]">
-              <p className="text-white font-semibold mb-1">You're on the list! 🎉</p>
-              <p className="text-white/60 text-sm">We'll be in touch before the Seattle beta opens.</p>
+              <p className="text-white font-semibold mb-1">You&apos;re on the list! 🎉</p>
+              <p className="text-white/60 text-sm">We&apos;ll be in touch before the Seattle beta opens.</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="flex gap-3 max-w-[460px] mb-5">
@@ -134,8 +134,21 @@ export default function Hero() {
           )}
 
           {status === 'error' && (
-            <p className="text-red-300 text-sm mb-4">Something went wrong — please try again.</p>
+            <p className="text-red-300 text-sm mb-4">Something went wrong &mdash; please try again.</p>
           )}
+
+          {/* Browse Discover */}
+          <div className="mb-8">
+            <a
+              href="/discover"
+              className="group inline-flex items-center gap-2 text-white/80 hover:text-white text-[15px] font-medium transition-colors"
+            >
+              <span className="border-b border-[#C4A882]/40 group-hover:border-[#C4A882] pb-0.5 transition-colors">
+                Browse Seattle activities now
+              </span>
+              <span className="text-[#C4A882] transition-transform group-hover:translate-x-1">&rarr;</span>
+            </a>
+          </div>
 
           {/* Trust pills */}
           <div className="flex flex-wrap gap-5">
@@ -148,7 +161,7 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* Right — Skyscanner-style search results mockup */}
+        {/* Right — search results mockup */}
         <div className="hidden lg:flex justify-center items-center">
           <div className="w-[420px] bg-white rounded-[24px] shadow-2xl overflow-hidden border border-white/10 animate-[float_7s_ease-in-out_infinite]">
 
@@ -168,11 +181,11 @@ export default function Hero() {
                 ].map((f) => (
                   <span
                     key={f.label}
-                    className={`whitespace-nowrap text-[10px] font-semibold px-3 py-1.5 rounded-full flex-shrink-0 ${
+                    className={
                       f.active
-                        ? 'bg-[#C4A882] text-white'
-                        : 'bg-white/10 text-white/60'
-                    }`}
+                        ? 'whitespace-nowrap text-[10px] font-semibold px-3 py-1.5 rounded-full flex-shrink-0 bg-[#C4A882] text-white'
+                        : 'whitespace-nowrap text-[10px] font-semibold px-3 py-1.5 rounded-full flex-shrink-0 bg-white/10 text-white/60'
+                    }
                   >
                     {f.label}
                   </span>
@@ -197,7 +210,6 @@ export default function Hero() {
                   key={item.name}
                   className="flex items-center gap-3 bg-[#F5EFE0] border border-[#E8DFC8] rounded-[14px] px-3 py-3 cursor-pointer hover:border-[#1A7A8A]/30 transition-colors"
                 >
-                  {/* Icon */}
                   <div
                     className="w-10 h-10 rounded-[10px] flex items-center justify-center text-lg flex-shrink-0"
                     style={{ background: item.bg }}
@@ -205,7 +217,6 @@ export default function Hero() {
                     {item.icon}
                   </div>
 
-                  {/* Info */}
                   <div className="flex-1 min-w-0">
                     <p className="text-[12px] font-semibold text-[#1C3A4A] truncate">{item.name}</p>
                     <p className="text-[10px] text-[#7A9AAA] truncate">{item.provider}</p>
@@ -216,7 +227,6 @@ export default function Hero() {
                     </div>
                   </div>
 
-                  {/* Right col */}
                   <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
                     <span className={`text-[10px] font-semibold px-2 py-1 rounded-full whitespace-nowrap ${item.tagColor}`}>
                       {item.tag}
@@ -231,9 +241,12 @@ export default function Hero() {
 
             {/* Bottom CTA */}
             <div className="px-4 pb-4">
-              <div className="bg-[#0D5C6E] rounded-[12px] px-4 py-3 text-center">
-                <p className="text-white text-[12px] font-semibold">See all 24 activities →</p>
-              </div>
+              <a
+                href="/discover"
+                className="block bg-[#0D5C6E] hover:bg-[#1A7A8A] rounded-[12px] px-4 py-3 text-center transition-colors"
+              >
+                <p className="text-white text-[12px] font-semibold">Browse all activities &rarr;</p>
+              </a>
             </div>
 
           </div>
