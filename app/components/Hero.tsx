@@ -163,7 +163,7 @@ export default function Hero() {
 
         {/* Right — search results mockup */}
         <div className="hidden lg:flex justify-center items-center">
-          <div className="w-[420px] bg-white rounded-[24px] shadow-2xl overflow-hidden border border-white/10 animate-[float_7s_ease-in-out_infinite]">
+          <div className="w-[420px] bg-white rounded-[24px] shadow-2xl overflow-hidden border border-white/10 transition-transform duration-500 hover:-translate-y-1">
 
             {/* Search bar header */}
             <div className="bg-[#0A4A5A] px-5 pt-5 pb-4">
@@ -243,9 +243,9 @@ export default function Hero() {
             <div className="px-4 pb-4">
               <a
                 href="/discover"
-                className="block bg-[#0D5C6E] hover:bg-[#1A7A8A] rounded-[12px] px-4 py-3 text-center transition-colors"
+                className="relative z-20 block bg-[#0D5C6E] hover:bg-[#1A7A8A] rounded-[12px] px-4 py-3 text-center transition-colors cursor-pointer"
               >
-                <p className="text-white text-[12px] font-semibold">Browse all activities &rarr;</p>
+                <span className="text-white text-[12px] font-semibold">Browse all activities &rarr;</span>
               </a>
             </div>
 
@@ -254,12 +254,6 @@ export default function Hero() {
 
       </div>
 
-      <style jsx>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0) rotate(-0.8deg); }
-          50%       { transform: translateY(-14px) rotate(-0.8deg); }
-        }
-      `}</style>
     </section>
   );
 }
