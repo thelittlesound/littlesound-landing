@@ -109,8 +109,13 @@ export default function Discover() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const cat = params.get('category');
-    if (cat && CATEGORIES.includes(cat)) {
-      setCategory(cat);
+    if (cat && CATEGORIES.includes(cat)) setCategory(cat);
+    const age = params.get('age');
+    if (age) {
+      // Normalize dashes — homepage uses en-dash (–), Discover uses hyphen (-)
+      const normalized = age.replace('–', '-');
+      const group = AGE_GROUPS.find(g => g.label.replace('–', '-') === normalized);
+      if (group) setAgeGroup(group);
     }
   }, []);
 
