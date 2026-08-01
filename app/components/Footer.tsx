@@ -31,6 +31,7 @@ export default function Footer() {
               Company
             </h4>
             <ul className="space-y-3 text-sm">
+              <li><a href="/about" className="text-blue-grey-300 hover:text-white transition">About</a></li>
               <li><a href="mailto:hello@thelittlesound.com" className="text-blue-grey-300 hover:text-white transition">Contact</a></li>
             </ul>
           </div>
