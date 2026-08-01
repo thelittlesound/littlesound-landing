@@ -121,7 +121,7 @@
     "ageMax": 15,
     "price": 175,
     "priceUnit": "month",
-    "description": "Julie and Greta believe creative expression matters more than ever. Small classes in a warm neighborhood studio on West McGraw Street.",
+    "description": "Julie and Greta believe creative expression matters more than ever. Small classes in a warm neighborhood studio on West McGraw Street. Summer camps currently listed on their site — contact for fall/winter class schedule and pricing.",
     "website": "https://www.westerlystudio.com",
     "subcategory": "Classes & Workshops"
   },
@@ -141,17 +141,17 @@
   },
   {
     "id": "12",
-    "title": "Private Kids Art Classes",
+    "title": "Tailored Art Classes & Summer Camp",
     "provider": "SW Art Studio",
     "category": "Arts",
     "neighborhood": "Fremont",
     "ageMin": 4,
     "ageMax": 14,
-    "price": 220,
-    "priceUnit": "month",
-    "description": "Private instruction across various art mediums in a quiet, comfortable, professional atmosphere. Students range from kindergarten through eighth grade.",
+    "price": 496,
+    "priceUnit": "session",
+    "description": "Professional instruction in a quiet Fremont studio. Tailored classes ($496) cover a range of mediums for ages 4–14. Contest prep classes ($400) guide students step-by-step toward national and international art competitions. Summer camp also available ($600/5 days).",
     "website": "https://www.sw-artstudio.com",
-    "subcategory": "Private Lessons"
+    "subcategory": "Classes & Workshops"
   },
   {
     "id": "13",
@@ -163,8 +163,8 @@
     "ageMax": 16,
     "price": 189,
     "priceUnit": "month",
-    "description": "Indoor pool with year-round lessons from 6 months through teens. Group, private, and semi-private options.",
-    "website": "https://lakeunionswim.com",
+    "description": "Indoor pool at 2040 Westlake Ave N with year-round lessons from 6 months through teens. Continuous enrollment — $189/month plus a $75 annual enrollment fee per swimmer.",
+    "website": "https://www.lakeunionswimacademy.com",
     "subcategory": "Year-Round"
   },
   {
@@ -177,7 +177,7 @@
     "ageMax": 18,
     "price": 120,
     "priceUnit": "session",
-    "description": "The largest swim lesson provider in the country. Instructors hold national certifications in instruction, CPR, AED, and First Aid. Financial assistance available.",
+    "description": "One of the largest swim lesson providers in the country, with locations citywide. 8 progressive skill levels from infant to teen. Pricing varies by membership — contact your local branch for current rates. Financial assistance available.",
     "website": "https://www.seattleymca.org/programs/swim/lessons",
     "subcategory": "Group Lessons"
   },
