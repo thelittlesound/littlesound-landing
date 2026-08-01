@@ -17,8 +17,8 @@ export default function Solution() {
     {
       num: '03',
       icon: '☕',
-      title: 'Book and Actually Relax',
-      body: 'One-click booking. Calendar sync. Payment in one place. Your Sunday night is yours again.',
+      title: 'Compare and Get Going',
+      body: 'View details, compare your top picks side by side, and connect directly with providers. You\'ll know exactly what you\'re signing up for before you commit.',
       honest: 'Go make some coffee. You\'ve earned it.',
     },
   ];

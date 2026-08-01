@@ -13,8 +13,8 @@ export default function Home() {
       <Hero />
       <Problem />
       <Solution />
-      <Founders />
       <Categories />
+      <Founders />
       <Providers />
       <CTA />
       <Footer />

@@ -90,13 +90,13 @@ export default function Hero() {
 
           {/* Headline */}
           <h1 className="font-['Cormorant_Garamond'] text-[clamp(44px,5.5vw,72px)] font-light leading-[1.1] tracking-tight text-white mb-6">
-            The hard part,<br />
-            <em className="italic text-[#C4A882]">handled.</em>
+            Every activity in Seattle,<br />
+            <em className="italic text-[#C4A882]">in one place.</em>
           </h1>
 
           {/* Subhead */}
           <p className="text-white/70 text-lg leading-relaxed max-w-[460px] mb-5">
-            More time with your kids. Less time searching.
+            Little Sound is Seattle&apos;s family activity platform. Search camps, classes, sports, and more — without opening a dozen tabs.
           </p>
 
           {/* Emotional stat hook */}
