@@ -82,6 +82,7 @@ export default function Discover() {
   const [category, setCategory] = useState('All');
   const [subcategory, setSubcategory] = useState('All');
   const [ageGroup, setAgeGroup] = useState(AGE_GROUPS[0]);
+  const [sort, setSort] = useState('default');
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -97,7 +98,7 @@ export default function Discover() {
   }, [category]);
 
   const results = useMemo(() => {
-    return activities.filter((a) => {
+    const filtered = activities.filter((a) => {
       const matchesQuery =
         query === '' ||
         a.title.toLowerCase().includes(query.toLowerCase()) ||
@@ -108,7 +109,13 @@ export default function Discover() {
       const matchesAge = a.ageMax >= ageGroup.min && a.ageMin <= ageGroup.max;
       return matchesQuery && matchesCategory && matchesAge;
     });
-  }, [query, category, ageGroup]);
+    const arr = [...filtered];
+    if (sort === 'price-asc')  arr.sort((a, b) => a.price - b.price);
+    if (sort === 'price-desc') arr.sort((a, b) => b.price - a.price);
+    if (sort === 'age-asc')    arr.sort((a, b) => a.ageMin - b.ageMin);
+    if (sort === 'age-desc')   arr.sort((a, b) => b.ageMin - a.ageMin);
+    return arr;
+  }, [query, category, ageGroup, sort]);
 
   // Subcategory pills — ordered, derived from current results
   const availableSubcategories = useMemo(() => {
@@ -149,6 +156,7 @@ export default function Discover() {
     setCategory('All');
     setSubcategory('All');
     setAgeGroup(AGE_GROUPS[0]);
+    setSort('default');
   };
 
   return (
@@ -247,6 +255,17 @@ export default function Discover() {
               <span className="font-semibold text-[#1C3A4A]">{filteredResults.length}</span>
               {filteredResults.length === 1 ? ' activity' : ' activities'} found
             </p>
+            <select
+              value={sort}
+              onChange={e => setSort(e.target.value)}
+              className="sm:ml-auto text-[12px] text-[#3A5A6A] border border-[#E8DFC8] rounded-full px-4 py-1.5 bg-white outline-none cursor-pointer hover:border-[#1A7A8A] transition-colors shrink-0"
+            >
+              <option value="default">Sort: Default</option>
+              <option value="price-asc">Price: Low → High</option>
+              <option value="price-desc">Price: High → Low</option>
+              <option value="age-asc">Age: Youngest first</option>
+              <option value="age-desc">Age: Oldest first</option>
+            </select>
             {availableSubcategories.length > 1 && (
               <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
                 <button
