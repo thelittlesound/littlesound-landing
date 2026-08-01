@@ -80,6 +80,7 @@ function ActivityCard({ a }: { a: Activity }) {
 export default function Discover() {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('All');
+  const [subcategory, setSubcategory] = useState('All');
   const [ageGroup, setAgeGroup] = useState(AGE_GROUPS[0]);
 
   useEffect(() => {
@@ -89,6 +90,11 @@ export default function Discover() {
       setCategory(cat);
     }
   }, []);
+
+  // Reset subcategory when category changes
+  useEffect(() => {
+    setSubcategory('All');
+  }, [category]);
 
   const results = useMemo(() => {
     return activities.filter((a) => {
@@ -104,8 +110,24 @@ export default function Discover() {
     });
   }, [query, category, ageGroup]);
 
+  // Subcategory pills — ordered, derived from current results
+  const availableSubcategories = useMemo(() => {
+    if (category === 'All') return [];
+    const order = SUBCATEGORY_ORDER[category] ?? [];
+    const present = new Set(results.map(a => (a as Activity).subcategory ?? 'Other'));
+    const ordered = order.filter(s => present.has(s));
+    present.forEach(s => { if (!order.includes(s)) ordered.push(s); });
+    return ordered;
+  }, [results, category]);
+
+  // Results after subcategory filter
+  const filteredResults = useMemo(() => {
+    if (subcategory === 'All') return results;
+    return results.filter(a => (a as Activity).subcategory === subcategory);
+  }, [results, subcategory]);
+
   const grouped = useMemo(() => {
-    if (category === 'All' || query !== '') return null;
+    if (category === 'All' || query !== '' || subcategory !== 'All') return null;
     const groups: Record<string, typeof results> = {};
     results.forEach((a) => {
       const key = (a as typeof a & { subcategory?: string }).subcategory ?? 'Other';
@@ -125,6 +147,7 @@ export default function Discover() {
   const clearAll = () => {
     setQuery('');
     setCategory('All');
+    setSubcategory('All');
     setAgeGroup(AGE_GROUPS[0]);
   };
 
@@ -219,12 +242,37 @@ export default function Discover() {
       <section className="px-6 md:px-10 lg:px-16 py-12">
         <div className="max-w-[1280px] mx-auto">
 
-          <p className="text-[14px] text-[#3A5A6A] mb-8">
-            <span className="font-semibold text-[#1C3A4A]">{results.length}</span>
-            {results.length === 1 ? ' activity' : ' activities'} found
-          </p>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-8">
+            <p className="text-[14px] text-[#3A5A6A] shrink-0">
+              <span className="font-semibold text-[#1C3A4A]">{filteredResults.length}</span>
+              {filteredResults.length === 1 ? ' activity' : ' activities'} found
+            </p>
+            {availableSubcategories.length > 1 && (
+              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                <button
+                  onClick={() => setSubcategory('All')}
+                  className={subcategory === 'All'
+                    ? 'px-4 py-1.5 rounded-full text-[12px] font-medium bg-[#1A7A8A] text-white whitespace-nowrap shrink-0 transition-all'
+                    : 'px-4 py-1.5 rounded-full text-[12px] font-medium bg-white text-[#3A5A6A] border border-[#E8DFC8] hover:border-[#1A7A8A] whitespace-nowrap shrink-0 transition-all'}
+                >
+                  All
+                </button>
+                {availableSubcategories.map(s => (
+                  <button
+                    key={s}
+                    onClick={() => setSubcategory(s)}
+                    className={subcategory === s
+                      ? 'px-4 py-1.5 rounded-full text-[12px] font-medium bg-[#1A7A8A] text-white whitespace-nowrap shrink-0 transition-all'
+                      : 'px-4 py-1.5 rounded-full text-[12px] font-medium bg-white text-[#3A5A6A] border border-[#E8DFC8] hover:border-[#1A7A8A] whitespace-nowrap shrink-0 transition-all'}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
 
-          {results.length === 0 ? (
+          {filteredResults.length === 0 ? (
             <div className="text-center py-20">
               <p className="font-['Cormorant_Garamond'] text-[28px] text-[#1C3A4A] mb-3">
                 Nothing matches that &mdash; yet.
@@ -257,7 +305,7 @@ export default function Discover() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {results.map((a) => <ActivityCard key={a.id} a={a} />)}
+              {filteredResults.map((a) => <ActivityCard key={a.id} a={a} />)}
             </div>
           )}
 
