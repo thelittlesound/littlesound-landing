@@ -20,7 +20,7 @@ export default function Footer() {
             </h4>
             <ul className="space-y-3 text-sm">
               <li><a href="/for-families" className="text-blue-grey-300 hover:text-white transition">For Families</a></li>
-              <li><a href="/" className="text-blue-grey-300 hover:text-white transition">For Providers</a></li>
+              <li><a href="/for-providers" className="text-blue-grey-300 hover:text-white transition">For Providers</a></li>
               <li><a href="/" className="text-blue-grey-300 hover:text-white transition">How it Works</a></li>
             </ul>
           </div>
