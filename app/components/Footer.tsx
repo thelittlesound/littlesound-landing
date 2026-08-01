@@ -19,10 +19,9 @@ export default function Footer() {
               Product
             </h4>
             <ul className="space-y-3 text-sm">
-              <li><a href="#" className="text-blue-grey-300 hover:text-white transition">For Families</a></li>
-              <li><a href="#" className="text-blue-grey-300 hover:text-white transition">For Providers</a></li>
-              <li><a href="#" className="text-blue-grey-300 hover:text-white transition">How it Works</a></li>
-              <li><a href="#" className="text-blue-grey-300 hover:text-white transition">Pricing</a></li>
+              <li><a href="/discover" className="text-blue-grey-300 hover:text-white transition">For Families</a></li>
+              <li><a href="/" className="text-blue-grey-300 hover:text-white transition">For Providers</a></li>
+              <li><a href="/" className="text-blue-grey-300 hover:text-white transition">How it Works</a></li>
             </ul>
           </div>
 
@@ -32,10 +31,7 @@ export default function Footer() {
               Company
             </h4>
             <ul className="space-y-3 text-sm">
-              <li><a href="#" className="text-blue-grey-300 hover:text-white transition">About Us</a></li>
-              <li><a href="#" className="text-blue-grey-300 hover:text-white transition">Blog</a></li>
-              <li><a href="#" className="text-blue-grey-300 hover:text-white transition">Contact</a></li>
-              <li><a href="#" className="text-blue-grey-300 hover:text-white transition">Careers</a></li>
+              <li><a href="mailto:hello@thelittlesound.com" className="text-blue-grey-300 hover:text-white transition">Contact</a></li>
             </ul>
           </div>
 
@@ -46,8 +42,7 @@ export default function Footer() {
             </h4>
             <ul className="space-y-3 text-sm">
               <li><a href="/privacy" className="text-blue-grey-300 hover:text-white transition">Privacy Policy</a></li>
-<li><a href="/terms" className="text-blue-grey-300 hover:text-white transition">Terms of Service</a></li>
-<li><a href="#" className="text-blue-grey-300 hover:text-white transition">Cookie Policy</a></li>
+              <li><a href="/terms" className="text-blue-grey-300 hover:text-white transition">Terms of Service</a></li>
             </ul>
           </div>
         </div>
@@ -58,17 +53,6 @@ export default function Footer() {
             © {currentYear} Little Sound. All rights reserved.
           </p>
           
-          <div className="flex gap-6">
-            <a href="#" className="text-blue-grey-300 hover:text-white transition text-sm">
-              Twitter
-            </a>
-            <a href="#" className="text-blue-grey-300 hover:text-white transition text-sm">
-              Instagram
-            </a>
-            <a href="#" className="text-blue-grey-300 hover:text-white transition text-sm">
-              Facebook
-            </a>
-          </div>
         </div>
       </div>
     </footer>
