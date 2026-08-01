@@ -53,13 +53,13 @@ function ActivityCard({ a }: { a: Activity }) {
         className="h-[160px] relative flex items-center justify-center overflow-hidden"
         style={{ background: `linear-gradient(135deg, ${style.from}, ${style.to})` }}
       >
-        <span className="absolute text-[96px] opacity-[0.15] select-none pointer-events-none" aria-hidden="true">
+        <span className="absolute bottom-3 right-4 text-[64px] opacity-20 select-none pointer-events-none leading-none" aria-hidden="true">
           {style.emoji}
         </span>
         <span className="absolute top-4 left-4 px-3 py-1 rounded-full bg-white/80 text-[11px] font-semibold uppercase tracking-wide text-[#1A7A8A]">
           {a.category}
         </span>
-        <span className="font-['Cormorant_Garamond'] text-[15px] italic text-[#0D5C6E]/50 relative z-10">
+        <span className="px-3 py-1 rounded-full bg-white/70 font-['Cormorant_Garamond'] text-[14px] italic text-[#0D5C6E] relative z-10">
           {a.neighborhood}
         </span>
       </div>
