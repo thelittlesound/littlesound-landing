@@ -1,13 +1,21 @@
+import activities from '../data/activities.json';
+import Link from 'next/link';
+
 export default function Categories() {
+  const counts = activities.reduce((acc: Record<string, number>, a: { category: string }) => {
+    acc[a.category] = (acc[a.category] || 0) + 1;
+    return acc;
+  }, {});
+
   const categories = [
-    { emoji: '⚽', name: 'Sports & Fitness', count: 'Coming Soon' },
-    { emoji: '🎨', name: 'Arts & Crafts', count: 'Coming Soon' },
-    { emoji: '🎵', name: 'Music & Dance', count: 'Coming Soon' },
-    { emoji: '🏕️', name: 'Camps & Outdoors', count: 'Coming Soon' },
-    { emoji: '🧠', name: 'STEM & Academics', count: 'Coming Soon' },
-    { emoji: '🎭', name: 'Theater & Drama', count: 'Coming Soon' },
-    { emoji: '📚', name: 'Language & Literacy', count: 'Coming Soon' },
-    { emoji: '🧘', name: 'Wellness & Mindfulness', count: 'Coming Soon' },
+    { emoji: '⚽', name: 'Sports & Fitness', count: (counts['Sports'] || 0) + (counts['Martial Arts'] || 0) },
+    { emoji: '🎨', name: 'Arts & Crafts',    count: counts['Arts'] || 0 },
+    { emoji: '🎵', name: 'Music & Dance',    count: (counts['Music'] || 0) + (counts['Dance'] || 0) },
+    { emoji: '🏕️', name: 'Camps & Outdoors', count: (counts['Camps'] || 0) + (counts['Outdoor'] || 0) },
+    { emoji: '🧠', name: 'STEM & Academics', count: (counts['STEM'] || 0) + (counts['Academic'] || 0) },
+    { emoji: '🎭', name: 'Theater & Drama',  count: counts['Theater'] || 0 },
+    { emoji: '🌱', name: 'Early Childhood',  count: counts['Early Childhood'] || 0 },
+    { emoji: '🗂️', name: 'All Activities',   count: activities.length },
   ];
 
   return (
@@ -25,16 +33,17 @@ export default function Categories() {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {categories.map((cat, index) => (
-            <div
+            <Link
               key={index}
-              className="card text-center hover:bg-cream-300 transition-colors duration-base cursor-pointer group"
+              href="/discover"
+              className="card text-center hover:bg-cream-300 transition-colors duration-base cursor-pointer group no-underline"
             >
               <div className="text-5xl mb-4 group-hover:scale-110 transition-transform duration-base">
                 {cat.emoji}
               </div>
               <h3 className="text-heading-sm mb-2">{cat.name}</h3>
-              <p className="text-xs text-text-muted font-medium">{cat.count}</p>
-            </div>
+              <p className="text-xs text-text-muted font-medium">{cat.count} activities</p>
+            </Link>
           ))}
         </div>
 
@@ -42,9 +51,9 @@ export default function Categories() {
           <p className="text-body-lg text-text-mid mb-8">
             Explore hundreds of activities right in your neighborhood.
           </p>
-          <button className="btn btn-primary">
+          <Link href="/discover" className="btn btn-primary">
             Browse All Activities
-          </button>
+          </Link>
         </div>
       </div>
     </section>
