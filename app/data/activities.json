@@ -1,7 +1,7 @@
 [
   {
     "id": "1",
-    "title": "Activity Camps — Art, LEGO, Science, Theater & More",
+    "title": "Activity Camps \u2014 Art, LEGO, Science, Theater & More",
     "provider": "Seattle Parks & Recreation",
     "category": "Camps",
     "neighborhood": "Citywide",
@@ -35,7 +35,7 @@
     "ageMax": 12,
     "price": 350,
     "priceUnit": "week",
-    "description": "Four habitats — freshwater, saltwater, forest, and meadow — explored through hands-on activities, songs, crafts, and games. Two miles of protected beach and dramatic sea cliffs.",
+    "description": "Four habitats \u2014 freshwater, saltwater, forest, and meadow \u2014 explored through hands-on activities, songs, crafts, and games. Two miles of protected beach and dramatic sea cliffs.",
     "website": "https://www.seattle.gov/parks/learning-and-childcare/camps"
   },
   {
@@ -74,7 +74,7 @@
     "ageMax": 12,
     "price": 165,
     "priceUnit": "month",
-    "description": "Art and play combined. Alongside classes there are open-studio hours and a playroom stocked with toys and art supplies — useful when you have siblings at different ages.",
+    "description": "Art and play combined. Alongside classes there are open-studio hours and a playroom stocked with toys and art supplies \u2014 useful when you have siblings at different ages.",
     "website": "https://roaringmouse.com"
   },
   {
@@ -113,7 +113,7 @@
     "ageMax": 16,
     "price": 195,
     "priceUnit": "month",
-    "description": "A cozy home studio near Salmon Bay School — you'll know it by the fence decorated with whimsical masks. Kids make bowls, cups, vases, games, and fairy houses.",
+    "description": "A cozy home studio near Salmon Bay School \u2014 you'll know it by the fence decorated with whimsical masks. Kids make bowls, cups, vases, games, and fairy houses.",
     "website": "https://www.fayezart.com"
   },
   {
@@ -183,7 +183,7 @@
   },
   {
     "id": "15",
-    "title": "Swim Lessons — 8 Progressive Stages",
+    "title": "Swim Lessons \u2014 8 Progressive Stages",
     "provider": "YMCA of Greater Seattle",
     "category": "Sports",
     "neighborhood": "Citywide",
@@ -217,7 +217,7 @@
     "ageMax": 16,
     "price": 105,
     "priceUnit": "session",
-    "description": "Seasonal outdoor pool with Puget Sound views, a diving board, and a tube slide. Bring a bucket and shovel — the beach is right there.",
+    "description": "Seasonal outdoor pool with Puget Sound views, a diving board, and a tube slide. Bring a bucket and shovel \u2014 the beach is right there.",
     "website": "https://www.seattle.gov/parks/find/pools/colman-pool"
   },
   {
@@ -256,7 +256,7 @@
     "ageMax": 15,
     "price": 285,
     "priceUnit": "month",
-    "description": "Climbing, activities, discovery, and social time — no experience needed. Also runs school-break camps at Fremont, University District, and South Seattle gyms.",
+    "description": "Climbing, activities, discovery, and social time \u2014 no experience needed. Also runs school-break camps at Fremont, University District, and South Seattle gyms.",
     "website": "https://seattleboulderingproject.com"
   },
   {
@@ -269,12 +269,12 @@
     "ageMax": 12,
     "price": 375,
     "priceUnit": "week",
-    "description": "Creative sports games where counselors work actively alongside kids. One parent called it organized recess with great counselors — equally fun across ability levels.",
+    "description": "Creative sports games where counselors work actively alongside kids. One parent called it organized recess with great counselors \u2014 equally fun across ability levels.",
     "website": "https://www.hof-teamcamp.com"
   },
   {
     "id": "22",
-    "title": "Youth Sports Leagues — Ages 4 to 14",
+    "title": "Youth Sports Leagues \u2014 Ages 4 to 14",
     "provider": "i9 Sports Puget Sound",
     "category": "Sports",
     "neighborhood": "South Seattle",
@@ -308,12 +308,12 @@
     "ageMax": 18,
     "price": 10,
     "priceUnit": "class",
-    "description": "The city's only indoor skatepark — 6,900 square feet of ledges, manual pads, quarter pipes, banks, rails, and a vert wall. Boards, helmets, and pads provided.",
+    "description": "The city's only indoor skatepark \u2014 6,900 square feet of ledges, manual pads, quarter pipes, banks, rails, and a vert wall. Boards, helmets, and pads provided.",
     "website": "https://alltogetherskatepark.com"
   },
   {
     "id": "25",
-    "title": "Coding, AI & Robotics — CREATE Program",
+    "title": "Coding, AI & Robotics \u2014 CREATE Program",
     "provider": "Code Ninjas Seattle",
     "category": "STEM",
     "neighborhood": "North Seattle",
@@ -391,7 +391,7 @@
   },
   {
     "id": "31",
-    "title": "Private Music Lessons — 15 Instruments",
+    "title": "Private Music Lessons \u2014 15 Instruments",
     "provider": "Meter Music School",
     "category": "Music",
     "neighborhood": "Central District",
@@ -404,7 +404,7 @@
   },
   {
     "id": "32",
-    "title": "Private Lessons — Piano, Guitar, Drums, Voice",
+    "title": "Private Lessons \u2014 Piano, Guitar, Drums, Voice",
     "provider": "Off the Wall School of Music",
     "category": "Music",
     "neighborhood": "North Seattle",
@@ -438,12 +438,12 @@
     "ageMax": 18,
     "price": 165,
     "priceUnit": "month",
-    "description": "Faculty of fifteen professional working musicians. Guitar, piano, voice, ukulele, violin, woodwinds, banjo, mandolin, bass, drums, and flute — students can switch instruments.",
+    "description": "Faculty of fifteen professional working musicians. Guitar, piano, voice, ukulele, violin, woodwinds, banjo, mandolin, bass, drums, and flute \u2014 students can switch instruments.",
     "website": "https://musicfactorynw.com"
   },
   {
     "id": "35",
-    "title": "Drum Instruction — All Levels",
+    "title": "Drum Instruction \u2014 All Levels",
     "provider": "Seattle Drum School",
     "category": "Music",
     "neighborhood": "Georgetown",
@@ -456,7 +456,7 @@
   },
   {
     "id": "36",
-    "title": "Music FunTime — Early Childhood Music",
+    "title": "Music FunTime \u2014 Early Childhood Music",
     "provider": "Ballard Academy of Music and Dance",
     "category": "Music",
     "neighborhood": "Crown Hill",
@@ -482,7 +482,7 @@
   },
   {
     "id": "38",
-    "title": "Dance Classes — Ballet Through K-Pop",
+    "title": "Dance Classes \u2014 Ballet Through K-Pop",
     "provider": "American Dance Institute",
     "category": "Dance",
     "neighborhood": "Greenwood",
@@ -490,7 +490,7 @@
     "ageMax": 18,
     "price": 155,
     "priceUnit": "month",
-    "description": "One of the most diverse dance lineups in the Pacific Northwest — ballet, hip hop, K-pop, flamenco, Irish, and musical theater. Try a free class; make up missed classes free.",
+    "description": "One of the most diverse dance lineups in the Pacific Northwest \u2014 ballet, hip hop, K-pop, flamenco, Irish, and musical theater. Try a free class; make up missed classes free.",
     "website": "https://www.americandanceinstitute.com"
   },
   {
@@ -521,7 +521,7 @@
   },
   {
     "id": "41",
-    "title": "Westlake Dance — Jazz, Hip Hop, Lyrical",
+    "title": "Westlake Dance \u2014 Jazz, Hip Hop, Lyrical",
     "provider": "Westlake Dance Center",
     "category": "Dance",
     "neighborhood": "North Seattle",
@@ -534,7 +534,7 @@
   },
   {
     "id": "42",
-    "title": "Drama School — Acting, Musical Theatre & Improv",
+    "title": "Drama School \u2014 Acting, Musical Theatre & Improv",
     "provider": "Seattle Children's Theatre",
     "category": "Theater",
     "neighborhood": "Seattle Center",
@@ -555,7 +555,7 @@
     "ageMax": 18,
     "price": 425,
     "priceUnit": "session",
-    "description": "Full-scale productions for grades 1 through 12 in the Bathhouse Theatre alongside Green Lake. No auditions required — kids problem-solve staging as a team.",
+    "description": "Full-scale productions for grades 1 through 12 in the Bathhouse Theatre alongside Green Lake. No auditions required \u2014 kids problem-solve staging as a team.",
     "website": "https://seattlepublictheater.org"
   },
   {
@@ -594,7 +594,7 @@
     "ageMax": 16,
     "price": 165,
     "priceUnit": "month",
-    "description": "Kids learn both striking and grappling — the combination that matters for real self-defense. Programs designed around focus, discipline, and rank advancement.",
+    "description": "Kids learn both striking and grappling \u2014 the combination that matters for real self-defense. Programs designed around focus, discipline, and rank advancement.",
     "website": "https://mkgseattle.com/kids-karate-martial-arts/"
   },
   {
@@ -612,7 +612,7 @@
   },
   {
     "id": "48",
-    "title": "YMCA Karate — Graded Skill Series",
+    "title": "YMCA Karate \u2014 Graded Skill Series",
     "provider": "YMCA of Greater Seattle",
     "category": "Martial Arts",
     "neighborhood": "Citywide",
@@ -659,12 +659,12 @@
     "ageMax": 5,
     "price": 285,
     "priceUnit": "week",
-    "description": "Games, activities, and animal encounters with routes kept short for little legs. Each day has a theme — colors, numbers, families. Half day for 3-4s, full day for 4-5s.",
+    "description": "Games, activities, and animal encounters with routes kept short for little legs. Each day has a theme \u2014 colors, numbers, families. Half day for 3-4s, full day for 4-5s.",
     "website": "https://zoo.org/programs/"
   },
   {
     "id": "52",
-    "title": "Zoo Camps — Tiny Turtles to Eco Explorers",
+    "title": "Zoo Camps \u2014 Tiny Turtles to Eco Explorers",
     "provider": "Woodland Park Zoo",
     "category": "Outdoor",
     "neighborhood": "Phinney Ridge",
@@ -677,7 +677,7 @@
   },
   {
     "id": "53",
-    "title": "Itty Bitty Camps — Parent & Child Nature",
+    "title": "Itty Bitty Camps \u2014 Parent & Child Nature",
     "provider": "Itty Bitty Camps",
     "category": "Early Childhood",
     "neighborhood": "Magnolia",
@@ -768,7 +768,7 @@
   },
   {
     "id": "60",
-    "title": "Summer Camp — Academic & Arts Blocks",
+    "title": "Summer Camp \u2014 Academic & Arts Blocks",
     "provider": "The Northwest School",
     "category": "Academic",
     "neighborhood": "Capitol Hill",
@@ -830,5 +830,96 @@
     "priceUnit": "week",
     "description": "Multilingual coaches teach ballet, ribbon, hoops, and tumbling alongside free play, games, and crafts. Only one week offered per age group in July.",
     "website": "https://www.evergreenrhythmics.com"
+  },
+  {
+    "id": "65",
+    "title": "Year-Round Swim Lessons",
+    "provider": "Goldfish Swim School",
+    "category": "Swimming",
+    "neighborhood": "Shoreline",
+    "ageMin": 0,
+    "ageMax": 12,
+    "price": 200,
+    "priceUnit": "month",
+    "description": "Year-round lessons in a warm 90\u00b0F pool with a 4:1 student-to-instructor ratio. Programs range from Aqua Babies through competitive preparation, focused on water safety and building confidence.",
+    "website": "https://goldfishswimschool.com/shoreline/"
+  },
+  {
+    "id": "66",
+    "title": "Group & Private Swim Lessons",
+    "provider": "YMCA of Greater Seattle",
+    "category": "Swimming",
+    "neighborhood": "Citywide",
+    "ageMin": 0,
+    "ageMax": 13,
+    "price": 120,
+    "priceUnit": "session",
+    "description": "Eight-stage progressive swim curriculum at 10+ locations across Seattle. Group and private lessons available for all skill levels, from water introduction through stroke refinement. Financial assistance available.",
+    "website": "https://www.seattleymca.org/programs/swim/lessons"
+  },
+  {
+    "id": "67",
+    "title": "Private & Semi-Private Swim Instruction",
+    "provider": "Seattle Swim Academy",
+    "category": "Swimming",
+    "neighborhood": "Magnolia",
+    "ageMin": 4,
+    "ageMax": 14,
+    "price": 760,
+    "priceUnit": "session",
+    "description": "Small-group and private swim instruction at indoor pools in Magnolia and Crown Hill. Sold in packages of 8 lessons (summer) or 10 lessons (fall/winter/spring). Experienced coaches, individualized feedback.",
+    "website": "https://www.seattleswimacademy.com/"
+  },
+  {
+    "id": "68",
+    "title": "Youth Swim Lessons",
+    "provider": "Seattle University Aquatics",
+    "category": "Swimming",
+    "neighborhood": "Capitol Hill",
+    "ageMin": 3,
+    "ageMax": 13,
+    "price": 40,
+    "priceUnit": "lesson",
+    "description": "Small-group swim lessons at Seattle University's indoor pool for ages 3\u201313. Focused on stroke development, water safety, and building confidence in the water.",
+    "website": "https://www.seattleu.edu/recreation/aquatics/"
+  },
+  {
+    "id": "69",
+    "title": "Pool & Beach Swim Lessons",
+    "provider": "Seattle Parks & Recreation",
+    "category": "Swimming",
+    "neighborhood": "Citywide",
+    "ageMin": 0,
+    "ageMax": 17,
+    "price": 6,
+    "priceUnit": "lesson",
+    "description": "Group swim lessons at Rainier Beach Pool, Mounger Pool, and Colman Pool for ages 6 months and up. Free beach swim lessons for ages 6\u201316 at all lifeguarded beaches each summer.",
+    "website": "https://www.seattle.gov/parks/find/swimming-lessons-and-classes"
+  },
+  {
+    "id": "70",
+    "title": "Semi-Private & Private Swim Lessons",
+    "provider": "SwimGuru",
+    "category": "Swimming",
+    "neighborhood": "North Seattle",
+    "ageMin": 0,
+    "ageMax": 12,
+    "price": 180,
+    "priceUnit": "month",
+    "description": "Flexible-schedule semi-private and private swim instruction in North Seattle and the Eastside. Monthly packages for all levels from water introduction through competitive stroke work.",
+    "website": "https://www.swim.guru/"
+  },
+  {
+    "id": "71",
+    "title": "Year-Round Swim Lessons & Open Swim",
+    "provider": "Blue Ridge Swimming Pool",
+    "category": "Swimming",
+    "neighborhood": "Crown Hill",
+    "ageMin": 2,
+    "ageMax": 18,
+    "price": 105,
+    "priceUnit": "month",
+    "description": "Community pool in Crown Hill offering year-round swim lessons in small classes for ages 2 and up. Monthly membership-based pricing with open swim times for families.",
+    "website": "https://www.blueridgepool.org/"
   }
 ]

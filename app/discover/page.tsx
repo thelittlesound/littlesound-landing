@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import activities from '../data/activities.json';
 
-const CATEGORIES = ['All', 'Sports', 'Arts', 'Outdoor', 'STEM', 'Music', 'Dance', 'Martial Arts', 'Early Childhood', 'Theater', 'Camps', 'Academic'];
+const CATEGORIES = ['All', 'Sports', 'Swimming', 'Arts', 'Outdoor', 'STEM', 'Music', 'Dance', 'Martial Arts', 'Early Childhood', 'Theater', 'Camps', 'Academic'];
 
 const AGE_GROUPS = [
   { label: 'All ages', min: 0, max: 18 },

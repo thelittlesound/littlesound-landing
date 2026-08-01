@@ -15,7 +15,7 @@ export default function Categories() {
     { emoji: '🧠', name: 'STEM & Academics', count: (counts['STEM'] || 0) + (counts['Academic'] || 0) },
     { emoji: '🎭', name: 'Theater & Drama',  count: counts['Theater'] || 0 },
     { emoji: '🌱', name: 'Early Childhood',  count: counts['Early Childhood'] || 0 },
-    { emoji: '🗂️', name: 'All Activities',   count: activities.length },
+    { emoji: '🏊', name: 'Swimming',          count: counts['Swimming'] || 0 },
   ];
 
   return (
