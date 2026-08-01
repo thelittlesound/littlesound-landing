@@ -30,14 +30,36 @@ const AGE_GROUPS = [
 
 type Activity = typeof activities[0] & { subcategory?: string };
 
+const CATEGORY_STYLES: Record<string, { from: string; to: string; emoji: string }> = {
+  'Swimming':        { from: '#B8D8EE', to: '#7FB8D8', emoji: '🏊' },
+  'Sports':          { from: '#B8D8B8', to: '#80B880', emoji: '⚽' },
+  'Arts':            { from: '#E8D0E8', to: '#C8A0C8', emoji: '🎨' },
+  'STEM':            { from: '#B8DCE8', to: '#7CBCCC', emoji: '🧠' },
+  'Music':           { from: '#F0E4C0', to: '#D4BC80', emoji: '🎵' },
+  'Dance':           { from: '#F0D0D0', to: '#D4A0A0', emoji: '💃' },
+  'Theater':         { from: '#E8D0B8', to: '#C8A070', emoji: '🎭' },
+  'Martial Arts':    { from: '#C8D0DC', to: '#98B0BC', emoji: '🥋' },
+  'Early Childhood': { from: '#F0EEB8', to: '#D4CC70', emoji: '🌱' },
+  'Outdoor':         { from: '#B8D8B0', to: '#78B870', emoji: '🌲' },
+  'Camps':           { from: '#F0DDB8', to: '#D4B870', emoji: '🏕️' },
+  'Academic':        { from: '#C0C8EC', to: '#8898CC', emoji: '📚' },
+};
+
 function ActivityCard({ a }: { a: Activity }) {
+  const style = CATEGORY_STYLES[a.category] ?? { from: '#C5D8E8', to: '#A8C8D8', emoji: '✨' };
   return (
     <article className="bg-white border border-[#E8DFC8] rounded-[20px] overflow-hidden hover:shadow-[0_12px_32px_rgba(10,74,90,0.14)] transition-shadow duration-300 flex flex-col">
-      <div className="h-[160px] bg-gradient-to-br from-[#C5D8E8] to-[#D6EEF2] relative flex items-center justify-center">
-        <span className="absolute top-4 left-4 px-3 py-1 rounded-full bg-white/90 text-[11px] font-semibold uppercase tracking-wide text-[#1A7A8A]">
+      <div
+        className="h-[160px] relative flex items-center justify-center overflow-hidden"
+        style={{ background: `linear-gradient(135deg, ${style.from}, ${style.to})` }}
+      >
+        <span className="absolute text-[96px] opacity-[0.15] select-none pointer-events-none" aria-hidden="true">
+          {style.emoji}
+        </span>
+        <span className="absolute top-4 left-4 px-3 py-1 rounded-full bg-white/80 text-[11px] font-semibold uppercase tracking-wide text-[#1A7A8A]">
           {a.category}
         </span>
-        <span className="font-['Cormorant_Garamond'] text-[15px] italic text-[#0D5C6E]/40">
+        <span className="font-['Cormorant_Garamond'] text-[15px] italic text-[#0D5C6E]/50 relative z-10">
           {a.neighborhood}
         </span>
       </div>
