@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import activities from '../data/activities.json';
 
 const CATEGORIES = ['All', 'Sports', 'Swimming', 'Arts', 'Outdoor', 'STEM', 'Music', 'Dance', 'Martial Arts', 'Early Childhood', 'Theater', 'Camps', 'Academic'];
@@ -17,6 +17,14 @@ export default function Discover() {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('All');
   const [ageGroup, setAgeGroup] = useState(AGE_GROUPS[0]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const cat = params.get('category');
+    if (cat && CATEGORIES.includes(cat)) {
+      setCategory(cat);
+    }
+  }, []);
 
   const results = useMemo(() => {
     return activities.filter((a) => {

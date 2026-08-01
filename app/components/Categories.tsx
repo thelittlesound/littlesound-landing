@@ -8,14 +8,14 @@ export default function Categories() {
   }, {});
 
   const categories = [
-    { emoji: '⚽', name: 'Sports & Fitness', count: (counts['Sports'] || 0) + (counts['Martial Arts'] || 0) },
-    { emoji: '🎨', name: 'Arts & Crafts',    count: counts['Arts'] || 0 },
-    { emoji: '🎵', name: 'Music & Dance',    count: (counts['Music'] || 0) + (counts['Dance'] || 0) },
-    { emoji: '🏕️', name: 'Camps & Outdoors', count: (counts['Camps'] || 0) + (counts['Outdoor'] || 0) },
-    { emoji: '🧠', name: 'STEM & Academics', count: (counts['STEM'] || 0) + (counts['Academic'] || 0) },
-    { emoji: '🎭', name: 'Theater & Drama',  count: counts['Theater'] || 0 },
-    { emoji: '🌱', name: 'Early Childhood',  count: counts['Early Childhood'] || 0 },
-    { emoji: '🏊', name: 'Swimming',          count: counts['Swimming'] || 0 },
+    { emoji: '⚽', name: 'Sports & Fitness', count: (counts['Sports'] || 0) + (counts['Martial Arts'] || 0), filter: 'Sports' },
+    { emoji: '🎨', name: 'Arts & Crafts',    count: counts['Arts'] || 0,                                     filter: 'Arts' },
+    { emoji: '🎵', name: 'Music & Dance',    count: (counts['Music'] || 0) + (counts['Dance'] || 0),         filter: 'Music' },
+    { emoji: '🏕️', name: 'Camps & Outdoors', count: (counts['Camps'] || 0) + (counts['Outdoor'] || 0),      filter: 'Outdoor' },
+    { emoji: '🧠', name: 'STEM & Academics', count: (counts['STEM'] || 0) + (counts['Academic'] || 0),       filter: 'STEM' },
+    { emoji: '🎭', name: 'Theater & Drama',  count: counts['Theater'] || 0,                                  filter: 'Theater' },
+    { emoji: '🌱', name: 'Early Childhood',  count: counts['Early Childhood'] || 0,                          filter: 'Early Childhood' },
+    { emoji: '🏊', name: 'Swimming',         count: counts['Swimming'] || 0,                                 filter: 'Swimming' },
   ];
 
   return (
@@ -35,7 +35,7 @@ export default function Categories() {
           {categories.map((cat, index) => (
             <Link
               key={index}
-              href="/discover"
+              href={`/discover?category=${encodeURIComponent(cat.filter)}`}
               className="card text-center hover:bg-cream-300 transition-colors duration-base cursor-pointer group no-underline"
             >
               <div className="text-5xl mb-4 group-hover:scale-110 transition-transform duration-base">
