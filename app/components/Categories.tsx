@@ -23,6 +23,8 @@ export default function Categories() {
     { emoji: '🎭', name: 'Theater & Drama',  count: counts['Theater'] || 0,                                  filter: 'Theater' },
     { emoji: '🌱', name: 'Early Childhood',  count: counts['Early Childhood'] || 0,                          filter: 'Early Childhood' },
     { emoji: '🏊', name: 'Swimming',         count: counts['Swimming'] || 0,                                 filter: 'Swimming' },
+    { emoji: '🍳', name: 'Cooking',          count: counts['Cooking'] || 0,                                  filter: 'Cooking' },
+    { emoji: '🌍', name: 'Language',         count: counts['Language'] || 0,                                 filter: 'Language' },
   ];
 
   const buildHref = (filter: string) => {
@@ -70,7 +72,7 @@ export default function Categories() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
           {categories.map((cat, index) => (
             <Link
               key={index}

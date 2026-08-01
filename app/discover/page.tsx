@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import activities from '../data/activities.json';
 
-const CATEGORIES = ['All', 'Sports', 'Swimming', 'Arts', 'Outdoor', 'STEM', 'Music', 'Dance', 'Martial Arts', 'Early Childhood', 'Theater', 'Camps', 'Academic'];
+const CATEGORIES = ['All', 'Sports', 'Swimming', 'Arts', 'Outdoor', 'STEM', 'Music', 'Dance', 'Cooking', 'Language', 'Martial Arts', 'Early Childhood', 'Theater', 'Camps', 'Academic'];
 
 const SUBCATEGORY_ORDER: Record<string, string[]> = {
   Swimming:       ['Year-Round', 'Group Lessons', 'Private Lessons', 'Outdoor & Beach', 'Seasonal'],
@@ -18,6 +18,8 @@ const SUBCATEGORY_ORDER: Record<string, string[]> = {
   Outdoor:        ['Nature & Forest', 'Zoo Programs', 'Water Sports'],
   Camps:          ['Day Camps', 'Multi-Theme'],
   Academic:       ['Academic Camps'],
+  Cooking:        ['Classes & Workshops', 'Summer Camps'],
+  Language:       ['Group Classes', 'Summer Camps', 'Year-Round Programs'],
 };
 
 const AGE_GROUPS = [
@@ -43,6 +45,8 @@ const CATEGORY_STYLES: Record<string, { from: string; to: string; emoji: string 
   'Outdoor':         { from: '#B8D8B0', to: '#78B870', emoji: '🌲' },
   'Camps':           { from: '#F0DDB8', to: '#D4B870', emoji: '🏕️' },
   'Academic':        { from: '#C0C8EC', to: '#8898CC', emoji: '📚' },
+  'Cooking':         { from: '#F5DDB8', to: '#E0B870', emoji: '🍳' },
+  'Language':        { from: '#B8E8D0', to: '#70C8A0', emoji: '🌍' },
 };
 
 function ActivityCard({ a }: { a: Activity }) {
