@@ -10,7 +10,8 @@
     "price": 110,
     "priceUnit": "week",
     "description": "Half-day themed camps at community centers citywide. Themes include animation, art, carpentry, D&D, fishing, jewelry, LEGO, pottery, science, sports, and theater. Scholarships available.",
-    "website": "https://www.seattle.gov/parks/learning-and-childcare/camps"
+    "website": "https://www.seattle.gov/parks/learning-and-childcare/camps",
+    "subcategory": "Multi-Theme"
   },
   {
     "id": "2",
@@ -23,7 +24,8 @@
     "price": 515,
     "priceUnit": "week",
     "description": "Full-day licensed childcare with field trips and weekly themes, June 22 through August 27. Accepts DCYF Working Connections, CCAP, and Best Starts for Kids subsidies.",
-    "website": "https://www.seattle.gov/parks/learning-and-childcare/camps"
+    "website": "https://www.seattle.gov/parks/learning-and-childcare/camps",
+    "subcategory": "Day Camps"
   },
   {
     "id": "3",
@@ -36,7 +38,8 @@
     "price": 350,
     "priceUnit": "week",
     "description": "Four habitats \u2014 freshwater, saltwater, forest, and meadow \u2014 explored through hands-on activities, songs, crafts, and games. Two miles of protected beach and dramatic sea cliffs.",
-    "website": "https://www.seattle.gov/parks/learning-and-childcare/camps"
+    "website": "https://www.seattle.gov/parks/learning-and-childcare/camps",
+    "subcategory": "Nature & Forest"
   },
   {
     "id": "4",
@@ -49,7 +52,8 @@
     "price": 250,
     "priceUnit": "month",
     "description": "Seattle's oldest locally-owned art school for children, established 1982. After-school, school-break, summer camp, and homeschool classes on Sunnyside Ave N.",
-    "website": "https://www.neoartschool.com"
+    "website": "https://www.neoartschool.com",
+    "subcategory": "Classes & Workshops"
   },
   {
     "id": "5",
@@ -62,7 +66,8 @@
     "price": 180,
     "priceUnit": "session",
     "description": "Fifteen years running. Classes in a backyard painting studio with big doors opening onto a shady, tree-lined yard. Professional artist instruction and very small groups.",
-    "website": "http://www.studio-kids.com"
+    "website": "http://www.studio-kids.com",
+    "subcategory": "Workshops & Intensives"
   },
   {
     "id": "6",
@@ -75,7 +80,8 @@
     "price": 165,
     "priceUnit": "month",
     "description": "Art and play combined. Alongside classes there are open-studio hours and a playroom stocked with toys and art supplies \u2014 useful when you have siblings at different ages.",
-    "website": "https://roaringmouse.com"
+    "website": "https://roaringmouse.com",
+    "subcategory": "Classes & Workshops"
   },
   {
     "id": "7",
@@ -88,7 +94,8 @@
     "price": 150,
     "priceUnit": "month",
     "description": "Process-based art in a distinctive outdoor setting, including a heated and lit wedding-style tent. Toddler time, school-age classes, and birthday parties.",
-    "website": "https://www.westseattleartnest.com"
+    "website": "https://www.westseattleartnest.com",
+    "subcategory": "Workshops & Intensives"
   },
   {
     "id": "8",
@@ -101,7 +108,8 @@
     "price": 320,
     "priceUnit": "session",
     "description": "Serious instruction in drawing, painting, sculpture, and alternative media at one of Seattle's most respected art institutions. Students experiment widely across techniques.",
-    "website": "https://gageacademy.org"
+    "website": "https://gageacademy.org",
+    "subcategory": "Drawing & Painting"
   },
   {
     "id": "9",
@@ -114,7 +122,8 @@
     "price": 195,
     "priceUnit": "month",
     "description": "A cozy home studio near Salmon Bay School \u2014 you'll know it by the fence decorated with whimsical masks. Kids make bowls, cups, vases, games, and fairy houses.",
-    "website": "https://www.fayezart.com"
+    "website": "https://www.fayezart.com",
+    "subcategory": "Pottery & Ceramics"
   },
   {
     "id": "10",
@@ -127,7 +136,8 @@
     "price": 175,
     "priceUnit": "month",
     "description": "Julie and Greta believe creative expression matters more than ever. Small classes in a warm neighborhood studio on West McGraw Street.",
-    "website": "https://www.westerlystudio.com"
+    "website": "https://www.westerlystudio.com",
+    "subcategory": "Classes & Workshops"
   },
   {
     "id": "11",
@@ -140,7 +150,8 @@
     "price": 185,
     "priceUnit": "month",
     "description": "Students learn techniques of the grand masters across tempera, acrylic, and watercolor. One parent reports their child asks about art class literally every day.",
-    "website": "https://artsaloftforkids.com"
+    "website": "https://artsaloftforkids.com",
+    "subcategory": "Classes & Workshops"
   },
   {
     "id": "12",
@@ -153,85 +164,92 @@
     "price": 220,
     "priceUnit": "month",
     "description": "Private instruction across various art mediums in a quiet, comfortable, professional atmosphere. Students range from kindergarten through eighth grade.",
-    "website": "https://www.sw-artstudio.com"
+    "website": "https://www.sw-artstudio.com",
+    "subcategory": "Private Lessons"
   },
   {
     "id": "13",
     "title": "Year-Round Swim Lessons",
     "provider": "Lake Union Swim Academy",
-    "category": "Sports",
+    "category": "Swimming",
     "neighborhood": "South Lake Union",
     "ageMin": 0,
     "ageMax": 16,
     "price": 189,
     "priceUnit": "month",
     "description": "Indoor pool with year-round lessons from 6 months through teens. Group, private, and semi-private options.",
-    "website": "https://lakeunionswim.com"
+    "website": "https://lakeunionswim.com",
+    "subcategory": "Year-Round"
   },
   {
     "id": "14",
     "title": "Summer Swim Lessons",
     "provider": "Blue Ridge Swimming Pool",
-    "category": "Sports",
+    "category": "Swimming",
     "neighborhood": "Ballard",
     "ageMin": 2,
     "ageMax": 18,
     "price": 92,
     "priceUnit": "month",
     "description": "Seasonal outdoor pool with summer lessons for ages 2 through adult. Email for private lesson availability.",
-    "website": "https://www.blueridgeclub.com"
+    "website": "https://www.blueridgeclub.com",
+    "subcategory": "Seasonal"
   },
   {
     "id": "15",
     "title": "Swim Lessons \u2014 8 Progressive Stages",
     "provider": "YMCA of Greater Seattle",
-    "category": "Sports",
+    "category": "Swimming",
     "neighborhood": "Citywide",
     "ageMin": 0,
     "ageMax": 18,
     "price": 120,
     "priceUnit": "session",
     "description": "The largest swim lesson provider in the country. Instructors hold national certifications in instruction, CPR, AED, and First Aid. Financial assistance available.",
-    "website": "https://www.seattleymca.org/programs/swim/lessons"
+    "website": "https://www.seattleymca.org/programs/swim/lessons",
+    "subcategory": "Group Lessons"
   },
   {
     "id": "16",
     "title": "Parent & Tot Through Advanced Youth Swim",
     "provider": "Queen Anne Pool",
-    "category": "Sports",
+    "category": "Swimming",
     "neighborhood": "Queen Anne",
     "ageMin": 0,
     "ageMax": 12,
     "price": 105,
     "priceUnit": "session",
     "description": "Indoor pool kept at 85 degrees with two diving boards. Parent/tot through advanced youth lessons, plus synchronized swimming.",
-    "website": "https://www.seattle.gov/parks/find/pools/queen-anne-pool"
+    "website": "https://www.seattle.gov/parks/find/pools/queen-anne-pool",
+    "subcategory": "Year-Round"
   },
   {
     "id": "17",
     "title": "Beach-Side Swim Lessons at Colman Pool",
     "provider": "Seattle Parks & Recreation",
-    "category": "Sports",
+    "category": "Swimming",
     "neighborhood": "West Seattle",
     "ageMin": 0,
     "ageMax": 16,
     "price": 105,
     "priceUnit": "session",
     "description": "Seasonal outdoor pool with Puget Sound views, a diving board, and a tube slide. Bring a bucket and shovel \u2014 the beach is right there.",
-    "website": "https://www.seattle.gov/parks/find/pools/colman-pool"
+    "website": "https://www.seattle.gov/parks/find/pools/colman-pool",
+    "subcategory": "Outdoor & Beach"
   },
   {
     "id": "18",
     "title": "Preschool & Youth Swim Lessons",
     "provider": "Meadowbrook Pool",
-    "category": "Sports",
+    "category": "Swimming",
     "neighborhood": "Lake City",
     "ageMin": 3,
     "ageMax": 12,
     "price": 105,
     "priceUnit": "session",
     "description": "Parent and child, preschool (3-5), and youth (6-12) lessons, plus pre-competitive and diving. Daily morning and evening sessions in summer.",
-    "website": "https://www.seattle.gov/parks/find/pools/meadowbrook-pool"
+    "website": "https://www.seattle.gov/parks/find/pools/meadowbrook-pool",
+    "subcategory": "Year-Round"
   },
   {
     "id": "19",
@@ -244,7 +262,8 @@
     "price": 95,
     "priceUnit": "session",
     "description": "Recreational leagues built around participation over competition. Soccer, baseball, volleyball, basketball, and cheer across multiple branches.",
-    "website": "https://www.seattleymca.org/programs/youth-family/youth-sports"
+    "website": "https://www.seattleymca.org/programs/youth-family/youth-sports",
+    "subcategory": "Multi-Sport"
   },
   {
     "id": "20",
@@ -257,7 +276,8 @@
     "price": 285,
     "priceUnit": "month",
     "description": "Climbing, activities, discovery, and social time \u2014 no experience needed. Also runs school-break camps at Fremont, University District, and South Seattle gyms.",
-    "website": "https://seattleboulderingproject.com"
+    "website": "https://seattleboulderingproject.com",
+    "subcategory": "Climbing"
   },
   {
     "id": "21",
@@ -270,7 +290,8 @@
     "price": 375,
     "priceUnit": "week",
     "description": "Creative sports games where counselors work actively alongside kids. One parent called it organized recess with great counselors \u2014 equally fun across ability levels.",
-    "website": "https://www.hof-teamcamp.com"
+    "website": "https://www.hof-teamcamp.com",
+    "subcategory": "Multi-Sport"
   },
   {
     "id": "22",
@@ -283,7 +304,8 @@
     "price": 149,
     "priceUnit": "session",
     "description": "Baseball, basketball, flag football, and soccer leagues emphasizing good sportsmanship and equal playing time. Seasons run year-round.",
-    "website": "https://www.i9sports.com"
+    "website": "https://www.i9sports.com",
+    "subcategory": "Multi-Sport"
   },
   {
     "id": "23",
@@ -296,7 +318,8 @@
     "price": 18,
     "priceUnit": "class",
     "description": "Daily public skating sessions for all ages and skill levels at the Kraken's community rink. Free for kids under 3. Helmets highly recommended.",
-    "website": "https://krakencommunityiceplex.com"
+    "website": "https://krakencommunityiceplex.com",
+    "subcategory": "Ice Skating"
   },
   {
     "id": "24",
@@ -309,7 +332,8 @@
     "price": 10,
     "priceUnit": "class",
     "description": "The city's only indoor skatepark \u2014 6,900 square feet of ledges, manual pads, quarter pipes, banks, rails, and a vert wall. Boards, helmets, and pads provided.",
-    "website": "https://alltogetherskatepark.com"
+    "website": "https://alltogetherskatepark.com",
+    "subcategory": "Skateboarding"
   },
   {
     "id": "25",
@@ -322,7 +346,8 @@
     "price": 299,
     "priceUnit": "month",
     "description": "Kids build video games and debug real code through structured hands-on lessons that feel like play. Holds the ISTE Seal of Approval.",
-    "website": "https://www.codeninjas.com/wa-seattle"
+    "website": "https://www.codeninjas.com/wa-seattle",
+    "subcategory": "Coding & AI"
   },
   {
     "id": "26",
@@ -335,7 +360,8 @@
     "price": 210,
     "priceUnit": "month",
     "description": "STEAM programs using LEGO bricks and robotics. Curriculum supports children of all abilities, including sensory sensitivities and autism spectrum considerations.",
-    "website": "https://www.snapology.com/washington-downtown-seattle"
+    "website": "https://www.snapology.com/washington-downtown-seattle",
+    "subcategory": "Robotics"
   },
   {
     "id": "27",
@@ -348,7 +374,8 @@
     "price": 1099,
     "priceUnit": "week",
     "description": "Coding, game dev, robotics, and 3D printing on the UW campus, with breaks for ultimate frisbee and capture the flag on the university's fields.",
-    "website": "https://www.idtech.com/locations/washington-summer-camps/uw-seattle"
+    "website": "https://www.idtech.com/locations/washington-summer-camps/uw-seattle",
+    "subcategory": "Coding & AI"
   },
   {
     "id": "28",
@@ -361,7 +388,8 @@
     "price": 265,
     "priceUnit": "month",
     "description": "Learn to code, code to learn. Multiple locations across the Seattle area with morning and afternoon camp options, plus school-year classes.",
-    "website": "https://www.codingwithkids.com"
+    "website": "https://www.codingwithkids.com",
+    "subcategory": "Coding & AI"
   },
   {
     "id": "29",
@@ -374,7 +402,8 @@
     "price": 425,
     "priceUnit": "week",
     "description": "Small, focused camps built around LEGO robotics and coding. Younger students build motorized vehicles and creatures; older kids go deeper into robotics and Scratch.",
-    "website": "https://www.techknowhowkids.com"
+    "website": "https://www.techknowhowkids.com",
+    "subcategory": "Robotics"
   },
   {
     "id": "30",
@@ -387,7 +416,8 @@
     "price": 395,
     "priceUnit": "week",
     "description": "Camps at a Seattle institution operating since the 1962 World's Fair, home to a saltwater tide pool, butterfly garden, science playground, and IMAX theater.",
-    "website": "https://pacificsciencecenter.org"
+    "website": "https://pacificsciencecenter.org",
+    "subcategory": "Science"
   },
   {
     "id": "31",
@@ -400,7 +430,8 @@
     "price": 175,
     "priceUnit": "month",
     "description": "Guitar, piano, drums, bass, voice, ukulele, strings, woodwinds, brass, harp, mandolin, and banjo. MiniMeter classes serve babies from 6 months with a caregiver.",
-    "website": "https://www.metermusicschool.com"
+    "website": "https://www.metermusicschool.com",
+    "subcategory": "Private Lessons"
   },
   {
     "id": "32",
@@ -413,7 +444,8 @@
     "price": 145,
     "priceUnit": "month",
     "description": "Kids walk out of the first lesson able to play something to impress their friends. Four weekly half-hour private lessons per month in piano, guitar, drums, bass, voice, or violin.",
-    "website": "https://offthewallschoolofmusic.com"
+    "website": "https://offthewallschoolofmusic.com",
+    "subcategory": "Private Lessons"
   },
   {
     "id": "33",
@@ -426,7 +458,8 @@
     "price": 250,
     "priceUnit": "month",
     "description": "The philosophy is that the best way to learn music is to play it. Weekly private lessons paired with band rehearsals. Little Wing program serves ages 2 to 5.",
-    "website": "https://www.schoolofrock.com/locations/seattle"
+    "website": "https://www.schoolofrock.com/locations/seattle",
+    "subcategory": "Bands & Performance"
   },
   {
     "id": "34",
@@ -439,7 +472,8 @@
     "price": 165,
     "priceUnit": "month",
     "description": "Faculty of fifteen professional working musicians. Guitar, piano, voice, ukulele, violin, woodwinds, banjo, mandolin, bass, drums, and flute \u2014 students can switch instruments.",
-    "website": "https://musicfactorynw.com"
+    "website": "https://musicfactorynw.com",
+    "subcategory": "Private Lessons"
   },
   {
     "id": "35",
@@ -452,7 +486,8 @@
     "price": 180,
     "priceUnit": "month",
     "description": "Founded 1986. A vocational music school offering serious drum instruction from beginner through pre-professional, plus summer drum camps.",
-    "website": "https://seattledrumschool.com"
+    "website": "https://seattledrumschool.com",
+    "subcategory": "Private Lessons"
   },
   {
     "id": "36",
@@ -465,7 +500,8 @@
     "price": 130,
     "priceUnit": "month",
     "description": "An internationally acclaimed early childhood program based on Johns Hopkins research. Thirty-minute classes of 2 to 6 students, theory-based, with violins, guitars, and drums.",
-    "website": "https://www.seattlemusicanddance.com/musicfuntime"
+    "website": "https://www.seattlemusicanddance.com/musicfuntime",
+    "subcategory": "Early Childhood"
   },
   {
     "id": "37",
@@ -478,7 +514,8 @@
     "price": 160,
     "priceUnit": "month",
     "description": "More than 30 years in Northeast Seattle. Classes are gender-neutral, non-competitive, and supportive of all body types. Strength, flexibility, alignment, and artistry.",
-    "website": "https://allthatdanceseattle.com/kids-dance-classes"
+    "website": "https://allthatdanceseattle.com/kids-dance-classes",
+    "subcategory": "Multi-Style"
   },
   {
     "id": "38",
@@ -491,7 +528,8 @@
     "price": 155,
     "priceUnit": "month",
     "description": "One of the most diverse dance lineups in the Pacific Northwest \u2014 ballet, hip hop, K-pop, flamenco, Irish, and musical theater. Try a free class; make up missed classes free.",
-    "website": "https://www.americandanceinstitute.com"
+    "website": "https://www.americandanceinstitute.com",
+    "subcategory": "Multi-Style"
   },
   {
     "id": "39",
@@ -504,7 +542,8 @@
     "price": 170,
     "priceUnit": "month",
     "description": "Four studios in the heart of the Alaska Junction. Ballet, jazz, modern, hip hop, piano, voice, and musical theater, with performances throughout the year.",
-    "website": "https://www.westseattleperformingarts.org"
+    "website": "https://www.westseattleperformingarts.org",
+    "subcategory": "Performing Arts"
   },
   {
     "id": "40",
@@ -517,7 +556,8 @@
     "price": 150,
     "priceUnit": "month",
     "description": "Preschool through advanced classes in ballet, tap, jazz, hip hop, modern, and contemporary. Serving north Seattle, Shoreline, and Edmonds families.",
-    "website": "https://www.seattlemusicanddance.com"
+    "website": "https://www.seattlemusicanddance.com",
+    "subcategory": "Multi-Style"
   },
   {
     "id": "41",
@@ -530,7 +570,8 @@
     "price": 158,
     "priceUnit": "month",
     "description": "Open since 1993. Acro, tap, ballet, pointe, jazz, lyrical, contemporary, hip hop, musical theater, pre-ballet, and combination classes.",
-    "website": "https://www.westlakedance.com"
+    "website": "https://www.westlakedance.com",
+    "subcategory": "Hip Hop & Jazz"
   },
   {
     "id": "42",
@@ -543,7 +584,8 @@
     "price": 385,
     "priceUnit": "session",
     "description": "Year-round classes at the Adrienne Dillard-Coons Drama School. Students build characters and invent original plays through collaborative storytelling. Off-site locations too.",
-    "website": "https://www.sct.org/education-programs/class-finder/"
+    "website": "https://www.sct.org/education-programs/class-finder/",
+    "subcategory": "Acting & Improv"
   },
   {
     "id": "43",
@@ -556,7 +598,8 @@
     "price": 425,
     "priceUnit": "session",
     "description": "Full-scale productions for grades 1 through 12 in the Bathhouse Theatre alongside Green Lake. No auditions required \u2014 kids problem-solve staging as a team.",
-    "website": "https://seattlepublictheater.org"
+    "website": "https://seattlepublictheater.org",
+    "subcategory": "Youth Productions"
   },
   {
     "id": "44",
@@ -569,7 +612,8 @@
     "price": 495,
     "priceUnit": "session",
     "description": "Junior productions for ages 5 to 10 and full-length shows for ages 11 to 18. Known for elaborate costumes and sets. Families contribute volunteer time or buy out the requirement.",
-    "website": "https://broadwayboundseattle.org"
+    "website": "https://broadwayboundseattle.org",
+    "subcategory": "Youth Productions"
   },
   {
     "id": "45",
@@ -582,7 +626,8 @@
     "price": 145,
     "priceUnit": "month",
     "description": "Traditional karate and practical self-defense in age-specific classes. Little Dragons builds listening skills and focus for the youngest students. Spring and summer camps too.",
-    "website": "https://emeraldcitykarate.com"
+    "website": "https://emeraldcitykarate.com",
+    "subcategory": "Karate"
   },
   {
     "id": "46",
@@ -595,7 +640,8 @@
     "price": 165,
     "priceUnit": "month",
     "description": "Kids learn both striking and grappling \u2014 the combination that matters for real self-defense. Programs designed around focus, discipline, and rank advancement.",
-    "website": "https://mkgseattle.com/kids-karate-martial-arts/"
+    "website": "https://mkgseattle.com/kids-karate-martial-arts/",
+    "subcategory": "Mixed Martial Arts"
   },
   {
     "id": "47",
@@ -608,7 +654,8 @@
     "price": 155,
     "priceUnit": "month",
     "description": "Operating since 2001. Karate, kickboxing, and self-defense in a supportive environment focused on confidence, resilience, and respect alongside technique.",
-    "website": "https://www.alphamartialarts.com/childrens-martial-arts/"
+    "website": "https://www.alphamartialarts.com/childrens-martial-arts/",
+    "subcategory": "Karate & Kickboxing"
   },
   {
     "id": "48",
@@ -621,7 +668,8 @@
     "price": 110,
     "priceUnit": "session",
     "description": "A graded series of increasing skill and complexity across Seido, Shindo-Jinen-Ryu, Shotokan, and Goju Ryu disciplines. Financial assistance available.",
-    "website": "https://www.seattleymca.org/programs/youth-family/martial-arts"
+    "website": "https://www.seattleymca.org/programs/youth-family/martial-arts",
+    "subcategory": "Karate"
   },
   {
     "id": "49",
@@ -634,7 +682,8 @@
     "price": 165,
     "priceUnit": "month",
     "description": "Gymnastics, dance, karate, sports skills, and Kindermusik under USA Gymnastics guidelines. WonderKids Club adds arts and crafts, story time, and LEGO DUPLO play.",
-    "website": "https://www.thelittlegym.com/WESTSEATTLEWA/classes"
+    "website": "https://www.thelittlegym.com/WESTSEATTLEWA/classes",
+    "subcategory": "Movement & Play"
   },
   {
     "id": "50",
@@ -647,7 +696,8 @@
     "price": 165,
     "priceUnit": "month",
     "description": "Foundational dance technique from ballet to jazz and hip hop, with creative movement emphasizing rhythm, muscle memory, and counting. Book a risk-free intro class.",
-    "website": "https://www.thelittlegym.com/washington-seattle-maple-leaf/class-category/dance/"
+    "website": "https://www.thelittlegym.com/washington-seattle-maple-leaf/class-category/dance/",
+    "subcategory": "Movement & Play"
   },
   {
     "id": "51",
@@ -660,7 +710,8 @@
     "price": 285,
     "priceUnit": "week",
     "description": "Games, activities, and animal encounters with routes kept short for little legs. Each day has a theme \u2014 colors, numbers, families. Half day for 3-4s, full day for 4-5s.",
-    "website": "https://zoo.org/programs/"
+    "website": "https://zoo.org/programs/",
+    "subcategory": "Zoo Programs"
   },
   {
     "id": "52",
@@ -673,7 +724,8 @@
     "price": 425,
     "priceUnit": "week",
     "description": "Wildlife-themed camps teaching STEAM skills, scientific inquiry, and global conservation. Extended day care and financial assistance available.",
-    "website": "https://zoo.org/programs/"
+    "website": "https://zoo.org/programs/",
+    "subcategory": "Zoo Programs"
   },
   {
     "id": "53",
@@ -686,7 +738,8 @@
     "price": 195,
     "priceUnit": "session",
     "description": "A parent-and-child nature program based out of Discovery Park. Only $30 per session to add a sibling, which makes it workable for families with more than one little one.",
-    "website": "https://ittybittycamps.com"
+    "website": "https://ittybittycamps.com",
+    "subcategory": "Nature Programs"
   },
   {
     "id": "54",
@@ -699,7 +752,8 @@
     "price": 495,
     "priceUnit": "month",
     "description": "Affordable, nature-rich outdoor preschool classes operating in Seattle parks through a partnership with Seattle Parks and Recreation. Kids count acorns instead of marbles.",
-    "website": "https://tinytrees.org"
+    "website": "https://tinytrees.org",
+    "subcategory": "Nature & Forest"
   },
   {
     "id": "55",
@@ -712,7 +766,8 @@
     "price": 525,
     "priceUnit": "month",
     "description": "An outdoor classroom in the Washington Park Arboretum where children foster a love of science alongside social and emotional development.",
-    "website": "https://botanicgardens.uw.edu"
+    "website": "https://botanicgardens.uw.edu",
+    "subcategory": "Nature & Forest"
   },
   {
     "id": "56",
@@ -725,7 +780,8 @@
     "price": 465,
     "priceUnit": "month",
     "description": "Three play- and nature-based programs with fenced yards and indoor play areas. Kids alternate between Matthews Beach Park explorations and a sandpit, playhouse, and fairy garden.",
-    "website": "https://www.tarastots.com"
+    "website": "https://www.tarastots.com",
+    "subcategory": "Nature Programs"
   },
   {
     "id": "57",
@@ -738,7 +794,8 @@
     "price": 325,
     "priceUnit": "week",
     "description": "A 68-acre Seattle Parks site with a climbing rock, trails, and rustic cabins. Programs build the next generation of environmental stewards.",
-    "website": "https://www.seattle.gov/parks/recreation/environmental-education"
+    "website": "https://www.seattle.gov/parks/recreation/environmental-education",
+    "subcategory": "Nature & Forest"
   },
   {
     "id": "58",
@@ -751,7 +808,8 @@
     "price": 395,
     "priceUnit": "week",
     "description": "Learn to row or sail on Lake Washington. A Seattle Parks facility with its own registration timeline, separate from general camp registration.",
-    "website": "https://www.seattle.gov/parks/learning-and-childcare/camps"
+    "website": "https://www.seattle.gov/parks/learning-and-childcare/camps",
+    "subcategory": "Water Sports"
   },
   {
     "id": "59",
@@ -764,7 +822,8 @@
     "price": 375,
     "priceUnit": "week",
     "description": "Canoeing, kayaking, rowing, and sailing on Green Lake. Registration opens later than general Seattle Parks camps, so watch the date.",
-    "website": "https://www.seattle.gov/parks/learning-and-childcare/camps"
+    "website": "https://www.seattle.gov/parks/learning-and-childcare/camps",
+    "subcategory": "Water Sports"
   },
   {
     "id": "60",
@@ -777,7 +836,8 @@
     "price": 650,
     "priceUnit": "week",
     "description": "Four instructional blocks daily with lunch provided, drawing campers from across Seattle and internationally. Boarding available for ages 12 to 16.",
-    "website": "https://www.northwestschool.org/summer"
+    "website": "https://www.northwestschool.org/summer",
+    "subcategory": "Academic Camps"
   },
   {
     "id": "61",
@@ -790,7 +850,8 @@
     "price": 425,
     "priceUnit": "week",
     "description": "Long-running Seattle childcare provider running full-summer day camp with weekly themes at school and community sites across the city.",
-    "website": "https://www.kidscompany.org/childcare/summer-camp/"
+    "website": "https://www.kidscompany.org/childcare/summer-camp/",
+    "subcategory": "Day Camps"
   },
   {
     "id": "62",
@@ -803,7 +864,8 @@
     "price": 575,
     "priceUnit": "week",
     "description": "Computing, game creation, robotics, and Python for students in fifth grade and up. Themes and lessons differ by level through grades 6 to 8.",
-    "website": "https://www.lakesideschool.org"
+    "website": "https://www.lakesideschool.org",
+    "subcategory": "Academic Camps"
   },
   {
     "id": "63",
@@ -816,7 +878,8 @@
     "price": 225,
     "priceUnit": "month",
     "description": "Active after-school classes supporting Seattle-area schools with quality care and sports activities. Runs at school sites across the city.",
-    "website": "https://www.hof-teamcamp.com"
+    "website": "https://www.hof-teamcamp.com",
+    "subcategory": "Multi-Sport"
   },
   {
     "id": "64",
@@ -829,7 +892,8 @@
     "price": 350,
     "priceUnit": "week",
     "description": "Multilingual coaches teach ballet, ribbon, hoops, and tumbling alongside free play, games, and crafts. Only one week offered per age group in July.",
-    "website": "https://www.evergreenrhythmics.com"
+    "website": "https://www.evergreenrhythmics.com",
+    "subcategory": "Gymnastics"
   },
   {
     "id": "65",
@@ -842,7 +906,8 @@
     "price": 200,
     "priceUnit": "month",
     "description": "Year-round lessons in a warm 90\u00b0F pool with a 4:1 student-to-instructor ratio. Programs range from Aqua Babies through competitive preparation, focused on water safety and building confidence.",
-    "website": "https://goldfishswimschool.com/shoreline/"
+    "website": "https://goldfishswimschool.com/shoreline/",
+    "subcategory": "Year-Round"
   },
   {
     "id": "66",
@@ -855,7 +920,8 @@
     "price": 120,
     "priceUnit": "session",
     "description": "Eight-stage progressive swim curriculum at 10+ locations across Seattle. Group and private lessons available for all skill levels, from water introduction through stroke refinement. Financial assistance available.",
-    "website": "https://www.seattleymca.org/programs/swim/lessons"
+    "website": "https://www.seattleymca.org/programs/swim/lessons",
+    "subcategory": "Group Lessons"
   },
   {
     "id": "67",
@@ -868,7 +934,8 @@
     "price": 760,
     "priceUnit": "session",
     "description": "Small-group and private swim instruction at indoor pools in Magnolia and Crown Hill. Sold in packages of 8 lessons (summer) or 10 lessons (fall/winter/spring). Experienced coaches, individualized feedback.",
-    "website": "https://www.seattleswimacademy.com/"
+    "website": "https://www.seattleswimacademy.com/",
+    "subcategory": "Private Lessons"
   },
   {
     "id": "68",
@@ -881,7 +948,8 @@
     "price": 40,
     "priceUnit": "lesson",
     "description": "Small-group swim lessons at Seattle University's indoor pool for ages 3\u201313. Focused on stroke development, water safety, and building confidence in the water.",
-    "website": "https://www.seattleu.edu/recreation/aquatics/"
+    "website": "https://www.seattleu.edu/recreation/aquatics/",
+    "subcategory": "Group Lessons"
   },
   {
     "id": "69",
@@ -894,7 +962,8 @@
     "price": 6,
     "priceUnit": "lesson",
     "description": "Group swim lessons at Rainier Beach Pool, Mounger Pool, and Colman Pool for ages 6 months and up. Free beach swim lessons for ages 6\u201316 at all lifeguarded beaches each summer.",
-    "website": "https://www.seattle.gov/parks/find/swimming-lessons-and-classes"
+    "website": "https://www.seattle.gov/parks/find/swimming-lessons-and-classes",
+    "subcategory": "Group Lessons"
   },
   {
     "id": "70",
@@ -907,7 +976,8 @@
     "price": 180,
     "priceUnit": "month",
     "description": "Flexible-schedule semi-private and private swim instruction in North Seattle and the Eastside. Monthly packages for all levels from water introduction through competitive stroke work.",
-    "website": "https://www.swim.guru/"
+    "website": "https://www.swim.guru/",
+    "subcategory": "Private Lessons"
   },
   {
     "id": "71",
@@ -920,7 +990,8 @@
     "price": 105,
     "priceUnit": "month",
     "description": "Community pool in Crown Hill offering year-round swim lessons in small classes for ages 2 and up. Monthly membership-based pricing with open swim times for families.",
-    "website": "https://www.blueridgepool.org/"
+    "website": "https://www.blueridgepool.org/",
+    "subcategory": "Year-Round"
   },
   {
     "id": "72",
@@ -933,6 +1004,7 @@
     "price": 180,
     "priceUnit": "month",
     "description": "Gentle, survival-first approach to swim instruction across 6+ Seattle-area locations including West Seattle, Bothell, and the Eastside. Year-round lessons for ages 3 months and up at indoor pools.",
-    "website": "https://britishswimschool.com/seattle/"
+    "website": "https://britishswimschool.com/seattle/",
+    "subcategory": "Year-Round"
   }
 ]

@@ -5,6 +5,21 @@ import activities from '../data/activities.json';
 
 const CATEGORIES = ['All', 'Sports', 'Swimming', 'Arts', 'Outdoor', 'STEM', 'Music', 'Dance', 'Martial Arts', 'Early Childhood', 'Theater', 'Camps', 'Academic'];
 
+const SUBCATEGORY_ORDER: Record<string, string[]> = {
+  Swimming:       ['Year-Round', 'Group Lessons', 'Private Lessons', 'Outdoor & Beach', 'Seasonal'],
+  Sports:         ['Multi-Sport', 'Gymnastics', 'Climbing', 'Ice Skating', 'Skateboarding'],
+  Arts:           ['Classes & Workshops', 'Drawing & Painting', 'Pottery & Ceramics', 'Private Lessons', 'Workshops & Intensives'],
+  STEM:           ['Coding & AI', 'Robotics', 'Science'],
+  Music:          ['Private Lessons', 'Bands & Performance', 'Early Childhood'],
+  Dance:          ['Multi-Style', 'Hip Hop & Jazz', 'Performing Arts'],
+  Theater:        ['Acting & Improv', 'Youth Productions'],
+  'Martial Arts': ['Karate', 'Karate & Kickboxing', 'Mixed Martial Arts'],
+  'Early Childhood': ['Movement & Play', 'Nature Programs'],
+  Outdoor:        ['Nature & Forest', 'Zoo Programs', 'Water Sports'],
+  Camps:          ['Day Camps', 'Multi-Theme'],
+  Academic:       ['Academic Camps'],
+};
+
 const AGE_GROUPS = [
   { label: 'All ages', min: 0, max: 18 },
   { label: '2-4', min: 2, max: 4 },
@@ -12,6 +27,55 @@ const AGE_GROUPS = [
   { label: '8-11', min: 8, max: 11 },
   { label: '12+', min: 12, max: 18 },
 ];
+
+type Activity = typeof activities[0] & { subcategory?: string };
+
+function ActivityCard({ a }: { a: Activity }) {
+  return (
+    <article className="bg-white border border-[#E8DFC8] rounded-[20px] overflow-hidden hover:shadow-[0_12px_32px_rgba(10,74,90,0.14)] transition-shadow duration-300 flex flex-col">
+      <div className="h-[160px] bg-gradient-to-br from-[#C5D8E8] to-[#D6EEF2] relative flex items-center justify-center">
+        <span className="absolute top-4 left-4 px-3 py-1 rounded-full bg-white/90 text-[11px] font-semibold uppercase tracking-wide text-[#1A7A8A]">
+          {a.category}
+        </span>
+        <span className="font-['Cormorant_Garamond'] text-[15px] italic text-[#0D5C6E]/40">
+          {a.neighborhood}
+        </span>
+      </div>
+      <div className="p-6 flex flex-col flex-1">
+        <h3 className="font-['Cormorant_Garamond'] text-[21px] font-semibold text-[#1C3A4A] leading-snug mb-1">
+          {a.title}
+        </h3>
+        <p className="text-[13px] text-[#1A7A8A] font-medium mb-3">
+          {a.provider}
+        </p>
+        <p className="text-[14px] leading-[1.7] text-[#3A5A6A] mb-5 flex-1">
+          {a.description}
+        </p>
+        <div className="flex items-center gap-3 text-[12px] text-[#7A9AAA] mb-5 pt-4 border-t border-[#E8DFC8]">
+          <span>Ages {a.ageMin}&ndash;{a.ageMax}</span>
+          <span>&middot;</span>
+          <span>{a.neighborhood}</span>
+        </div>
+        <div className="flex items-center justify-between">
+          <div>
+            <span className="font-['Cormorant_Garamond'] text-[24px] font-medium text-[#1C3A4A]">
+              ${a.price}
+            </span>
+            <span className="text-[13px] text-[#7A9AAA]"> /{a.priceUnit}</span>
+          </div>
+          <a
+            href={a.website}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-5 py-2.5 rounded-full bg-[#1A7A8A] text-white text-[13px] font-medium hover:bg-[#2A9AAA] transition-colors"
+          >
+            View details
+          </a>
+        </div>
+      </div>
+    </article>
+  );
+}
 
 export default function Discover() {
   const [query, setQuery] = useState('');
@@ -39,6 +103,24 @@ export default function Discover() {
       return matchesQuery && matchesCategory && matchesAge;
     });
   }, [query, category, ageGroup]);
+
+  const grouped = useMemo(() => {
+    if (category === 'All' || query !== '') return null;
+    const groups: Record<string, typeof results> = {};
+    results.forEach((a) => {
+      const key = (a as typeof a & { subcategory?: string }).subcategory ?? 'Other';
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(a);
+    });
+    const order = SUBCATEGORY_ORDER[category] ?? [];
+    return Object.entries(groups).sort(([a], [b]) => {
+      const ai = order.indexOf(a), bi = order.indexOf(b);
+      if (ai === -1 && bi === -1) return a.localeCompare(b);
+      if (ai === -1) return 1;
+      if (bi === -1) return -1;
+      return ai - bi;
+    });
+  }, [results, category, query]);
 
   const clearAll = () => {
     setQuery('');
@@ -157,58 +239,25 @@ export default function Discover() {
                 Clear filters
               </button>
             </div>
+          ) : grouped ? (
+            <div className="space-y-14">
+              {grouped.map(([subcat, items]) => (
+                <div key={subcat}>
+                  <div className="flex items-baseline gap-3 mb-6 pb-3 border-b border-[#E8DFC8]">
+                    <h2 className="font-['Cormorant_Garamond'] text-[24px] font-semibold text-[#1C3A4A]">
+                      {subcat}
+                    </h2>
+                    <span className="text-[13px] text-[#7A9AAA]">{items.length} {items.length === 1 ? 'provider' : 'providers'}</span>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {items.map((a) => <ActivityCard key={a.id} a={a} />)}
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {results.map((a) => (
-                <article
-                  key={a.id}
-                  className="bg-white border border-[#E8DFC8] rounded-[20px] overflow-hidden hover:shadow-[0_12px_32px_rgba(10,74,90,0.14)] transition-shadow duration-300 flex flex-col"
-                >
-                  <div className="h-[160px] bg-gradient-to-br from-[#C5D8E8] to-[#D6EEF2] relative flex items-center justify-center">
-                    <span className="absolute top-4 left-4 px-3 py-1 rounded-full bg-white/90 text-[11px] font-semibold uppercase tracking-wide text-[#1A7A8A]">
-                      {a.category}
-                    </span>
-                    <span className="font-['Cormorant_Garamond'] text-[15px] italic text-[#0D5C6E]/40">
-                      {a.neighborhood}
-                    </span>
-                  </div>
-
-                  <div className="p-6 flex flex-col flex-1">
-                    <h3 className="font-['Cormorant_Garamond'] text-[21px] font-semibold text-[#1C3A4A] leading-snug mb-1">
-                      {a.title}
-                    </h3>
-                    <p className="text-[13px] text-[#1A7A8A] font-medium mb-3">
-                      {a.provider}
-                    </p>
-                    <p className="text-[14px] leading-[1.7] text-[#3A5A6A] mb-5 flex-1">
-                      {a.description}
-                    </p>
-
-                    <div className="flex items-center gap-3 text-[12px] text-[#7A9AAA] mb-5 pt-4 border-t border-[#E8DFC8]">
-                      <span>Ages {a.ageMin}&ndash;{a.ageMax}</span>
-                      <span>&middot;</span>
-                      <span>{a.neighborhood}</span>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <span className="font-['Cormorant_Garamond'] text-[24px] font-medium text-[#1C3A4A]">
-                          ${a.price}
-                        </span>
-                        <span className="text-[13px] text-[#7A9AAA]"> /{a.priceUnit}</span>
-                      </div>
-                      <a
-                        href={a.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-5 py-2.5 rounded-full bg-[#1A7A8A] text-white text-[13px] font-medium hover:bg-[#2A9AAA] transition-colors"
-                      >
-                        View details
-                      </a>
-                    </div>
-                  </div>
-                </article>
-              ))}
+              {results.map((a) => <ActivityCard key={a.id} a={a} />)}
             </div>
           )}
 
