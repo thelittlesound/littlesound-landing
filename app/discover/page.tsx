@@ -92,7 +92,7 @@ export default function Discover() {
             <p className="text-[11px] font-semibold uppercase tracking-widest text-[#7A9AAA] mb-2">
               Category
             </p>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex gap-2 overflow-x-auto pb-1 md:flex-wrap md:overflow-visible scrollbar-hide">
               {CATEGORIES.map((c) => (
                 <button
                   key={c}
