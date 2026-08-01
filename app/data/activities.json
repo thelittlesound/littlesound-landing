@@ -921,5 +921,18 @@
     "priceUnit": "month",
     "description": "Community pool in Crown Hill offering year-round swim lessons in small classes for ages 2 and up. Monthly membership-based pricing with open swim times for families.",
     "website": "https://www.blueridgepool.org/"
+  },
+  {
+    "id": "72",
+    "title": "Year-Round Swim Lessons",
+    "provider": "British Swim School",
+    "category": "Swimming",
+    "neighborhood": "Citywide",
+    "ageMin": 0,
+    "ageMax": 18,
+    "price": 180,
+    "priceUnit": "month",
+    "description": "Gentle, survival-first approach to swim instruction across 6+ Seattle-area locations including West Seattle, Bothell, and the Eastside. Year-round lessons for ages 3 months and up at indoor pools.",
+    "website": "https://britishswimschool.com/seattle/"
   }
 ]
