@@ -73,24 +73,6 @@ export default function ForProviders() {
   return (
     <main>
 
-      {/* ── NAV ── */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0D5C6E]/95 backdrop-blur-sm border-b border-white/10 px-6 md:px-10 lg:px-16 h-16 flex items-center justify-between">
-        <Link href="/" className="font-['Cormorant_Garamond'] text-xl font-semibold text-white tracking-tight">
-          Little Sound
-        </Link>
-        <div className="flex items-center gap-6">
-          <Link href="/discover" className="text-white/70 hover:text-white text-sm font-medium transition-colors">
-            Browse Activities
-          </Link>
-          <a
-            href="mailto:hello@thelittlesound.com"
-            className="bg-[#C4A882] hover:bg-[#A8865A] text-white text-sm font-semibold rounded-full px-5 py-2.5 transition-colors"
-          >
-            Claim Your Listing
-          </a>
-        </div>
-      </nav>
-
       {/* ── HERO ── */}
       <section className="min-h-screen bg-[#0D5C6E] pt-32 pb-20 px-6 md:px-10 lg:px-16 flex items-center">
         <div className="max-w-[1280px] mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">

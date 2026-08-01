@@ -75,7 +75,7 @@ export default function Hero() {
   ];
 
   return (
-    <section className="min-h-screen bg-[#0D5C6E] pt-24 pb-16 px-6 md:px-10 lg:px-16 flex items-center">
+    <section className="min-h-screen bg-[#0D5C6E] pt-32 pb-16 px-6 md:px-10 lg:px-16 flex items-center">
       <div className="max-w-[1280px] mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 
         {/* Left — copy */}

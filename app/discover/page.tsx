@@ -194,7 +194,7 @@ export default function Discover() {
     <main className="min-h-screen bg-white">
 
       {/* Header */}
-      <section className="bg-[#0D5C6E] px-6 md:px-10 lg:px-16 pt-16 pb-12">
+      <section className="bg-[#0D5C6E] px-6 md:px-10 lg:px-16 pt-32 pb-12">
         <div className="max-w-[1280px] mx-auto">
           <p className="text-xs font-bold uppercase tracking-widest text-[#7A9AAA] mb-4">
             Seattle Metro
@@ -229,7 +229,7 @@ export default function Discover() {
       </section>
 
       {/* Filters */}
-      <section className="border-b border-[#E8DFC8] bg-[#F5EFE0] px-6 md:px-10 lg:px-16 py-6 sticky top-0 z-10">
+      <section className="border-b border-[#E8DFC8] bg-[#F5EFE0] px-6 md:px-10 lg:px-16 py-6 sticky top-16 z-10">
         <div className="max-w-[1280px] mx-auto space-y-4">
 
           <div>

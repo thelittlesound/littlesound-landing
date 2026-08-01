@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import Nav from './components/Nav';
 
 export const metadata: Metadata = {
   title: 'Little Sound | Family Activity Planning Platform',
@@ -53,6 +54,7 @@ export default function RootLayout({
         {/* Fonts are loaded via CSS @import */}
       </head>
       <body>
+        <Nav />
         {children}
       </body>
     </html>
