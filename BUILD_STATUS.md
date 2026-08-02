@@ -21,24 +21,32 @@ Family activity planning platform ("The Family OS") for Seattle. Helps parents d
 ---
 
 ## Last Completed Work
-Data verification pass on top 15 listings:
-- Removed dead listings (Roaring Mouse, Blue Ridge Swimming Pool)
-- Fixed URLs, prices, and descriptions across 13 listings
-- Lake Union Swim Academy URL corrected to lakeunionswimacademy.com
+**Provider registration flow** — self-serve provider onboarding (no more emailing hello@).
 
-Static pages built: `/for-families`, `/for-providers`, `/about`
+New files:
+| File | Route | Purpose |
+|------|-------|---------|
+| `app/providers/signup/page.tsx` | `/providers/signup` | Provider account form (name, email, business, category) |
+| `app/providers/listings/new/page.tsx` | `/providers/listings/new` | 4-step listing creation (details → age/pricing → location → review) |
+| `app/api/providers/submit/route.ts` | `POST /api/providers/submit` | Adds to Brevo provider list + emails hello@ with full details |
 
-Site-wide nav added (`app/components/Nav.tsx`) — fixed to top, mobile hamburger included
+Flow: signup → passes name/email/category as URL params → listing form (pre-filled) → submit → success screen.
+Email notifications go to hello@thelittlesound.com via Brevo transactional API.
+Set `BREVO_PROVIDER_LIST_ID` in Vercel env vars (default falls back to list 3).
 
-Homepage flow restructured: Hero → Problem → Solution → Categories → Founders → Providers → CTA
+Previous work:
+- Data verification pass on top 15 listings
+- Static pages: `/for-families`, `/for-providers`, `/about`
+- Site-wide nav (`app/components/Nav.tsx`) — fixed top, mobile hamburger
+- Homepage flow restructured: Hero → Problem → Solution → Categories → Founders → Providers → CTA
 
 ---
 
 ## Next Up
-**Provider registration flow** — providers should be able to self-serve (submit or claim a listing) instead of emailing hello@. Specific screens needed:
-1. Provider signup form (business name, category, contact info)
-2. Listing creation/edit form (all fields in activities.json)
-3. Confirmation / next steps screen
+- Add `/providers/signup` and `/providers/listings/new` links to the Nav and For Providers page CTA
+- Set `BREVO_PROVIDER_LIST_ID` env var in Vercel dashboard
+- Family auth flow (waitlist-only for beta or full signup?)
+- Provider dashboard (view/edit listing after submission)
 
 ---
 
