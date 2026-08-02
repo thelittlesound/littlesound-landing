@@ -7,13 +7,15 @@ const NOTIFY_EMAIL = 'hello@thelittlesound.com';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { type, contactName, contactEmail, firstName, lastName, email, businessName, ...rest } = body;
+    const { type, contactName, contactEmail, firstName, lastName, email, businessName, title, ...rest } = body;
 
     // Normalise contact fields (signup vs listing paths use slightly different keys)
     const name = contactName || `${firstName || ''} ${lastName || ''}`.trim();
     const providerEmail = contactEmail || email;
+    // Listing submissions use 'title' rather than 'businessName'
+    const resolvedBusinessName = businessName || title;
 
-    if (!providerEmail || !businessName) {
+    if (!providerEmail || !resolvedBusinessName) {
       return NextResponse.json(
         { error: 'Email and business name are required' },
         { status: 400 }
@@ -37,7 +39,7 @@ export async function POST(request: NextRequest) {
           attributes: {
             FIRSTNAME: name.split(' ')[0] || name,
             LASTNAME: name.split(' ').slice(1).join(' ') || '',
-            COMPANY: businessName,
+            COMPANY: resolvedBusinessName,
           },
           listIds: [PROVIDER_LIST_ID],
           updateEnabled: true,
@@ -50,8 +52,8 @@ export async function POST(request: NextRequest) {
       const isListing = type === 'listing';
 
       const htmlContent = isListing
-        ? buildListingEmail({ name, email: providerEmail, businessName, ...rest })
-        : buildSignupEmail({ name, email: providerEmail, businessName, ...rest });
+        ? buildListingEmail({ name, email: providerEmail, businessName: resolvedBusinessName, title: resolvedBusinessName, ...rest })
+        : buildSignupEmail({ name, email: providerEmail, businessName: resolvedBusinessName, ...rest });
 
       await fetch(`${BREVO_API_URL}/smtp/email`, {
         method: 'POST',
@@ -64,8 +66,8 @@ export async function POST(request: NextRequest) {
           to: [{ email: NOTIFY_EMAIL, name: 'Little Sound Team' }],
           replyTo: { email: providerEmail, name },
           subject: isListing
-            ? `New listing submission: ${businessName}`
-            : `New provider signup: ${businessName}`,
+            ? `New listing submission: ${resolvedBusinessName}`
+            : `New provider signup: ${resolvedBusinessName}`,
           htmlContent,
         }),
       });
