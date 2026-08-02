@@ -92,7 +92,7 @@ export default function ForProviders() {
               Little Sound is Seattle&apos;s family activity platform. 100+ families are already on the waitlist — and they&apos;re searching for exactly what you offer.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 mb-10">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-4 mb-10">
               <a
                 href="mailto:hello@thelittlesound.com"
                 className="inline-flex items-center justify-center gap-2 bg-[#C4A882] hover:bg-[#A8865A] text-white font-semibold rounded-full px-7 py-4 text-[15px] transition-all duration-200 hover:-translate-y-0.5"
@@ -104,6 +104,12 @@ export default function ForProviders() {
                 className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-full px-7 py-4 text-[15px] transition-all duration-200 border border-white/20"
               >
                 See How We List Providers
+              </Link>
+              <Link
+                href="/providers/signup"
+                className="inline-flex items-center justify-center gap-2 bg-white text-[#0D5C6E] hover:bg-white/90 font-semibold rounded-full px-7 py-4 text-[15px] transition-all duration-200 hover:-translate-y-0.5"
+              >
+                List Your Activity →
               </Link>
             </div>
 
