@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
         ? buildListingEmail({ name, email: providerEmail, businessName: resolvedBusinessName, title: resolvedBusinessName, ...rest })
         : buildSignupEmail({ name, email: providerEmail, businessName: resolvedBusinessName, ...rest });
 
-      await fetch(`${BREVO_API_URL}/smtp/email`, {
+      const emailRes = await fetch(`${BREVO_API_URL}/smtp/email`, {
         method: 'POST',
         headers: {
           'api-key': BREVO_API_KEY,
@@ -71,6 +71,9 @@ export async function POST(request: NextRequest) {
           htmlContent,
         }),
       });
+
+      const emailData = await emailRes.json();
+      console.log('Brevo email response:', emailRes.status, JSON.stringify(emailData));
     }
 
     return NextResponse.json(
