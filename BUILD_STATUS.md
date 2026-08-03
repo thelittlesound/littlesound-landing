@@ -146,6 +146,18 @@ Family clicks "Forgot password?" on `/families/login` → `/families/forgot-pass
 
 **Note:** while the site is password-gated (see Site-wide password gate section), this flow only works for people who already know the site-wide password, since `middleware.ts` gates `/families/reset-password` like everything else. Not an issue during private beta testing; resolves itself once the site goes public.
 
+### Branded auth emails (templates ready, action needed in Supabase dashboard)
+
+**Why:** Supabase's default auth emails (signup confirmation, password reset) are generic — no Little Sound branding, and the sender address doesn't look like it's from us. Evan flagged this after receiving a plain "Supabase Auth" reset email.
+
+**Two separate things need fixing:**
+1. **Email content/branding** — templates drafted, ready to paste in. See `supabase/email-templates/confirm-signup.html` and `reset-password.html`.
+2. **Sender address** ("from Little Sound," not a generic Supabase domain) — requires setting up custom SMTP in Supabase, since the built-in email service forces its own sender domain. This also fixes the email rate-limit issue we hit during testing (Supabase's default email service is limited to a handful of emails/hour — fine for testing, not for real families).
+
+**⚠️ Action required (Supabase dashboard, both are UI-only, no code changes):**
+1. **Content:** Authentication → Email Templates → select "Confirm signup" → paste in `confirm-signup.html`'s body, set subject to "Confirm your Little Sound account" → Save. Repeat for "Reset Password" using `reset-password.html`, subject "Reset your Little Sound password."
+2. **Sender:** Authentication → Settings → SMTP Settings → enable custom SMTP. Recommend reusing Brevo (already set up and verified for `hello@thelittlesound.com` — used for provider notification emails). Get SMTP credentials from Brevo dashboard → SMTP & API → SMTP tab (host `smtp-relay.brevo.com`, port 587, your Brevo login as username, an SMTP key as password), enter those in Supabase along with Sender email `hello@thelittlesound.com` and Sender name `Little Sound`.
+
 ### Previous work
 - Data verification pass on top 15 listings
 - Static pages: `/for-families`, `/for-providers`, `/about`
@@ -161,7 +173,7 @@ Family clicks "Forgot password?" on `/families/login` → `/families/forgot-pass
 2. ~~**Family password recovery**~~ — done, see "Family password recovery" above.
 3. **Provider authentication doesn't exist** — provider signup only writes a row to `submissions`; it never creates a real account. Providers can never log back in. "Provider dashboard" requires building provider auth from scratch first (signup → login → session-protected dashboard), same pattern as family auth.
 4. **Family dashboard is mostly a placeholder** — profile (neighborhood/kids/interests) saves for real, but "saved activities" and "booking history" are just placeholder text, no feature behind them yet.
-5. **Branded confirmation email** — still Supabase's generic default template, not Little Sound branded. Cosmetic, low priority.
+5. **Branded confirmation email** — templates drafted, needs Evan to paste into Supabase dashboard + set up custom SMTP. See "Branded auth emails" above.
 6. **No `sitemap.xml`** — irrelevant while the site is password-gated; matters once public again.
 
 **Other open items:**

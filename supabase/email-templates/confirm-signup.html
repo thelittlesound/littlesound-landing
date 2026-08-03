@@ -1,0 +1,31 @@
+<!--
+  Little Sound — Supabase Auth email template: "Confirm signup"
+
+  Where to paste this: Supabase dashboard → Authentication → Email Templates
+  → "Confirm signup" → paste this into the body (HTML) field.
+
+  Subject line to set on the same screen:
+    Confirm your Little Sound account
+
+  Supabase template variables used: {{ .ConfirmationURL }}
+-->
+<div style="font-family:'DM Sans',Helvetica,Arial,sans-serif;max-width:480px;margin:0 auto;padding:40px 24px;background:#F5EFE0;">
+  <p style="font-family:Georgia,serif;font-weight:400;color:#0D5C6E;font-size:26px;margin:0 0 4px;letter-spacing:-0.01em;">Little Sound</p>
+  <p style="color:#7A9AAA;font-size:12px;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 28px;">Seattle's family activity platform</p>
+
+  <h1 style="font-family:Georgia,serif;font-weight:400;color:#1C3A4A;font-size:22px;margin:0 0 12px;">Confirm your email</h1>
+  <p style="color:#3A5A6A;font-size:15px;line-height:1.6;margin:0 0 28px;">
+    Thanks for creating a family account with Little Sound. Confirm your email to finish setting up your account and start exploring Seattle activities.
+  </p>
+
+  <a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#0D5C6E;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:14px 32px;border-radius:999px;">
+    Confirm your email
+  </a>
+
+  <p style="color:#7A9AAA;font-size:13px;line-height:1.6;margin-top:32px;padding-top:20px;border-top:1px solid #E8DFC8;">
+    If you didn't create a Little Sound account, you can safely ignore this email.
+  </p>
+  <p style="color:#B0C8D0;font-size:12px;margin-top:16px;">
+    Little Sound · Seattle, WA · <a href="https://www.thelittlesound.com" style="color:#B0C8D0;">thelittlesound.com</a>
+  </p>
+</div>
