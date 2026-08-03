@@ -1,6 +1,21 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 
+// Map provider form categories → Discover page categories
+const CATEGORY_MAP: Record<string, string> = {
+  'Camps':               'Camps',
+  'Sports & Athletics':  'Sports',
+  'Arts & Crafts':       'Arts',
+  'Music & Dance':       'Music',
+  'Academic & Tutoring': 'Academic',
+  'Outdoor Adventure':   'Outdoor',
+  'STEM & Tech':         'STEM',
+  'Swim & Aquatics':     'Swimming',
+  'Dance & Movement':    'Dance',
+  'Theater & Performance': 'Theater',
+  'Other':               'Arts', // fallback
+};
+
 export async function GET() {
   const { data, error } = await supabaseAdmin
     .from('submissions')
@@ -18,7 +33,7 @@ export async function GET() {
     id: `sub_${s.id}`,
     title: s.title,
     provider: s.contact_name,
-    category: s.category ?? 'Other',
+    category: CATEGORY_MAP[s.category ?? ''] ?? s.category ?? 'Other',
     subcategory: s.subcategory ?? null,
     neighborhood: s.neighborhood ?? 'Seattle',
     ageMin: s.age_min ?? 0,
