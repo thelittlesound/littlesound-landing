@@ -74,6 +74,12 @@ function FamilyLoginForm() {
               required
               className="h-12 rounded-[12px] border-2 border-[#E8DFC8] px-4 text-[15px] font-['DM_Sans'] text-[#1C3A4A] bg-white w-full transition-colors focus:outline-none focus:border-[#0D5C6E]"
             />
+            <Link
+              href="/families/forgot-password"
+              className="self-end text-[12px] text-[#1A7A8A] hover:text-[#0D5C6E] underline underline-offset-2 -mt-0.5"
+            >
+              Forgot password?
+            </Link>
           </div>
 
           {error && (

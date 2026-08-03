@@ -122,14 +122,29 @@ Admin visits `/admin` → `middleware.ts` checks for a session + `admin_users` m
 | `app/api/admin/submissions/route.ts` | Now calls `requireAdmin()` and returns 401 if not an admin (previously had **no server-side check at all**) |
 | `app/api/admin/submissions/[id]/status/route.ts` | Same — now requires admin. Also **removed the unused `DELETE` handler** (contradicted the documented "no delete, only reject" policy and was unnecessary attack surface) |
 | `middleware.ts` | Extended to also gate `/admin/*` (same pattern as `/families/dashboard`, checked via the service-role client against `admin_users`) |
-| `supabase/admin-users.sql` | **Not yet run** — creates `admin_users` table (no client-facing RLS policies at all; service-role only) |
+| `supabase/admin-users.sql` | Creates `admin_users` table (no client-facing RLS policies at all; service-role only) |
 
 **Why this mattered:** the old admin panel's password check was purely a client-side UI gate — the actual API routes (`GET /api/admin/submissions`, `POST /api/admin/submissions/[id]/status`) had zero auth check of their own, so anyone who found those URLs could read every submission's contact info or approve/reject listings directly, completely bypassing the password screen. That's fixed now — both the page and the underlying API routes independently require real admin auth.
 
-**⚠️ Action required:**
-1. Run `supabase/admin-users.sql` in the Supabase SQL editor.
-2. Add yourself (and Kelly, when ready) as an admin — there's no signup form for this on purpose. Steps are in the comments at the bottom of `admin-users.sql`: create a Supabase Auth user via the dashboard, then add a row to `admin_users` with that user's id via Table Editor.
-3. Once that's done, the old `NEXT_PUBLIC_ADMIN_PASSWORD` env var in Vercel is no longer used by the code — safe to remove whenever, not urgent.
+**Status: ✅ done and verified live 2026-08-03.** Evan + Kelly both added as admin users (Supabase Auth accounts + `admin_users` rows), tested sign-in at `/admin/login` successfully. Old `NEXT_PUBLIC_ADMIN_PASSWORD` env var in Vercel is no longer used by the code — safe to remove whenever, not urgent.
+
+### Family password recovery (fully complete)
+
+**Why:** signup and login existed, but there was no way to recover a forgotten password — a family would be permanently locked out. This closes that gap.
+
+**End-to-end flow:**
+Family clicks "Forgot password?" on `/families/login` → `/families/forgot-password` → enters email → `supabase.auth.resetPasswordForEmail()` sends a reset link (same success message shown whether or not the email has an account, so the flow doesn't leak which emails are registered) → family clicks the emailed link → lands on `/families/reset-password` → Supabase's client SDK detects the recovery tokens in the URL and fires a `PASSWORD_RECOVERY` auth event, which unlocks the "set new password" form → `supabase.auth.updateUser({ password })` → redirected into `/families/dashboard`, already signed in.
+
+**New files:**
+| File | Route | Purpose |
+|------|-------|---------|
+| `app/families/forgot-password/page.tsx` | `/families/forgot-password` | Request a reset link by email |
+| `app/families/reset-password/page.tsx` | `/families/reset-password` | Landing page for the emailed link; sets new password |
+
+**Changed files:**
+- `app/families/login/page.tsx` — added a "Forgot password?" link under the password field
+
+**Note:** while the site is password-gated (see Site-wide password gate section), this flow only works for people who already know the site-wide password, since `middleware.ts` gates `/families/reset-password` like everything else. Not an issue during private beta testing; resolves itself once the site goes public.
 
 ### Previous work
 - Data verification pass on top 15 listings
@@ -142,8 +157,8 @@ Admin visits `/admin` → `middleware.ts` checks for a session + `admin_users` m
 ## Next Up
 
 **Functional gaps flagged 2026-08-03 — fixing in priority order:**
-1. ~~**Admin panel security**~~ — done, see "Admin panel real auth" above. Still need to run `admin-users.sql` + add admin rows (see that section).
-2. **Family password recovery** — signup and login exist, but there's no "forgot password" flow. A family that forgets their password is permanently locked out today.
+1. ~~**Admin panel security**~~ — done, see "Admin panel real auth" above.
+2. ~~**Family password recovery**~~ — done, see "Family password recovery" above.
 3. **Provider authentication doesn't exist** — provider signup only writes a row to `submissions`; it never creates a real account. Providers can never log back in. "Provider dashboard" requires building provider auth from scratch first (signup → login → session-protected dashboard), same pattern as family auth.
 4. **Family dashboard is mostly a placeholder** — profile (neighborhood/kids/interests) saves for real, but "saved activities" and "booking history" are just placeholder text, no feature behind them yet.
 5. **Branded confirmation email** — still Supabase's generic default template, not Little Sound branded. Cosmetic, low priority.
@@ -192,6 +207,8 @@ Admin visits `/admin` → `middleware.ts` checks for a session + `admin_users` m
 | `app/api/activities/route.ts` | Public: approved listings for Discover |
 | `app/families/signup/page.tsx` | Family signup (2-step) |
 | `app/families/login/page.tsx` | Family sign in |
+| `app/families/forgot-password/page.tsx` | Request password reset link |
+| `app/families/reset-password/page.tsx` | Set new password from reset link |
 | `app/families/dashboard/page.tsx` | Family dashboard (session-protected) |
 | `app/api/families/signup/route.ts` | Family signup API (auth + profile) |
 | `middleware.ts` | Session refresh + `/families/*` route protection |
