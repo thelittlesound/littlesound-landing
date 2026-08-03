@@ -22,6 +22,8 @@ interface FormState {
   firstName: string;
   lastName: string;
   email: string;
+  password: string;
+  confirmPassword: string;
   businessName: string;
   category: string;
   website: string;
@@ -33,6 +35,8 @@ interface Errors {
   firstName?: string;
   lastName?: string;
   email?: string;
+  password?: string;
+  confirmPassword?: string;
   businessName?: string;
   category?: string;
   agreeToTerms?: string;
@@ -44,6 +48,8 @@ export default function ProviderSignupPage() {
     firstName: '',
     lastName: '',
     email: '',
+    password: '',
+    confirmPassword: '',
     businessName: '',
     category: '',
     website: '',
@@ -53,6 +59,7 @@ export default function ProviderSignupPage() {
   const [errors, setErrors] = useState<Errors>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
+  const [checkEmail, setCheckEmail] = useState(false);
 
   function set<K extends keyof FormState>(field: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -67,6 +74,8 @@ export default function ProviderSignupPage() {
     if (!form.lastName.trim()) e.lastName = 'Required';
     if (!form.email.trim() || !/\S+@\S+\.\S+/.test(form.email))
       e.email = 'Valid email required';
+    if (!form.password || form.password.length < 8) e.password = 'At least 8 characters';
+    if (form.confirmPassword !== form.password) e.confirmPassword = "Passwords don't match";
     if (!form.businessName.trim()) e.businessName = 'Required';
     if (!form.category) e.category = 'Select a category';
     if (!form.agreeToTerms) e.agreeToTerms = 'You must agree to continue';
@@ -84,26 +93,62 @@ export default function ProviderSignupPage() {
     setSubmitError('');
 
     try {
-      const res = await fetch('/api/providers/submit', {
+      const res = await fetch('/api/providers/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'signup', ...form }),
+        body: JSON.stringify({
+          firstName: form.firstName,
+          lastName: form.lastName,
+          email: form.email,
+          password: form.password,
+          businessName: form.businessName,
+          category: form.category,
+          website: form.website,
+          phone: form.phone,
+        }),
       });
 
-      if (!res.ok) throw new Error('Submission failed');
+      const data = await res.json();
 
-      // Pass along to listing creation so the form can pre-fill provider info
-      const params = new URLSearchParams({
-        email: form.email,
-        biz: form.businessName,
-        cat: form.category,
-        name: `${form.firstName} ${form.lastName}`,
-      });
-      router.push(`/providers/listings/new?${params.toString()}`);
-    } catch {
-      setSubmitError('Something went wrong. Please try again or email hello@thelittlesound.com.');
+      if (!res.ok) throw new Error(data.error || 'Submission failed');
+
+      if (data.confirmedImmediately) {
+        router.push('/providers/listings/new');
+      } else {
+        setCheckEmail(true);
+        setSubmitting(false);
+      }
+    } catch (err) {
+      setSubmitError(
+        err instanceof Error ? err.message : 'Something went wrong. Please try again or email hello@thelittlesound.com.'
+      );
       setSubmitting(false);
     }
+  }
+
+  if (checkEmail) {
+    return (
+      <main className="min-h-screen bg-[#F5EFE0] flex flex-col items-center px-4 py-16 pt-28">
+        <div className="bg-white rounded-[24px] shadow-[0_4px_32px_rgba(10,74,90,0.09)] w-full max-w-[480px] p-8 md:p-10 text-center">
+          <div className="w-14 h-14 rounded-full bg-[#0D5C6E]/8 flex items-center justify-center mx-auto mb-5">
+            <span className="text-2xl">✉️</span>
+          </div>
+          <h1 className="font-['Cormorant_Garamond'] text-[28px] font-light text-[#1C3A4A] mb-3">
+            Check your email
+          </h1>
+          <p className="text-[#3A5A6A] text-[15px] leading-relaxed mb-6">
+            We sent a confirmation link to <strong>{form.email}</strong>. Click it to activate
+            your account, then sign in to create your listing.
+          </p>
+          <Link
+            href="/providers/login"
+            className="inline-flex h-12 items-center justify-center rounded-full bg-[#0D5C6E] text-white font-semibold text-[15px] px-8 hover:bg-[#1A7A8A] transition-colors"
+          >
+            Go to sign in
+          </Link>
+        </div>
+      </main>
+    );
   }
 
   return (
@@ -154,6 +199,26 @@ export default function ProviderSignupPage() {
             error={errors.email}
             autoComplete="email"
           />
+
+          <div className="grid grid-cols-2 gap-3">
+            <Field
+              label="Password"
+              type="password"
+              value={form.password}
+              onChange={(v) => set('password', v)}
+              error={errors.password}
+              placeholder="At least 8 characters"
+              autoComplete="new-password"
+            />
+            <Field
+              label="Confirm password"
+              type="password"
+              value={form.confirmPassword}
+              onChange={(v) => set('confirmPassword', v)}
+              error={errors.confirmPassword}
+              autoComplete="new-password"
+            />
+          </div>
 
           <div className="border-t border-[#E8DFC8]" />
 
@@ -246,10 +311,10 @@ export default function ProviderSignupPage() {
         </form>
 
         <p className="text-center text-[13px] text-[#7A9AAA] mt-6">
-          Already have a listing?{' '}
-          <a href="mailto:hello@thelittlesound.com" className="text-[#1A7A8A] underline underline-offset-2">
-            Email us to claim it
-          </a>
+          Already have an account?{' '}
+          <Link href="/providers/login" className="text-[#1A7A8A] underline underline-offset-2">
+            Sign in
+          </Link>
         </p>
       </div>
 

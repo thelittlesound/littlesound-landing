@@ -1,45 +1,46 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { requireProvider } from '@/lib/provider-auth';
 
 const BREVO_API_KEY = process.env.BREVO_API_KEY;
 const BREVO_API_URL = 'https://api.brevo.com/v3';
 const NOTIFY_EMAIL = 'hello@thelittlesound.com';
 
+// Listing submissions only — account creation happens in
+// /api/providers/signup. This route requires an authenticated provider and
+// tags the submission with their id so it shows up on their dashboard.
 export async function POST(request: NextRequest) {
   try {
+    const provider = await requireProvider();
+    if (!provider) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await request.json();
     const {
-      type,
       contactName, contactEmail,
-      firstName, lastName, email,
-      businessName, title,
-      category, subcategory, description,
+      title, category, subcategory, description,
       ageMin, ageMax,
       price, priceUnit,
       neighborhood, website, phone,
-      ...rest
     } = body;
 
-    // Normalise contact fields
-    const name = contactName || `${firstName || ''} ${lastName || ''}`.trim();
-    const providerEmail = contactEmail || email;
-    const resolvedBusinessName = businessName || title;
-
-    if (!providerEmail || !resolvedBusinessName) {
+    if (!title || !category) {
       return NextResponse.json(
-        { error: 'Email and business name are required' },
+        { error: 'Title and category are required' },
         { status: 400 }
       );
     }
 
-    // ── 1. Save to Supabase ───────────────────────────────────────────────────
+    // ── 1. Save to Supabase, tagged with the provider who submitted it ──────
     const { error: dbError } = await supabaseAdmin
       .from('submissions')
       .insert({
-        contact_name: name,
-        contact_email: providerEmail,
+        provider_id: provider.id,
+        contact_name: contactName || null,
+        contact_email: contactEmail || provider.email || null,
         phone: phone || null,
-        title: resolvedBusinessName,
+        title,
         category: category || null,
         subcategory: subcategory || null,
         description: description || null,
@@ -54,51 +55,19 @@ export async function POST(request: NextRequest) {
 
     if (dbError) {
       console.error('Supabase insert error:', dbError);
-      // Don't block the user — log and continue
+      return NextResponse.json({ error: 'Failed to save listing' }, { status: 500 });
     }
 
-    // ── 2. Add to Brevo contact list ─────────────────────────────────────────
-    const PROVIDER_LIST_ID = Number(process.env.BREVO_PROVIDER_LIST_ID) || 5;
-
+    // ── 2. Send notification email ────────────────────────────────────────────
     if (BREVO_API_KEY) {
-      await fetch(`${BREVO_API_URL}/contacts`, {
-        method: 'POST',
-        headers: {
-          'api-key': BREVO_API_KEY,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: providerEmail,
-          attributes: {
-            FIRSTNAME: name.split(' ')[0] || name,
-            LASTNAME: name.split(' ').slice(1).join(' ') || '',
-            COMPANY: resolvedBusinessName,
-          },
-          listIds: [PROVIDER_LIST_ID],
-          updateEnabled: true,
-        }),
+      const htmlContent = buildListingEmail({
+        name: contactName, email: contactEmail,
+        title, category, subcategory, description,
+        ageMin, ageMax, price, priceUnit,
+        neighborhood, website, phone,
       });
-    }
 
-    // ── 3. Send notification email ────────────────────────────────────────────
-    if (BREVO_API_KEY) {
-      const isListing = type === 'listing';
-
-      const htmlContent = isListing
-        ? buildListingEmail({
-            name, email: providerEmail,
-            businessName: resolvedBusinessName, title: resolvedBusinessName,
-            category, subcategory, description,
-            ageMin, ageMax, price, priceUnit,
-            neighborhood, website, phone,
-          })
-        : buildSignupEmail({
-            name, email: providerEmail,
-            businessName: resolvedBusinessName,
-            category, website, phone,
-          });
-
-      const emailRes = await fetch(`${BREVO_API_URL}/smtp/email`, {
+      await fetch(`${BREVO_API_URL}/smtp/email`, {
         method: 'POST',
         headers: {
           'api-key': BREVO_API_KEY,
@@ -107,16 +76,11 @@ export async function POST(request: NextRequest) {
         body: JSON.stringify({
           sender: { name: 'Little Sound Providers', email: NOTIFY_EMAIL },
           to: [{ email: NOTIFY_EMAIL, name: 'Little Sound Team' }],
-          replyTo: { email: providerEmail, name },
-          subject: isListing
-            ? `New listing submission: ${resolvedBusinessName}`
-            : `New provider signup: ${resolvedBusinessName}`,
+          replyTo: { email: contactEmail || provider.email || NOTIFY_EMAIL, name: contactName || '' },
+          subject: `New listing submission: ${title}`,
           htmlContent,
         }),
       });
-
-      const emailData = await emailRes.json();
-      console.log('Brevo email response:', emailRes.status, JSON.stringify(emailData));
     }
 
     return NextResponse.json(
@@ -132,32 +96,13 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// ─── Email builders ───────────────────────────────────────────────────────────
+// ─── Email builder ──────────────────────────────────────────────────────────
 
 function row(label: string, value: string | number | null | undefined) {
   return `<tr>
     <td style="padding:8px 12px;font-weight:600;color:#0D5C6E;white-space:nowrap;vertical-align:top;font-size:13px;">${label}</td>
     <td style="padding:8px 12px;color:#1C3A4A;font-size:14px;">${value || '—'}</td>
   </tr>`;
-}
-
-function buildSignupEmail(data: Record<string, string | undefined>) {
-  return `
-<div style="font-family:'DM Sans',Helvetica,sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;">
-  <h2 style="font-family:Georgia,serif;font-weight:400;color:#0D5C6E;margin:0 0 4px;">New provider signup</h2>
-  <p style="color:#3A5A6A;font-size:14px;margin:0 0 24px;">Someone just signed up on <a href="https://thelittlesound.com/providers/signup" style="color:#1A7A8A;">thelittlesound.com</a></p>
-  <table style="width:100%;border-collapse:collapse;background:#F5EFE0;border-radius:12px;overflow:hidden;">
-    ${row('Name', data.name)}
-    ${row('Email', data.email)}
-    ${row('Business', data.businessName)}
-    ${row('Category', data.category)}
-    ${row('Website', data.website)}
-    ${row('Phone', data.phone)}
-  </table>
-  <p style="font-size:13px;color:#7A9AAA;margin-top:24px;">
-    <a href="https://thelittlesound.com/admin" style="color:#1A7A8A;">Review in admin →</a>
-  </p>
-</div>`;
 }
 
 function buildListingEmail(data: Record<string, string | number | null | undefined>) {

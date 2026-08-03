@@ -160,6 +160,44 @@ Family clicks "Forgot password?" on `/families/login` → `/families/forgot-pass
 1. **Content:** Authentication → Email Templates → select "Confirm signup" → paste in `confirm-signup.html`'s body, set subject to "Confirm your Little Sound account" → Save. Repeat for "Reset Password" using `reset-password.html`, subject "Reset your Little Sound password."
 2. **Sender:** Authentication → Settings → SMTP Settings → enable custom SMTP. Recommend reusing Brevo (already set up and verified for `hello@thelittlesound.com` — used for provider notification emails). Get SMTP credentials from Brevo dashboard → SMTP & API → SMTP tab (host `smtp-relay.brevo.com`, port 587, your Brevo login as username, an SMTP key as password), enter those in Supabase along with Sender email `hello@thelittlesound.com` and Sender name `Little Sound`.
 
+### Provider authentication (fully complete)
+
+**What changed:** provider signup used to only write a row to `submissions` — no real account was ever created, so providers could never log back in, view their listing's status, or submit a second listing without emailing hello@. Now providers have full accounts, mirroring the family auth pattern.
+
+**Bug found + fixed along the way:** the old flow actually created **two** `submissions` rows per provider — one mostly-empty row from the signup form, and a second complete one from the listing form. Both `type: 'signup'` and `type: 'listing'` POSTs to `/api/providers/submit` inserted into `submissions` regardless of type. Account creation no longer touches `submissions` at all, so this is fixed as a side effect.
+
+**End-to-end flow:**
+Provider visits `/providers/signup` → fills out account + business info (now including a password) → `POST /api/providers/signup` creates the Supabase Auth user + a `provider_profiles` row + Brevo contact + notifies hello@ → if auto-confirmed, straight to `/providers/listings/new`; otherwise a "check your email" screen, then `/providers/login` → `/providers/listings/new` (now session-protected, pulls contact info from their profile instead of URL params) → submitting a listing calls `POST /api/providers/submit`, which requires a logged-in provider and tags the row with `provider_id` → `/providers/dashboard` shows all their listings with live status (pending / live on Discover / not approved, with admin notes if rejected).
+
+**New files:**
+| File | Route | Purpose |
+|------|-------|---------|
+| `app/providers/login/page.tsx` | `/providers/login` | Email + password sign in |
+| `app/providers/forgot-password/page.tsx` | `/providers/forgot-password` | Request password reset |
+| `app/providers/reset-password/page.tsx` | `/providers/reset-password` | Set new password |
+| `app/providers/dashboard/page.tsx` | `/providers/dashboard` | Server component — session-gated, loads profile + listings |
+| `app/providers/dashboard/ProviderDashboardClient.tsx` | — | Listings list with status, sign out |
+| `app/providers/listings/new/ListingForm.tsx` | — | The 4-step wizard UI (moved out of `page.tsx`, now takes contact info as props instead of URL params) |
+| `app/api/providers/signup/route.ts` | `POST /api/providers/signup` | Creates auth user + `provider_profiles` row + Brevo contact + hello@ notification |
+| `lib/provider-auth.ts` | — | `requireProvider()` — used by `/api/providers/submit` |
+| `supabase/provider-profiles.sql` | — | **Not yet run** — creates `provider_profiles` table + adds `provider_id` column to `submissions`. Run once in Supabase SQL editor. |
+
+**Changed files:**
+- `app/providers/signup/page.tsx` — added password/confirm-password fields, now posts to `/api/providers/signup` instead of `/api/providers/submit`, "check your email" screen added, footer link now points to `/providers/login`
+- `app/providers/listings/new/page.tsx` — now a server component: requires login, redirects to `/providers/login` if not signed in, fetches the provider's profile and passes it to `ListingForm`
+- `app/api/providers/submit/route.ts` — now listing-only (the dead `type: 'signup'` branch and `buildSignupEmail` are gone), requires `requireProvider()`, tags each row with `provider_id`
+- `middleware.ts` — restructured family + provider route protection into a shared `PORTALS` list (same "protect the dashboard, bounce logged-in users off login/signup" pattern for both)
+
+**Infrastructure:**
+- `provider_profiles` table: id (references `auth.users`), first_name, last_name, email, business_name, category, website, phone, timestamps — same RLS pattern as `profiles` (select/update own row only, insert via service role)
+- `submissions.provider_id` — new nullable column linking a listing to the provider who submitted it; existing pre-auth rows just have it as null
+
+**⚠️ Action required:**
+1. Run `supabase/provider-profiles.sql` in the Supabase SQL editor.
+2. That's it — no manual account creation needed this time (unlike admins), providers self-serve through `/providers/signup` same as families.
+
+**Not built yet (intentionally out of scope for this pass):** editing an already-submitted listing. The dashboard is view-only for now — the copy says to email hello@ for changes. Worth revisiting once there's real provider volume.
+
 ### Previous work
 - Data verification pass on top 15 listings
 - Static pages: `/for-families`, `/for-providers`, `/about`
@@ -173,7 +211,7 @@ Family clicks "Forgot password?" on `/families/login` → `/families/forgot-pass
 **Functional gaps flagged 2026-08-03 — fixing in priority order:**
 1. ~~**Admin panel security**~~ — done, see "Admin panel real auth" above.
 2. ~~**Family password recovery**~~ — done, see "Family password recovery" above.
-3. **Provider authentication doesn't exist** — provider signup only writes a row to `submissions`; it never creates a real account. Providers can never log back in. "Provider dashboard" requires building provider auth from scratch first (signup → login → session-protected dashboard), same pattern as family auth.
+3. ~~**Provider authentication doesn't exist**~~ — done, see "Provider authentication" above. Still need to run `provider-profiles.sql` (see that section).
 4. **Family dashboard is mostly a placeholder** — profile (neighborhood/kids/interests) saves for real, but "saved activities" and "booking history" are just placeholder text, no feature behind them yet.
 5. ~~**Branded confirmation email**~~ — done, see "Branded auth emails" above.
 6. **No `sitemap.xml`** — irrelevant while the site is password-gated; matters once public again.
@@ -207,15 +245,23 @@ Family clicks "Forgot password?" on `/families/login` → `/families/forgot-pass
 | `app/for-families/page.tsx` | For Families static page |
 | `app/for-providers/page.tsx` | For Providers static page |
 | `app/about/page.tsx` | About static page |
-| `app/providers/signup/page.tsx` | Provider signup form |
-| `app/providers/listings/new/page.tsx` | Provider listing creation (4-step) |
+| `app/providers/signup/page.tsx` | Provider signup form (account + business info) |
+| `app/providers/login/page.tsx` | Provider sign in |
+| `app/providers/forgot-password/page.tsx` | Request password reset link |
+| `app/providers/reset-password/page.tsx` | Set new password from reset link |
+| `app/providers/dashboard/page.tsx` | Provider dashboard — their listings + status (session-protected) |
+| `app/providers/listings/new/page.tsx` | Provider listing creation entry (server component, auth check) |
+| `app/providers/listings/new/ListingForm.tsx` | The 4-step listing wizard UI |
+| `app/api/providers/signup/route.ts` | Provider signup API (auth + profile) |
+| `lib/provider-auth.ts` | `requireProvider()` helper for provider API routes |
+| `supabase/provider-profiles.sql` | `provider_profiles` table + `submissions.provider_id` (run manually) |
 | `app/admin/page.tsx` | Internal admin panel (server component, auth check) |
 | `app/admin/AdminClient.tsx` | Internal admin panel UI |
 | `app/admin/login/page.tsx` | Admin sign in |
 | `lib/admin-auth.ts` | `requireAdmin()` helper for admin API routes |
 | `supabase/admin-users.sql` | `admin_users` allowlist table (run manually) |
 | `app/api/waitlist/route.ts` | Family waitlist API (Brevo) |
-| `app/api/providers/submit/route.ts` | Provider submission API |
+| `app/api/providers/submit/route.ts` | Provider listing submission API (requires login) |
 | `app/api/admin/submissions/route.ts` | Admin: fetch submissions |
 | `app/api/admin/submissions/[id]/status/route.ts` | Admin: approve/reject |
 | `app/api/activities/route.ts` | Public: approved listings for Discover |
@@ -225,7 +271,7 @@ Family clicks "Forgot password?" on `/families/login` → `/families/forgot-pass
 | `app/families/reset-password/page.tsx` | Set new password from reset link |
 | `app/families/dashboard/page.tsx` | Family dashboard (session-protected) |
 | `app/api/families/signup/route.ts` | Family signup API (auth + profile) |
-| `middleware.ts` | Session refresh + `/families/*` route protection |
+| `middleware.ts` | Site gate + session refresh + `/families/*`, `/providers/*`, `/admin/*` route protection |
 | `supabase/family-profiles.sql` | `profiles` table + RLS (run manually) |
 | `lib/supabase.ts` | Supabase client instances (public + admin) |
 | `lib/supabase-browser.ts` | Cookie-backed Supabase client (client components) |

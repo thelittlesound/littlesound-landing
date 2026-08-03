@@ -5,8 +5,23 @@ import { supabaseAdmin } from '@/lib/supabase';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-const PROTECTED_ROUTES = ['/families/dashboard'];
-const AUTH_ROUTES = ['/families/login', '/families/signup'];
+// Two portals share the same shape: some routes need a signed-in user,
+// some routes (login/signup) should bounce a signed-in user straight to
+// their dashboard instead.
+const PORTALS = [
+  {
+    protectedRoutes: ['/families/dashboard'],
+    authRoutes: ['/families/login', '/families/signup'],
+    loginPath: '/families/login',
+    dashboardPath: '/families/dashboard',
+  },
+  {
+    protectedRoutes: ['/providers/dashboard', '/providers/listings/new'],
+    authRoutes: ['/providers/login', '/providers/signup'],
+    loginPath: '/providers/login',
+    dashboardPath: '/providers/dashboard',
+  },
+];
 
 // ── Site-wide password gate ─────────────────────────────────────────────────
 // We're still building — real family/provider signups aren't live yet, so
@@ -58,17 +73,19 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isProtected = PROTECTED_ROUTES.some((route) => path.startsWith(route));
-  const isAuthRoute = AUTH_ROUTES.some((route) => path.startsWith(route));
+  for (const portal of PORTALS) {
+    const isProtected = portal.protectedRoutes.some((route) => path.startsWith(route));
+    const isAuthRoute = portal.authRoutes.some((route) => path.startsWith(route));
 
-  if (isProtected && !user) {
-    const redirectUrl = new URL('/families/login', request.url);
-    redirectUrl.searchParams.set('next', path);
-    return NextResponse.redirect(redirectUrl);
-  }
+    if (isProtected && !user) {
+      const redirectUrl = new URL(portal.loginPath, request.url);
+      redirectUrl.searchParams.set('next', path);
+      return NextResponse.redirect(redirectUrl);
+    }
 
-  if (isAuthRoute && user) {
-    return NextResponse.redirect(new URL('/families/dashboard', request.url));
+    if (isAuthRoute && user) {
+      return NextResponse.redirect(new URL(portal.dashboardPath, request.url));
+    }
   }
 
   // ── Admin auth ───────────────────────────────────────────────────────────
