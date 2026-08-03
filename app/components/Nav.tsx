@@ -44,12 +44,20 @@ export default function Nav() {
         </div>
 
         {/* Desktop CTA */}
-        <a
-          href="/#waitlist"
-          className="hidden md:inline-flex bg-[#C4A882] hover:bg-[#A8865A] text-white text-sm font-semibold rounded-full px-5 py-2.5 transition-colors shrink-0"
-        >
-          Join Waitlist
-        </a>
+        <div className="hidden md:flex items-center gap-4 shrink-0">
+          <Link
+            href="/families/login"
+            className="text-sm font-medium text-white/65 hover:text-white transition-colors"
+          >
+            Sign In
+          </Link>
+          <a
+            href="/#waitlist"
+            className="inline-flex bg-[#C4A882] hover:bg-[#A8865A] text-white text-sm font-semibold rounded-full px-5 py-2.5 transition-colors"
+          >
+            Join Waitlist
+          </a>
+        </div>
 
         {/* Mobile hamburger */}
         <button
@@ -78,6 +86,13 @@ export default function Nav() {
               {link.label}
             </Link>
           ))}
+          <Link
+            href="/families/login"
+            onClick={() => setOpen(false)}
+            className="block py-3 text-[15px] font-medium text-white/70 hover:text-white transition-colors"
+          >
+            Family Sign In
+          </Link>
           <a
             href="/#waitlist"
             onClick={() => setOpen(false)}

@@ -61,6 +61,38 @@ Provider visits `/providers/signup` → fills out account form → redirected to
 **Homepage:**
 - Providers section has three CTA buttons: Claim Your Listing, See How We List Providers, List Your Activity → `/providers/signup`
 
+### Family auth (fully complete — Option B, full signup)
+
+**Decision:** Full family accounts via Supabase Auth (email + password), not waitlist-only. Rationale: 80+ providers already catalogued is enough inventory to make an account valuable, and this is infrastructure the platform needs at launch regardless.
+
+**End-to-end flow:**
+Family visits `/families/signup` → 2-step form (account: name/email/password → profile: neighborhood, kids' ages, interests) → `POST /api/families/signup` creates the Supabase Auth user and a `profiles` row → if email confirmation is off, they land straight in `/families/dashboard`; if it's on, they see a "check your email" screen, then sign in at `/families/login` → `/families/dashboard` is session-protected by `middleware.ts`.
+
+**New files:**
+| File | Route | Purpose |
+|------|-------|---------|
+| `app/families/signup/page.tsx` | `/families/signup` | 2-step family signup (account → profile) |
+| `app/families/login/page.tsx` | `/families/login` | Email + password sign in |
+| `app/families/dashboard/page.tsx` | `/families/dashboard` | Server component, session-gated, loads profile |
+| `app/families/dashboard/DashboardClient.tsx` | — | Client component: view/edit profile, sign out |
+| `app/api/families/signup/route.ts` | `POST /api/families/signup` | Creates auth user (cookie-aware) + profile row (service role) |
+| `lib/supabase-browser.ts` | — | `@supabase/ssr` browser client (cookie-backed, for client components) |
+| `lib/supabase-server.ts` | — | `@supabase/ssr` server client (for server components / route handlers) |
+| `middleware.ts` | — | Refreshes session cookie; gates `/families/dashboard`; bounces logged-in users off `/families/login` + `/families/signup` |
+| `supabase/family-profiles.sql` | — | **Not yet run** — creates `profiles` table + RLS policies. Run once in Supabase SQL editor. |
+
+**Infrastructure:**
+- `profiles` table (see `supabase/family-profiles.sql`): id (references `auth.users`), first_name, last_name, email, neighborhood, kids (jsonb array of `{age}`), preferences (text[]), created_at, updated_at
+- RLS: families can select/update their own row only; row creation happens server-side via `supabaseAdmin` (service role), so no insert policy needed
+- Added `@supabase/ssr` to `package.json` — run `npm install` before next `npm run dev`/build
+- Nav updated with a "Sign In" link (desktop) / "Family Sign In" link (mobile) pointing to `/families/login`
+
+**Still needed before this goes live:**
+1. Run `supabase/family-profiles.sql` in the Supabase SQL editor (Project → SQL Editor)
+2. `npm install` to pull in `@supabase/ssr`
+3. Confirm whether "Confirm email" is on or off in Supabase Auth settings — determines whether new families land straight in the dashboard or see a "check your email" screen first
+4. `npm run build` locally or a Vercel preview deploy to catch anything environment-specific
+
 ### Previous work
 - Data verification pass on top 15 listings
 - Static pages: `/for-families`, `/for-providers`, `/about`
@@ -70,14 +102,15 @@ Provider visits `/providers/signup` → fills out account form → redirected to
 ---
 
 ## Next Up
-- **Family auth decision** — full signup flow vs. waitlist-only for beta (decision needed before building)
-- **Provider dashboard** — view/edit listing post-submission (requires auth, build after family auth decision)
+- **Run `supabase/family-profiles.sql`** in the Supabase SQL editor + `npm install` — required before family auth works end to end
+- **Provider dashboard** — view/edit listing post-submission (can now reuse the family auth pattern — Supabase Auth + `@supabase/ssr` + `middleware.ts`)
+- **Saved activities / booking history** — dashboard has a placeholder for this; not yet built
 - **Admin password** — move from env var to proper auth (post-beta)
 
 ---
 
 ## Open Decisions
-- **Family registration:** full auth flow vs. waitlist-only for beta — this is the next conversation
+- **Family registration:** ✅ decided — full auth flow (Option B), built 2026-08-02
 - **Booking:** not in scope for Phase 1
 - **Provider CRM:** TBD post-launch
 
@@ -105,7 +138,15 @@ Provider visits `/providers/signup` → fills out account form → redirected to
 | `app/api/admin/submissions/route.ts` | Admin: fetch submissions |
 | `app/api/admin/submissions/[id]/status/route.ts` | Admin: approve/reject |
 | `app/api/activities/route.ts` | Public: approved listings for Discover |
-| `lib/supabase.ts` | Supabase client instances |
+| `app/families/signup/page.tsx` | Family signup (2-step) |
+| `app/families/login/page.tsx` | Family sign in |
+| `app/families/dashboard/page.tsx` | Family dashboard (session-protected) |
+| `app/api/families/signup/route.ts` | Family signup API (auth + profile) |
+| `middleware.ts` | Session refresh + `/families/*` route protection |
+| `supabase/family-profiles.sql` | `profiles` table + RLS (run manually) |
+| `lib/supabase.ts` | Supabase client instances (public + admin) |
+| `lib/supabase-browser.ts` | Cookie-backed Supabase client (client components) |
+| `lib/supabase-server.ts` | Cookie-backed Supabase client (server components) |
 | `little-sound-design-tokens.css` | Design system — colors, fonts, spacing |
 | `tailwind.config.js` | Tailwind config |
 
