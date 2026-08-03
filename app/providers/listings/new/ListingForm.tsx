@@ -507,12 +507,16 @@ function SuccessScreen({ businessName }: { businessName: string }) {
           <strong className="text-[#1C3A4A]">{businessName}</strong> is in review. We&apos;ll have your listing live within 24 hours — and notify the Seattle families already waiting.
         </p>
         <div className="flex flex-col gap-3">
-          <Link
+          {/* Plain <a>, not next/link — a full navigation guarantees the
+              dashboard re-fetches fresh data server-side. A client-side
+              Link can serve a router-cached snapshot from before this
+              listing was submitted, showing a stale empty state. */}
+          <a
             href="/providers/dashboard"
             className="inline-flex items-center justify-center h-12 rounded-full bg-[#0D5C6E] text-white font-semibold text-[15px] hover:bg-[#1A7A8A] transition-colors"
           >
             Go to your dashboard →
-          </Link>
+          </a>
           <Link
             href="/discover"
             className="inline-flex items-center justify-center h-12 rounded-full border-2 border-[#E8DFC8] text-[#0D5C6E] font-semibold text-[14px] hover:border-[#C5D8E8] transition-colors"

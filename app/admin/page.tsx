@@ -3,6 +3,10 @@ import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { supabaseAdmin } from '@/lib/supabase';
 import AdminClient from './AdminClient';
 
+// Always render fresh — avoids ever serving a router-cached snapshot from
+// before a sign-in.
+export const dynamic = 'force-dynamic';
+
 export default async function AdminPage() {
   const supabase = await createSupabaseServerClient();
 

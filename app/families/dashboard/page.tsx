@@ -2,6 +2,10 @@ import { redirect } from 'next/navigation';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import DashboardClient, { type Profile } from './DashboardClient';
 
+// Always render fresh — avoids ever serving a router-cached snapshot from
+// before a profile update or sign-in.
+export const dynamic = 'force-dynamic';
+
 export default async function FamilyDashboardPage() {
   const supabase = await createSupabaseServerClient();
 

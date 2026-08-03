@@ -3,6 +3,10 @@ import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { supabaseAdmin } from '@/lib/supabase';
 import ProviderDashboardClient, { type Listing, type ProviderProfile } from './ProviderDashboardClient';
 
+// Always render fresh — this page shows live listing status, so it should
+// never serve a cached snapshot from before the most recent change.
+export const dynamic = 'force-dynamic';
+
 export default async function ProviderDashboardPage() {
   const supabase = await createSupabaseServerClient();
 
