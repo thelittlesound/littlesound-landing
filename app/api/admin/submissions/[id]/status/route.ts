@@ -30,3 +30,20 @@ export async function POST(
 
   return NextResponse.json({ success: true, status });
 }
+
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const { error } = await supabaseAdmin
+    .from('submissions')
+    .delete()
+    .eq('id', params.id);
+
+  if (error) {
+    console.error('Supabase delete error:', error);
+    return NextResponse.json({ error: 'Failed to delete submission' }, { status: 500 });
+  }
+
+  return NextResponse.json({ success: true });
+}
