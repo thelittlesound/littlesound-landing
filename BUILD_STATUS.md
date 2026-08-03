@@ -105,6 +105,32 @@ Family visits `/families/signup` → 2-step form (account: name/email/password �
 
 **To go public again later:** remove or rename `SITE_ACCESS_PASSWORD` handling in `middleware.ts` (or just stop requiring it), once there's real traction and honest numbers to show. At that point, also revisit the fabricated "100+ families / 57+ providers" copy across `Hero.tsx`, `CTA.tsx`, `for-families/page.tsx`, `for-providers/page.tsx`, `about/page.tsx`, and `providers/signup/page.tsx` — replace with real live counts or honest qualitative language.
 
+### Admin panel real auth (fully complete)
+
+**What changed:** `/admin` no longer uses a single shared password stored in a client-exposed `NEXT_PUBLIC_ADMIN_PASSWORD` env var. It's now real Supabase Auth (same system as families), gated by a dedicated `admin_users` allowlist table — being logged in isn't enough, your `auth.users` id also has to be listed in `admin_users`.
+
+**End-to-end flow:**
+Admin visits `/admin` → `middleware.ts` checks for a session + `admin_users` membership → if either is missing, redirect to `/admin/login` → email + password sign in → back to `/admin`, session-protected the same way `/families/dashboard` is.
+
+**New/changed files:**
+| File | Purpose |
+|------|---------|
+| `app/admin/login/page.tsx` | Admin sign in |
+| `app/admin/page.tsx` | Server component — verifies session + `admin_users` membership, redirects if not, renders `AdminClient` |
+| `app/admin/AdminClient.tsx` | The actual panel UI (moved out of `page.tsx`, password gate removed, sign-out button added) |
+| `lib/admin-auth.ts` | `requireAdmin()` — used by the API routes below |
+| `app/api/admin/submissions/route.ts` | Now calls `requireAdmin()` and returns 401 if not an admin (previously had **no server-side check at all**) |
+| `app/api/admin/submissions/[id]/status/route.ts` | Same — now requires admin. Also **removed the unused `DELETE` handler** (contradicted the documented "no delete, only reject" policy and was unnecessary attack surface) |
+| `middleware.ts` | Extended to also gate `/admin/*` (same pattern as `/families/dashboard`, checked via the service-role client against `admin_users`) |
+| `supabase/admin-users.sql` | **Not yet run** — creates `admin_users` table (no client-facing RLS policies at all; service-role only) |
+
+**Why this mattered:** the old admin panel's password check was purely a client-side UI gate — the actual API routes (`GET /api/admin/submissions`, `POST /api/admin/submissions/[id]/status`) had zero auth check of their own, so anyone who found those URLs could read every submission's contact info or approve/reject listings directly, completely bypassing the password screen. That's fixed now — both the page and the underlying API routes independently require real admin auth.
+
+**⚠️ Action required:**
+1. Run `supabase/admin-users.sql` in the Supabase SQL editor.
+2. Add yourself (and Kelly, when ready) as an admin — there's no signup form for this on purpose. Steps are in the comments at the bottom of `admin-users.sql`: create a Supabase Auth user via the dashboard, then add a row to `admin_users` with that user's id via Table Editor.
+3. Once that's done, the old `NEXT_PUBLIC_ADMIN_PASSWORD` env var in Vercel is no longer used by the code — safe to remove whenever, not urgent.
+
 ### Previous work
 - Data verification pass on top 15 listings
 - Static pages: `/for-families`, `/for-providers`, `/about`
@@ -114,14 +140,20 @@ Family visits `/families/signup` → 2-step form (account: name/email/password �
 ---
 
 ## Next Up
+
+**Functional gaps flagged 2026-08-03 — fixing in priority order:**
+1. ~~**Admin panel security**~~ — done, see "Admin panel real auth" above. Still need to run `admin-users.sql` + add admin rows (see that section).
+2. **Family password recovery** — signup and login exist, but there's no "forgot password" flow. A family that forgets their password is permanently locked out today.
+3. **Provider authentication doesn't exist** — provider signup only writes a row to `submissions`; it never creates a real account. Providers can never log back in. "Provider dashboard" requires building provider auth from scratch first (signup → login → session-protected dashboard), same pattern as family auth.
+4. **Family dashboard is mostly a placeholder** — profile (neighborhood/kids/interests) saves for real, but "saved activities" and "booking history" are just placeholder text, no feature behind them yet.
+5. **Branded confirmation email** — still Supabase's generic default template, not Little Sound branded. Cosmetic, low priority.
+6. **No `sitemap.xml`** — irrelevant while the site is password-gated; matters once public again.
+
+**Other open items:**
 - **Set `SITE_ACCESS_PASSWORD` in Vercel** — required immediately after this deploys, or the site is unreachable (see Site-wide password gate section above)
 - ~~Run `supabase/family-profiles.sql` + `npm install`~~ — done, deployed and tested live 2026-08-03
 - **Homepage CTA** — homepage still only pushes the waitlist; consider adding a "Create Your Account" link there too, same as `/for-families` (do this once the site is public again)
 - **Fix fabricated stats** — "100+ families," "57+ providers verified" language across the site needs replacing with real live counts or honest language before going public again (see Site-wide password gate section)
-- **Provider dashboard** — view/edit listing post-submission (can now reuse the family auth pattern — Supabase Auth + `@supabase/ssr` + `middleware.ts`)
-- **Saved activities / booking history** — family dashboard has a placeholder for this; not yet built
-- **Branded confirmation email** — currently Supabase's default template; customize under Authentication → Email Templates when there's time
-- **Admin password** — move from env var to proper auth (post-beta)
 
 ---
 
@@ -148,7 +180,11 @@ Family visits `/families/signup` → 2-step form (account: name/email/password �
 | `app/about/page.tsx` | About static page |
 | `app/providers/signup/page.tsx` | Provider signup form |
 | `app/providers/listings/new/page.tsx` | Provider listing creation (4-step) |
-| `app/admin/page.tsx` | Internal admin panel |
+| `app/admin/page.tsx` | Internal admin panel (server component, auth check) |
+| `app/admin/AdminClient.tsx` | Internal admin panel UI |
+| `app/admin/login/page.tsx` | Admin sign in |
+| `lib/admin-auth.ts` | `requireAdmin()` helper for admin API routes |
+| `supabase/admin-users.sql` | `admin_users` allowlist table (run manually) |
 | `app/api/waitlist/route.ts` | Family waitlist API (Brevo) |
 | `app/api/providers/submit/route.ts` | Provider submission API |
 | `app/api/admin/submissions/route.ts` | Admin: fetch submissions |

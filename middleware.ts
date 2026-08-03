@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { supabaseAdmin } from '@/lib/supabase';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -68,6 +69,43 @@ export async function middleware(request: NextRequest) {
 
   if (isAuthRoute && user) {
     return NextResponse.redirect(new URL('/families/dashboard', request.url));
+  }
+
+  // ── Admin auth ───────────────────────────────────────────────────────────
+  // Membership in admin_users (not just "is logged in") is what makes
+  // someone an admin — checked with the service-role client since that
+  // table has no client-facing RLS policies at all.
+  const isAdminRoute = path === '/admin' || path.startsWith('/admin/');
+  const isAdminLoginRoute = path === '/admin/login';
+
+  if (isAdminRoute && !isAdminLoginRoute) {
+    if (!user) {
+      const redirectUrl = new URL('/admin/login', request.url);
+      redirectUrl.searchParams.set('next', path);
+      return NextResponse.redirect(redirectUrl);
+    }
+    const { data: adminRow } = await supabaseAdmin
+      .from('admin_users')
+      .select('id')
+      .eq('id', user.id)
+      .maybeSingle();
+    if (!adminRow) {
+      const redirectUrl = new URL('/admin/login', request.url);
+      redirectUrl.searchParams.set('next', path);
+      redirectUrl.searchParams.set('error', 'not_admin');
+      return NextResponse.redirect(redirectUrl);
+    }
+  }
+
+  if (isAdminLoginRoute && user) {
+    const { data: adminRow } = await supabaseAdmin
+      .from('admin_users')
+      .select('id')
+      .eq('id', user.id)
+      .maybeSingle();
+    if (adminRow) {
+      return NextResponse.redirect(new URL('/admin', request.url));
+    }
   }
 
   return response;
