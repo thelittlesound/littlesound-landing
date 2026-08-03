@@ -108,13 +108,13 @@ export default function ForFamilies() {
               Little Sound is Seattle&apos;s family activity platform. Search camps, classes, and sports by age, neighborhood, and price — all in one place.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 mb-10">
-              <a
-                href="#waitlist"
+            <div className="flex flex-col sm:flex-row flex-wrap gap-4 mb-4">
+              <Link
+                href="/families/signup"
                 className="inline-flex items-center justify-center gap-2 bg-[#C4A882] hover:bg-[#A8865A] text-white font-semibold rounded-full px-7 py-4 text-[15px] transition-all duration-200 hover:-translate-y-0.5"
               >
-                Join the Waitlist →
-              </a>
+                Create Your Account →
+              </Link>
               <Link
                 href="/discover"
                 className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-full px-7 py-4 text-[15px] transition-all duration-200 border border-white/20"
@@ -122,6 +122,14 @@ export default function ForFamilies() {
                 Browse Activities
               </Link>
             </div>
+
+            <p className="text-white/50 text-[13px] mb-10">
+              Not ready yet?{' '}
+              <a href="#waitlist" className="text-white/75 underline underline-offset-2 hover:text-white">
+                Join the waitlist
+              </a>{' '}
+              instead.
+            </p>
 
             <div className="flex flex-wrap gap-5">
               {['Free to join', 'Seattle beta — Q3 2026', '$29/yr founding family pricing'].map((item) => (
