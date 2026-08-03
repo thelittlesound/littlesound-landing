@@ -20,41 +20,66 @@ Family activity planning platform ("The Family OS") for Seattle. Helps parents d
 
 ---
 
-## Last Completed Work
-**Provider registration flow** — self-serve provider onboarding (no more emailing hello@).
+## Completed Work
 
-New files:
+### Provider registration + admin flow (fully complete)
+
+**End-to-end flow:**
+Provider visits `/providers/signup` → fills out account form → redirected to `/providers/listings/new` → completes 4-step listing form → submission saved to Supabase + email sent to hello@ → Kelly/Evan review in `/admin` → Approve (listing appears on Discover) or Reject (removed from site, record kept)
+
+**New files:**
 | File | Route | Purpose |
 |------|-------|---------|
 | `app/providers/signup/page.tsx` | `/providers/signup` | Provider account form (name, email, business, category) |
 | `app/providers/listings/new/page.tsx` | `/providers/listings/new` | 4-step listing creation (details → age/pricing → location → review) |
-| `app/api/providers/submit/route.ts` | `POST /api/providers/submit` | Adds to Brevo provider list + emails hello@ with full details |
+| `app/api/providers/submit/route.ts` | `POST /api/providers/submit` | Saves to Supabase + adds to Brevo provider list + emails hello@ |
+| `app/admin/page.tsx` | `/admin` | Password-protected admin panel (review, approve, reject submissions) |
+| `app/api/admin/submissions/route.ts` | `GET /api/admin/submissions` | Fetches submissions from Supabase (filterable by status) |
+| `app/api/admin/submissions/[id]/status/route.ts` | `POST /api/admin/submissions/[id]/status` | Updates submission status + admin notes in Supabase |
+| `app/api/activities/route.ts` | `GET /api/activities` | Returns approved submissions mapped to activity card shape |
+| `lib/supabase.ts` | — | Supabase client (public) + supabaseAdmin (service role, server-only) |
 
-Flow: signup → passes name/email/category as URL params → listing form (pre-filled) → submit → success screen.
-Email notifications go to hello@thelittlesound.com via Brevo transactional API.
-Set `BREVO_PROVIDER_LIST_ID` in Vercel env vars (default falls back to list 3).
+**Infrastructure:**
+- Supabase project: `https://eyuetlkggoaegtyhirbt.supabase.co` (West US / Oregon)
+- `submissions` table: id, created_at, status, contact_name, contact_email, phone, title, category, subcategory, description, age_min, age_max, price, price_unit, neighborhood, website, admin_notes, reviewed_at, reviewed_by
+- RLS enabled on Supabase project
+- Brevo provider list: Little Sound Providers (List #5)
+- Admin password: `littlesound2026` (set via `NEXT_PUBLIC_ADMIN_PASSWORD` env var to change)
 
-Previous work:
+**Vercel env vars required (all set):**
+- `BREVO_API_KEY`
+- `BREVO_PROVIDER_LIST_ID` = 5
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+
+**Discover page integration:**
+- `app/discover/page.tsx` now fetches `/api/activities` on load and merges approved provider submissions with static `activities.json` seed data
+- Category mapping handled in API route (e.g. "STEM & Tech" → "STEM")
+- Rejecting a listing removes it from Discover; no delete — all submissions kept for record
+
+**Homepage:**
+- Providers section has three CTA buttons: Claim Your Listing, See How We List Providers, List Your Activity → `/providers/signup`
+
+### Previous work
 - Data verification pass on top 15 listings
 - Static pages: `/for-families`, `/for-providers`, `/about`
-- Site-wide nav (`app/components/Nav.tsx`) — fixed top, mobile hamburger
-- Homepage flow restructured: Hero → Problem → Solution → Categories → Founders → Providers → CTA
+- Site-wide nav (`app/components/Nav.tsx`) — fixed top, mobile hamburger; links: Browse Activities, For Families, For Providers
+- Homepage flow: Hero → Problem → Solution → Categories → Founders → Providers → CTA
 
 ---
 
 ## Next Up
-- Add `/providers/signup` and `/providers/listings/new` links to the Nav and For Providers page CTA
-- Set `BREVO_PROVIDER_LIST_ID` env var in Vercel dashboard
-- Family auth flow (waitlist-only for beta or full signup?)
-- Provider dashboard (view/edit listing after submission)
+- **Family auth decision** — full signup flow vs. waitlist-only for beta (decision needed before building)
+- **Provider dashboard** — view/edit listing post-submission (requires auth, build after family auth decision)
+- **Admin password** — move from env var to proper auth (post-beta)
 
 ---
 
 ## Open Decisions
-- Provider registration: store submissions in a database (Supabase recommended) or email-based for now?
-- Family registration: full auth flow vs. waitlist-only for beta
-- Booking: not in scope for Phase 1
-- Stack for provider CRM: TBD post-launch
+- **Family registration:** full auth flow vs. waitlist-only for beta — this is the next conversation
+- **Booking:** not in scope for Phase 1
+- **Provider CRM:** TBD post-launch
 
 ---
 
@@ -63,7 +88,7 @@ Previous work:
 |------|---------|
 | `app/page.tsx` | Homepage — imports all section components |
 | `app/discover/page.tsx` | Discover/search page — main family-facing product |
-| `app/data/activities.json` | All activity listings (81 entries) |
+| `app/data/activities.json` | Static seed listings (81 entries) |
 | `app/components/Nav.tsx` | Site-wide fixed navigation |
 | `app/components/Hero.tsx` | Homepage hero section |
 | `app/components/Categories.tsx` | Homepage category grid with live counts |
@@ -72,9 +97,17 @@ Previous work:
 | `app/for-families/page.tsx` | For Families static page |
 | `app/for-providers/page.tsx` | For Providers static page |
 | `app/about/page.tsx` | About static page |
-| `app/api/waitlist/route.ts` | Waitlist API route (Brevo integration) |
+| `app/providers/signup/page.tsx` | Provider signup form |
+| `app/providers/listings/new/page.tsx` | Provider listing creation (4-step) |
+| `app/admin/page.tsx` | Internal admin panel |
+| `app/api/waitlist/route.ts` | Family waitlist API (Brevo) |
+| `app/api/providers/submit/route.ts` | Provider submission API |
+| `app/api/admin/submissions/route.ts` | Admin: fetch submissions |
+| `app/api/admin/submissions/[id]/status/route.ts` | Admin: approve/reject |
+| `app/api/activities/route.ts` | Public: approved listings for Discover |
+| `lib/supabase.ts` | Supabase client instances |
 | `little-sound-design-tokens.css` | Design system — colors, fonts, spacing |
-| `tailwind.config.js` | Tailwind config (includes scrollbar-hide plugin) |
+| `tailwind.config.js` | Tailwind config |
 
 ---
 
