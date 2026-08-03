@@ -146,7 +146,9 @@ Family clicks "Forgot password?" on `/families/login` → `/families/forgot-pass
 
 **Note:** while the site is password-gated (see Site-wide password gate section), this flow only works for people who already know the site-wide password, since `middleware.ts` gates `/families/reset-password` like everything else. Not an issue during private beta testing; resolves itself once the site goes public.
 
-### Branded auth emails (templates ready, action needed in Supabase dashboard)
+### Branded auth emails (fully complete)
+
+**Status: ✅ done and verified live 2026-08-03.** Custom SMTP configured via Brevo (dedicated "Supabase Auth" key), both templates pasted in and confirmed working — reset password email arrives branded as Little Sound from hello@thelittlesound.com.
 
 **Why:** Supabase's default auth emails (signup confirmation, password reset) are generic — no Little Sound branding, and the sender address doesn't look like it's from us. Evan flagged this after receiving a plain "Supabase Auth" reset email.
 
@@ -173,7 +175,7 @@ Family clicks "Forgot password?" on `/families/login` → `/families/forgot-pass
 2. ~~**Family password recovery**~~ — done, see "Family password recovery" above.
 3. **Provider authentication doesn't exist** — provider signup only writes a row to `submissions`; it never creates a real account. Providers can never log back in. "Provider dashboard" requires building provider auth from scratch first (signup → login → session-protected dashboard), same pattern as family auth.
 4. **Family dashboard is mostly a placeholder** — profile (neighborhood/kids/interests) saves for real, but "saved activities" and "booking history" are just placeholder text, no feature behind them yet.
-5. **Branded confirmation email** — templates drafted, needs Evan to paste into Supabase dashboard + set up custom SMTP. See "Branded auth emails" above.
+5. ~~**Branded confirmation email**~~ — done, see "Branded auth emails" above.
 6. **No `sitemap.xml`** — irrelevant while the site is password-gated; matters once public again.
 
 **Other open items:**
