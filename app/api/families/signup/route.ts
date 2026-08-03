@@ -58,6 +58,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Could not create account' }, { status: 500 });
     }
 
+    // Supabase's anti-enumeration protection: if this email already has an
+    // account, signUp() doesn't error — it returns a decoy user object with
+    // an id that doesn't actually exist in auth.users, so nothing leaks
+    // about whether the email is registered. An empty `identities` array is
+    // the documented signal for this. Without this check we'd try to write
+    // a profiles row for a fake id and get a foreign-key error.
+    if (data.user.identities && data.user.identities.length === 0) {
+      return NextResponse.json(
+        { error: 'An account with this email already exists. Try signing in instead.' },
+        { status: 409 }
+      );
+    }
+
     // ── 2. Create the family profile row ────────────────────────────────────
     // Uses the service-role client so this succeeds even when email
     // confirmation is required and no session exists yet.
