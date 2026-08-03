@@ -12,10 +12,9 @@ Family activity planning platform ("The Family OS") for Seattle. Helps parents d
 ---
 
 ## Current Phase
-**Phase 1 — Seattle Beta (Q3 2026)**
-- Marketing site live and complete
-- 100+ families on waitlist
-- 80+ providers catalogued in `app/data/activities.json`
+**Phase 1 — Seattle Beta (Q3 2026)** — still building, site is password-gated (not public yet)
+- Marketing site built, not yet publicly launched
+- No real family or provider signups yet — waitlist/provider counts shown on-site are catalogued research data (80+ providers researched in `app/data/activities.json`), not live signups. **Do not treat "100+ families" language anywhere on the site as real until the waitlist actually has real signups.**
 - hello@thelittlesound.com active (Google Workspace)
 
 ---
@@ -93,6 +92,19 @@ Family visits `/families/signup` → 2-step form (account: name/email/password �
 3. Confirm whether "Confirm email" is on or off in Supabase Auth settings — determines whether new families land straight in the dashboard or see a "check your email" screen first
 4. `npm run build` locally or a Vercel preview deploy to catch anything environment-specific
 
+### Site-wide password gate (fully complete)
+
+**Why:** Real family/provider signups aren't live yet — the "100+ families," "57+ providers verified" language across the site is aspirational, not real. Rather than show fabricated or embarrassingly-low real numbers while still building, the whole site is now gated behind a shared password until there's real traction worth launching publicly with.
+
+**How it works:** `middleware.ts` now runs on nearly every request (pages, API routes, everything except Next's static assets). It checks for a `ls_site_access` cookie matching `SITE_ACCESS_PASSWORD`; if missing or wrong, it redirects to `/unlock`, a simple password form that POSTs to `/api/site-gate` and sets an HttpOnly cookie on success (30-day expiry).
+
+**⚠️ Action required before/after this deploys:**
+- Set `SITE_ACCESS_PASSWORD` in Vercel → Project Settings → Environment Variables (any string you choose — share it only with people who should see the site right now).
+- **If this isn't set, the site fails closed in production — meaning nobody, including you, can get in.** That's intentional (safer than accidentally leaking it open), but don't forget to set it.
+- Locally, `npm run dev` falls back to a hardcoded dev password (`dev-preview`) so you don't need the env var set to test on your machine.
+
+**To go public again later:** remove or rename `SITE_ACCESS_PASSWORD` handling in `middleware.ts` (or just stop requiring it), once there's real traction and honest numbers to show. At that point, also revisit the fabricated "100+ families / 57+ providers" copy across `Hero.tsx`, `CTA.tsx`, `for-families/page.tsx`, `for-providers/page.tsx`, `about/page.tsx`, and `providers/signup/page.tsx` — replace with real live counts or honest qualitative language.
+
 ### Previous work
 - Data verification pass on top 15 listings
 - Static pages: `/for-families`, `/for-providers`, `/about`
@@ -102,8 +114,10 @@ Family visits `/families/signup` → 2-step form (account: name/email/password �
 ---
 
 ## Next Up
+- **Set `SITE_ACCESS_PASSWORD` in Vercel** — required immediately after this deploys, or the site is unreachable (see Site-wide password gate section above)
 - ~~Run `supabase/family-profiles.sql` + `npm install`~~ — done, deployed and tested live 2026-08-03
-- **Homepage CTA** — homepage still only pushes the waitlist; consider adding a "Create Your Account" link there too, same as `/for-families`
+- **Homepage CTA** — homepage still only pushes the waitlist; consider adding a "Create Your Account" link there too, same as `/for-families` (do this once the site is public again)
+- **Fix fabricated stats** — "100+ families," "57+ providers verified" language across the site needs replacing with real live counts or honest language before going public again (see Site-wide password gate section)
 - **Provider dashboard** — view/edit listing post-submission (can now reuse the family auth pattern — Supabase Auth + `@supabase/ssr` + `middleware.ts`)
 - **Saved activities / booking history** — family dashboard has a placeholder for this; not yet built
 - **Branded confirmation email** — currently Supabase's default template; customize under Authentication → Email Templates when there's time
