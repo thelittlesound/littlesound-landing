@@ -67,24 +67,6 @@ export default function AdminPage() {
     setTimeout(() => setToast(null), 3500);
   }
 
-  async function deleteSubmission(id: string) {
-    if (!confirm('Delete this submission? This cannot be undone.')) return;
-    setActionLoading(id + 'delete');
-    try {
-      const res = await fetch(`/api/admin/submissions/${id}/status`, {
-        method: 'DELETE',
-      });
-      if (!res.ok) throw new Error();
-      showToast('Submission deleted', true);
-      setSelectedId(null);
-      fetchSubmissions();
-    } catch {
-      showToast('Something went wrong', false);
-    } finally {
-      setActionLoading(null);
-    }
-  }
-
   async function updateStatus(id: string, status: 'approved' | 'rejected') {
     setActionLoading(id + status);
     try {
@@ -349,15 +331,6 @@ export default function AdminPage() {
                 </p>
               )}
 
-              <div className="mt-4 pt-4 border-t border-[#E8DFC8]">
-                <button
-                  onClick={() => deleteSubmission(selected.id)}
-                  disabled={!!actionLoading}
-                  className="w-full text-[#B0C8D0] text-xs py-1.5 hover:text-red-400 transition-colors disabled:opacity-50"
-                >
-                  {actionLoading === selected.id + 'delete' ? 'Deleting…' : 'Delete submission'}
-                </button>
-              </div>
             </div>
           </div>
         )}
