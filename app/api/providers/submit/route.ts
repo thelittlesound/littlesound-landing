@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { supabaseAdmin } from '@/lib/supabase';
 
 const BREVO_API_KEY = process.env.BREVO_API_KEY;
 const BREVO_API_URL = 'https://api.brevo.com/v3';
@@ -7,12 +8,21 @@ const NOTIFY_EMAIL = 'hello@thelittlesound.com';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { type, contactName, contactEmail, firstName, lastName, email, businessName, title, ...rest } = body;
+    const {
+      type,
+      contactName, contactEmail,
+      firstName, lastName, email,
+      businessName, title,
+      category, subcategory, description,
+      ageMin, ageMax,
+      price, priceUnit,
+      neighborhood, website, phone,
+      ...rest
+    } = body;
 
-    // Normalise contact fields (signup vs listing paths use slightly different keys)
+    // Normalise contact fields
     const name = contactName || `${firstName || ''} ${lastName || ''}`.trim();
     const providerEmail = contactEmail || email;
-    // Listing submissions use 'title' rather than 'businessName'
     const resolvedBusinessName = businessName || title;
 
     if (!providerEmail || !resolvedBusinessName) {
@@ -22,10 +32,33 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ── 1. Add provider as a Brevo contact (provider list) ───────────────────
-    // TODO: Set BREVO_PROVIDER_LIST_ID in your environment variables.
-    // Use a different list ID from the family waitlist (list 2).
-    const PROVIDER_LIST_ID = Number(process.env.BREVO_PROVIDER_LIST_ID) || 3;
+    // ── 1. Save to Supabase ───────────────────────────────────────────────────
+    const { error: dbError } = await supabaseAdmin
+      .from('submissions')
+      .insert({
+        contact_name: name,
+        contact_email: providerEmail,
+        phone: phone || null,
+        title: resolvedBusinessName,
+        category: category || null,
+        subcategory: subcategory || null,
+        description: description || null,
+        age_min: ageMin ? Number(ageMin) : null,
+        age_max: ageMax ? Number(ageMax) : null,
+        price: price ? Number(price) : null,
+        price_unit: priceUnit || null,
+        neighborhood: neighborhood || null,
+        website: website || null,
+        status: 'pending',
+      });
+
+    if (dbError) {
+      console.error('Supabase insert error:', dbError);
+      // Don't block the user — log and continue
+    }
+
+    // ── 2. Add to Brevo contact list ─────────────────────────────────────────
+    const PROVIDER_LIST_ID = Number(process.env.BREVO_PROVIDER_LIST_ID) || 5;
 
     if (BREVO_API_KEY) {
       await fetch(`${BREVO_API_URL}/contacts`, {
@@ -47,13 +80,23 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // ── 2. Send notification email to hello@ with all submission details ─────
+    // ── 3. Send notification email ────────────────────────────────────────────
     if (BREVO_API_KEY) {
       const isListing = type === 'listing';
 
       const htmlContent = isListing
-        ? buildListingEmail({ name, email: providerEmail, businessName: resolvedBusinessName, title: resolvedBusinessName, ...rest })
-        : buildSignupEmail({ name, email: providerEmail, businessName: resolvedBusinessName, ...rest });
+        ? buildListingEmail({
+            name, email: providerEmail,
+            businessName: resolvedBusinessName, title: resolvedBusinessName,
+            category, subcategory, description,
+            ageMin, ageMax, price, priceUnit,
+            neighborhood, website, phone,
+          })
+        : buildSignupEmail({
+            name, email: providerEmail,
+            businessName: resolvedBusinessName,
+            category, website, phone,
+          });
 
       const emailRes = await fetch(`${BREVO_API_URL}/smtp/email`, {
         method: 'POST',
@@ -91,14 +134,14 @@ export async function POST(request: NextRequest) {
 
 // ─── Email builders ───────────────────────────────────────────────────────────
 
-function row(label: string, value: string) {
+function row(label: string, value: string | number | null | undefined) {
   return `<tr>
     <td style="padding:8px 12px;font-weight:600;color:#0D5C6E;white-space:nowrap;vertical-align:top;font-size:13px;">${label}</td>
     <td style="padding:8px 12px;color:#1C3A4A;font-size:14px;">${value || '—'}</td>
   </tr>`;
 }
 
-function buildSignupEmail(data: Record<string, string>) {
+function buildSignupEmail(data: Record<string, string | undefined>) {
   return `
 <div style="font-family:'DM Sans',Helvetica,sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;">
   <h2 style="font-family:Georgia,serif;font-weight:400;color:#0D5C6E;margin:0 0 4px;">New provider signup</h2>
@@ -107,38 +150,38 @@ function buildSignupEmail(data: Record<string, string>) {
     ${row('Name', data.name)}
     ${row('Email', data.email)}
     ${row('Business', data.businessName)}
-    ${row('Category', data.category || '')}
-    ${row('Website', data.website || '')}
-    ${row('Phone', data.phone || '')}
+    ${row('Category', data.category)}
+    ${row('Website', data.website)}
+    ${row('Phone', data.phone)}
   </table>
   <p style="font-size:13px;color:#7A9AAA;margin-top:24px;">
-    Reply directly to this email to reach the provider.
+    <a href="https://thelittlesound.com/admin" style="color:#1A7A8A;">Review in admin →</a>
   </p>
 </div>`;
 }
 
-function buildListingEmail(data: Record<string, string>) {
+function buildListingEmail(data: Record<string, string | number | null | undefined>) {
   return `
 <div style="font-family:'DM Sans',Helvetica,sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;">
   <h2 style="font-family:Georgia,serif;font-weight:400;color:#0D5C6E;margin:0 0 4px;">New listing submission</h2>
-  <p style="color:#3A5A6A;font-size:14px;margin:0 0 24px;">Ready to review and go live.</p>
+  <p style="color:#3A5A6A;font-size:14px;margin:0 0 24px;">Ready to review and approve.</p>
   <table style="width:100%;border-collapse:collapse;background:#F5EFE0;border-radius:12px;overflow:hidden;">
-    ${row('Title', data.title || '')}
+    ${row('Title', data.title)}
     ${row('Category', [data.category, data.subcategory].filter(Boolean).join(' › '))}
     ${row('Ages', `${data.ageMin}–${data.ageMax} years`)}
     ${row('Price', `$${data.price} / ${data.priceUnit}`)}
-    ${row('Neighborhood', data.neighborhood || '')}
-    ${row('Website', data.website || '')}
+    ${row('Neighborhood', data.neighborhood)}
+    ${row('Website', data.website)}
     ${row('Contact', data.name)}
     ${row('Email', data.email)}
-    ${row('Phone', data.phone || '')}
+    ${row('Phone', data.phone)}
   </table>
   <div style="margin-top:16px;background:#fff;border:1px solid #E8DFC8;border-radius:12px;padding:16px 20px;">
     <p style="font-size:12px;font-weight:600;color:#7A9AAA;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 8px;">Description</p>
     <p style="font-size:14px;color:#1C3A4A;line-height:1.6;margin:0;">${data.description || ''}</p>
   </div>
   <p style="font-size:13px;color:#7A9AAA;margin-top:24px;">
-    Reply directly to this email to reach the provider.
+    <a href="https://thelittlesound.com/admin" style="color:#1A7A8A;font-weight:600;">Review &amp; approve in admin →</a>
   </p>
 </div>`;
 }
