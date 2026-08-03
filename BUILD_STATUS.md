@@ -102,9 +102,11 @@ Family visits `/families/signup` → 2-step form (account: name/email/password �
 ---
 
 ## Next Up
-- **Run `supabase/family-profiles.sql`** in the Supabase SQL editor + `npm install` — required before family auth works end to end
+- ~~Run `supabase/family-profiles.sql` + `npm install`~~ — done, deployed and tested live 2026-08-03
+- **Homepage CTA** — homepage still only pushes the waitlist; consider adding a "Create Your Account" link there too, same as `/for-families`
 - **Provider dashboard** — view/edit listing post-submission (can now reuse the family auth pattern — Supabase Auth + `@supabase/ssr` + `middleware.ts`)
-- **Saved activities / booking history** — dashboard has a placeholder for this; not yet built
+- **Saved activities / booking history** — family dashboard has a placeholder for this; not yet built
+- **Branded confirmation email** — currently Supabase's default template; customize under Authentication → Email Templates when there's time
 - **Admin password** — move from env var to proper auth (post-beta)
 
 ---
