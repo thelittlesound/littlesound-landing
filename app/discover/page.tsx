@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import activities from '../data/activities.json';
+import staticActivities from '../data/activities.json';
+
+type Activity = typeof staticActivities[0] & { subcategory?: string; source?: string };
 
 const CATEGORIES = ['All', 'Sports', 'Swimming', 'Arts', 'Outdoor', 'STEM', 'Music', 'Dance', 'Cooking', 'Language', 'Martial Arts', 'Early Childhood', 'Theater', 'Camps', 'Academic'];
 
@@ -30,7 +32,6 @@ const AGE_GROUPS = [
   { label: '12+', min: 12, max: 18 },
 ];
 
-type Activity = typeof activities[0] & { subcategory?: string };
 
 const CATEGORY_STYLES: Record<string, { from: string; to: string; emoji: string }> = {
   'Swimming':        { from: '#B8D8EE', to: '#7FB8D8', emoji: '🏊' },
@@ -109,6 +110,12 @@ export default function Discover() {
   const [subcategory, setSubcategory] = useState('All');
   const [ageGroup, setAgeGroup] = useState(AGE_GROUPS[0]);
   const [sort, setSort] = useState('default');
+  const [providerActivities, setProviderActivities] = useState<Activity[]>([]);
+
+  // Merge static seed data with approved provider submissions
+  const activities = useMemo<Activity[]>(() => {
+    return [...(staticActivities as Activity[]), ...providerActivities];
+  }, [providerActivities]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -121,6 +128,16 @@ export default function Discover() {
       const group = AGE_GROUPS.find(g => g.label.replace('–', '-') === normalized);
       if (group) setAgeGroup(group);
     }
+  }, []);
+
+  // Fetch approved provider listings from Supabase (via API)
+  useEffect(() => {
+    fetch('/api/activities')
+      .then(r => r.json())
+      .then(data => {
+        if (data.activities) setProviderActivities(data.activities);
+      })
+      .catch(() => {}); // Fail silently — static data still shows
   }, []);
 
   // Reset subcategory when category changes
