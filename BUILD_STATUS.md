@@ -14,6 +14,7 @@ Family activity planning platform ("The Family OS") for Seattle. Helps parents d
 ## Current Phase
 **Phase 1 — Seattle Beta (Q3 2026)** — still building, site is password-gated (not public yet)
 - Marketing site built, not yet publicly launched
+- Full auth stack is live and verified: families, providers, and admin all have real Supabase Auth accounts, session-protected dashboards, and password recovery
 - No real family or provider signups yet — waitlist/provider counts shown on-site are catalogued research data (80+ providers researched in `app/data/activities.json`), not live signups. **Do not treat "100+ families" language anywhere on the site as real until the waitlist actually has real signups.**
 - hello@thelittlesound.com active (Google Workspace)
 
@@ -32,7 +33,7 @@ Provider visits `/providers/signup` → fills out account form → redirected to
 | `app/providers/signup/page.tsx` | `/providers/signup` | Provider account form (name, email, business, category) |
 | `app/providers/listings/new/page.tsx` | `/providers/listings/new` | 4-step listing creation (details → age/pricing → location → review) |
 | `app/api/providers/submit/route.ts` | `POST /api/providers/submit` | Saves to Supabase + adds to Brevo provider list + emails hello@ |
-| `app/admin/page.tsx` | `/admin` | Password-protected admin panel (review, approve, reject submissions) |
+| `app/admin/page.tsx` | `/admin` | Admin panel (review, approve, reject submissions) — see "Admin panel real auth" below for how this is actually secured today |
 | `app/api/admin/submissions/route.ts` | `GET /api/admin/submissions` | Fetches submissions from Supabase (filterable by status) |
 | `app/api/admin/submissions/[id]/status/route.ts` | `POST /api/admin/submissions/[id]/status` | Updates submission status + admin notes in Supabase |
 | `app/api/activities/route.ts` | `GET /api/activities` | Returns approved submissions mapped to activity card shape |
@@ -43,7 +44,7 @@ Provider visits `/providers/signup` → fills out account form → redirected to
 - `submissions` table: id, created_at, status, contact_name, contact_email, phone, title, category, subcategory, description, age_min, age_max, price, price_unit, neighborhood, website, admin_notes, reviewed_at, reviewed_by
 - RLS enabled on Supabase project
 - Brevo provider list: Little Sound Providers (List #5)
-- Admin password: `littlesound2026` (set via `NEXT_PUBLIC_ADMIN_PASSWORD` env var to change)
+- ~~Admin password: `littlesound2026` (env var)~~ — superseded, see "Admin panel real auth" below
 
 **Vercel env vars required (all set):**
 - `BREVO_API_KEY`
@@ -78,30 +79,22 @@ Family visits `/families/signup` → 2-step form (account: name/email/password �
 | `lib/supabase-browser.ts` | — | `@supabase/ssr` browser client (cookie-backed, for client components) |
 | `lib/supabase-server.ts` | — | `@supabase/ssr` server client (for server components / route handlers) |
 | `middleware.ts` | — | Refreshes session cookie; gates `/families/dashboard`; bounces logged-in users off `/families/login` + `/families/signup` |
-| `supabase/family-profiles.sql` | — | **Not yet run** — creates `profiles` table + RLS policies. Run once in Supabase SQL editor. |
+| `supabase/family-profiles.sql` | — | Creates `profiles` table + RLS policies |
 
 **Infrastructure:**
 - `profiles` table (see `supabase/family-profiles.sql`): id (references `auth.users`), first_name, last_name, email, neighborhood, kids (jsonb array of `{age}`), preferences (text[]), created_at, updated_at
 - RLS: families can select/update their own row only; row creation happens server-side via `supabaseAdmin` (service role), so no insert policy needed
-- Added `@supabase/ssr` to `package.json` — run `npm install` before next `npm run dev`/build
-- Nav updated with a "Sign In" link (desktop) / "Family Sign In" link (mobile) pointing to `/families/login`
+- Nav has a "Sign In" link (desktop) / "Family Sign In" link (mobile) pointing to `/families/login`
 
-**Still needed before this goes live:**
-1. Run `supabase/family-profiles.sql` in the Supabase SQL editor (Project → SQL Editor)
-2. `npm install` to pull in `@supabase/ssr`
-3. Confirm whether "Confirm email" is on or off in Supabase Auth settings — determines whether new families land straight in the dashboard or see a "check your email" screen first
-4. `npm run build` locally or a Vercel preview deploy to catch anything environment-specific
+**Status: ✅ done and verified live 2026-08-03.** `family-profiles.sql` run, `@supabase/ssr` installed, "Confirm email" is ON in Supabase Auth settings (new families see a "check your email" screen, not an instant dashboard landing).
 
 ### Site-wide password gate (fully complete)
 
 **Why:** Real family/provider signups aren't live yet — the "100+ families," "57+ providers verified" language across the site is aspirational, not real. Rather than show fabricated or embarrassingly-low real numbers while still building, the whole site is now gated behind a shared password until there's real traction worth launching publicly with.
 
-**How it works:** `middleware.ts` now runs on nearly every request (pages, API routes, everything except Next's static assets). It checks for a `ls_site_access` cookie matching `SITE_ACCESS_PASSWORD`; if missing or wrong, it redirects to `/unlock`, a simple password form that POSTs to `/api/site-gate` and sets an HttpOnly cookie on success (30-day expiry).
+**How it works:** `middleware.ts` now runs on nearly every request (pages, API routes, everything except Next's static assets). It checks for a `ls_site_access` cookie matching `SITE_ACCESS_PASSWORD`; if missing or wrong, it redirects to `/unlock`, a simple password form that POSTs to `/api/site-gate` and sets an HttpOnly cookie on success (30-day expiry). If `SITE_ACCESS_PASSWORD` isn't set in production, the site fails closed (blocks everyone, including us) rather than leaking open.
 
-**⚠️ Action required before/after this deploys:**
-- Set `SITE_ACCESS_PASSWORD` in Vercel → Project Settings → Environment Variables (any string you choose — share it only with people who should see the site right now).
-- **If this isn't set, the site fails closed in production — meaning nobody, including you, can get in.** That's intentional (safer than accidentally leaking it open), but don't forget to set it.
-- Locally, `npm run dev` falls back to a hardcoded dev password (`dev-preview`) so you don't need the env var set to test on your machine.
+**Status: ✅ done and verified live 2026-08-03.** `SITE_ACCESS_PASSWORD` set in Vercel, unlock flow tested and working. Locally, `npm run dev` falls back to a hardcoded dev password (`dev-preview`) so the env var doesn't need to be set to test on your machine.
 
 **To go public again later:** remove or rename `SITE_ACCESS_PASSWORD` handling in `middleware.ts` (or just stop requiring it), once there's real traction and honest numbers to show. At that point, also revisit the fabricated "100+ families / 57+ providers" copy across `Hero.tsx`, `CTA.tsx`, `for-families/page.tsx`, `for-providers/page.tsx`, `about/page.tsx`, and `providers/signup/page.tsx` — replace with real live counts or honest qualitative language.
 
@@ -152,13 +145,7 @@ Family clicks "Forgot password?" on `/families/login` → `/families/forgot-pass
 
 **Why:** Supabase's default auth emails (signup confirmation, password reset) are generic — no Little Sound branding, and the sender address doesn't look like it's from us. Evan flagged this after receiving a plain "Supabase Auth" reset email.
 
-**Two separate things need fixing:**
-1. **Email content/branding** — templates drafted, ready to paste in. See `supabase/email-templates/confirm-signup.html` and `reset-password.html`.
-2. **Sender address** ("from Little Sound," not a generic Supabase domain) — requires setting up custom SMTP in Supabase, since the built-in email service forces its own sender domain. This also fixes the email rate-limit issue we hit during testing (Supabase's default email service is limited to a handful of emails/hour — fine for testing, not for real families).
-
-**⚠️ Action required (Supabase dashboard, both are UI-only, no code changes):**
-1. **Content:** Authentication → Email Templates → select "Confirm signup" → paste in `confirm-signup.html`'s body, set subject to "Confirm your Little Sound account" → Save. Repeat for "Reset Password" using `reset-password.html`, subject "Reset your Little Sound password."
-2. **Sender:** Authentication → Settings → SMTP Settings → enable custom SMTP. Recommend reusing Brevo (already set up and verified for `hello@thelittlesound.com` — used for provider notification emails). Get SMTP credentials from Brevo dashboard → SMTP & API → SMTP tab (host `smtp-relay.brevo.com`, port 587, your Brevo login as username, an SMTP key as password), enter those in Supabase along with Sender email `hello@thelittlesound.com` and Sender name `Little Sound`.
+**What this took:** two separate fixes — email content (templates in `supabase/email-templates/confirm-signup.html` and `reset-password.html`, pasted into Supabase's Email Templates screen) and sender address (custom SMTP via Brevo's SMTP relay, using a dedicated "Supabase Auth" key, entered under Authentication → Settings → SMTP Settings with Sender email `hello@thelittlesound.com`). The SMTP change also fixed the rate-limit issue hit during testing — Supabase's default built-in email service allows only a handful of emails/hour, fine for testing but not for real families.
 
 ### Provider authentication (fully complete)
 
@@ -180,7 +167,7 @@ Provider visits `/providers/signup` → fills out account + business info (now i
 | `app/providers/listings/new/ListingForm.tsx` | — | The 4-step wizard UI (moved out of `page.tsx`, now takes contact info as props instead of URL params) |
 | `app/api/providers/signup/route.ts` | `POST /api/providers/signup` | Creates auth user + `provider_profiles` row + Brevo contact + hello@ notification |
 | `lib/provider-auth.ts` | — | `requireProvider()` — used by `/api/providers/submit` |
-| `supabase/provider-profiles.sql` | — | **Not yet run** — creates `provider_profiles` table + adds `provider_id` column to `submissions`. Run once in Supabase SQL editor. |
+| `supabase/provider-profiles.sql` | — | Creates `provider_profiles` table + adds `provider_id` column to `submissions` |
 
 **Changed files:**
 - `app/providers/signup/page.tsx` — added password/confirm-password fields, now posts to `/api/providers/signup` instead of `/api/providers/submit`, "check your email" screen added, footer link now points to `/providers/login`
@@ -192,9 +179,7 @@ Provider visits `/providers/signup` → fills out account + business info (now i
 - `provider_profiles` table: id (references `auth.users`), first_name, last_name, email, business_name, category, website, phone, timestamps — same RLS pattern as `profiles` (select/update own row only, insert via service role)
 - `submissions.provider_id` — new nullable column linking a listing to the provider who submitted it; existing pre-auth rows just have it as null
 
-**⚠️ Action required:**
-1. Run `supabase/provider-profiles.sql` in the Supabase SQL editor.
-2. That's it — no manual account creation needed this time (unlike admins), providers self-serve through `/providers/signup` same as families.
+**Status: ✅ done and verified live 2026-08-03.** `provider-profiles.sql` run, full flow tested end to end (signup → email confirm → login → create listing → shows "In review" on dashboard → approved in `/admin` → dashboard updates to "Live on Discover"). Two real bugs were caught and fixed during this testing pass — see "Bugs found + fixed" below.
 
 **Not built yet (intentionally out of scope for this pass):** editing an already-submitted listing. The dashboard is view-only for now — the copy says to email hello@ for changes. Worth revisiting once there's real provider volume.
 
@@ -208,19 +193,14 @@ Provider visits `/providers/signup` → fills out account + business info (now i
 
 ## Next Up
 
-**Functional gaps flagged 2026-08-03 — fixing in priority order:**
-1. ~~**Admin panel security**~~ — done, see "Admin panel real auth" above.
-2. ~~**Family password recovery**~~ — done, see "Family password recovery" above.
-3. ~~**Provider authentication doesn't exist**~~ — done, see "Provider authentication" above. Still need to run `provider-profiles.sql` (see that section).
-4. **Family dashboard is mostly a placeholder** — profile (neighborhood/kids/interests) saves for real, but "saved activities" and "booking history" are just placeholder text, no feature behind them yet.
-5. ~~**Branded confirmation email**~~ — done, see "Branded auth emails" above.
-6. **No `sitemap.xml`** — irrelevant while the site is password-gated; matters once public again.
+Everything from the 2026-08-03 functional-gaps review is done except two low-priority items:
+1. **Family dashboard is mostly a placeholder beyond the profile** — neighborhood/kids/interests save for real, but "saved activities" and "booking history" are just placeholder text, no feature behind them yet.
+2. **No `sitemap.xml`** — irrelevant while the site is password-gated; matters once public again.
 
-**Other open items:**
-- **Set `SITE_ACCESS_PASSWORD` in Vercel** — required immediately after this deploys, or the site is unreachable (see Site-wide password gate section above)
-- ~~Run `supabase/family-profiles.sql` + `npm install`~~ — done, deployed and tested live 2026-08-03
-- **Homepage CTA** — homepage still only pushes the waitlist; consider adding a "Create Your Account" link there too, same as `/for-families` (do this once the site is public again)
-- **Fix fabricated stats** — "100+ families," "57+ providers verified" language across the site needs replacing with real live counts or honest language before going public again (see Site-wide password gate section)
+**Before going public again:**
+- **Homepage CTA** — homepage still only pushes the waitlist; consider adding a "Create Your Account" link there too, same as `/for-families`
+- **Fix fabricated stats** — "100+ families," "57+ providers verified" language across the site needs replacing with real live counts or honest language (see Site-wide password gate section above for the full list of files)
+- **Provider dashboard listing editing** — currently view-only; providers have to email hello@ to change a listing
 
 ---
 
@@ -295,6 +275,8 @@ Provider visits `/providers/signup` → fills out account + business info (now i
 - Vercel deployment occasionally requires a manual re-push if the lock deletion interrupts the push
 
 ## Bugs found + fixed
-- **2026-08-03 — Provider dashboard showed stale "no listings" right after submitting one.** The success screen's "Go to your dashboard" button used `next/link`, which Next.js prefetches in the background — so it cached a snapshot of the (empty) dashboard before the listing actually finished saving, then served that stale cache on click instead of fetching fresh. The listing itself saved correctly the whole time (confirmed via `/admin`). Fixed by using a plain `<a>` tag for that link (forces a full navigation, bypassing the router cache) and adding `export const dynamic = 'force-dynamic'` to `/providers/dashboard`, `/families/dashboard`, and `/admin` as defensive insurance against the same class of staleness.
-- **2026-08-03 — Duplicate-email signup silently broke account creation.** Supabase's anti-enumeration protection means `auth.signUp()` doesn't error when called with an already-registered email — it returns a decoy user object with an id that doesn't exist in `auth.users`, so nothing leaks about whether the email is taken. Both `/api/families/signup` and `/api/providers/signup` took that at face value and tried to write a profile row for the fake id, causing a foreign-key error (`23503`) that cascaded into other failures downstream (e.g. a provider's first listing submission failing with a not-null violation because their profile was never actually created). Found when Evan tested provider signup with an email that already had an admin account. Fixed by checking `data.user.identities.length === 0` right after signUp — now returns a clear "an account with this email already exists" error instead of silently corrupting state.
-- **2026-08-03 — Provider signup wrote two `submissions` rows per provider.** Both the account-creation step and the listing-creation step posted to the same `/api/providers/submit` endpoint, which always inserted into `submissions` regardless of type. Fixed as part of the provider authentication build — account creation no longer touches `submissions` at all.
+Listed chronologically — all found and fixed 2026-08-03 while building and testing provider authentication.
+
+1. **Provider signup wrote two `submissions` rows per provider.** Both the account-creation step and the listing-creation step posted to the same `/api/providers/submit` endpoint, which always inserted into `submissions` regardless of type. Found while building provider auth (not from a live test). Fixed as part of that build — account creation no longer touches `submissions` at all.
+2. **Duplicate-email signup silently broke account creation.** Supabase's anti-enumeration protection means `auth.signUp()` doesn't error when called with an already-registered email — it returns a decoy user object with an id that doesn't exist in `auth.users`, so nothing leaks about whether the email is taken. Both `/api/families/signup` and `/api/providers/signup` took that at face value and tried to write a profile row for the fake id, causing a foreign-key error (`23503`) that cascaded into other failures downstream (a provider's first listing submission then failed with a not-null violation because their profile was never actually created). Found when Evan tested provider signup with `esherm7@gmail.com`, which already had an admin account. Fixed by checking `data.user.identities.length === 0` right after signUp — now returns a clear "an account with this email already exists" error instead of silently corrupting state.
+3. **Provider dashboard showed stale "no listings" right after submitting one.** The success screen's "Go to your dashboard" button used `next/link`, which Next.js prefetches in the background — so it cached a snapshot of the (empty) dashboard before the listing actually finished saving, then served that stale cache on click instead of fetching fresh. The listing itself saved correctly the whole time (confirmed via `/admin`). Fixed by using a plain `<a>` tag for that link (forces a full navigation, bypassing the router cache) and adding `export const dynamic = 'force-dynamic'` to `/providers/dashboard`, `/families/dashboard`, and `/admin` as defensive insurance against the same class of staleness.
