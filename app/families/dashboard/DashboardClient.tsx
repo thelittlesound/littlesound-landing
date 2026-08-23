@@ -33,7 +33,27 @@ export interface Profile {
   preferences: string[];
 }
 
-export default function DashboardClient({ profile }: { profile: Profile }) {
+export interface SavedActivity {
+  activity_id: string;
+  title: string | null;
+  provider: string | null;
+  category: string | null;
+  neighborhood: string | null;
+  age_min: number | null;
+  age_max: number | null;
+  price: number | null;
+  price_unit: string | null;
+  website: string | null;
+  created_at: string;
+}
+
+export default function DashboardClient({
+  profile,
+  savedActivities,
+}: {
+  profile: Profile;
+  savedActivities: SavedActivity[];
+}) {
   const router = useRouter();
 
   const [editing, setEditing] = useState(false);
@@ -45,6 +65,8 @@ export default function DashboardClient({ profile }: { profile: Profile }) {
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [signingOut, setSigningOut] = useState(false);
+  const [saved, setSaved] = useState<SavedActivity[]>(savedActivities);
+  const [removingId, setRemovingId] = useState<string | null>(null);
 
   const isProfileEmpty =
     !profile.neighborhood && profile.kids.length === 0 && profile.preferences.length === 0;
@@ -117,6 +139,35 @@ export default function DashboardClient({ profile }: { profile: Profile }) {
     const supabase = createSupabaseBrowserClient();
     await supabase.auth.signOut();
     router.push('/');
+    router.refresh();
+  }
+
+  async function handleRemoveSaved(activityId: string) {
+    setRemovingId(activityId);
+    const supabase = createSupabaseBrowserClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      setRemovingId(null);
+      return;
+    }
+
+    const prev = saved;
+    setSaved((s) => s.filter((x) => x.activity_id !== activityId)); // optimistic
+
+    const { error } = await supabase
+      .from('saved_activities')
+      .delete()
+      .eq('user_id', user.id)
+      .eq('activity_id', activityId);
+
+    setRemovingId(null);
+
+    if (error) {
+      setSaved(prev); // revert
+      return;
+    }
     router.refresh();
   }
 
@@ -298,13 +349,81 @@ export default function DashboardClient({ profile }: { profile: Profile }) {
           )}
         </div>
 
-        {/* Placeholder for what's next */}
-        <div className="bg-white/60 border border-[#E8DFC8] rounded-[20px] p-6 text-center">
+        {/* Saved activities */}
+        <div className="bg-white rounded-[24px] shadow-[0_4px_32px_rgba(10,74,90,0.09)] p-8 md:p-10 mb-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="font-['Cormorant_Garamond'] text-2xl font-light text-[#1C3A4A]">
+              Saved activities
+            </h2>
+            {saved.length > 0 && (
+              <span className="text-[13px] text-[#7A9AAA]">{saved.length} saved</span>
+            )}
+          </div>
+
+          {saved.length === 0 ? (
+            <div className="text-center py-6">
+              <p className="text-[15px] text-[#3A5A6A] mb-4">
+                You haven&apos;t saved anything yet. Tap the heart on any activity to keep it here.
+              </p>
+              <a
+                href="/discover"
+                className="inline-flex items-center justify-center h-11 rounded-full bg-[#0D5C6E] text-white font-semibold text-[14px] px-6 hover:bg-[#1A7A8A] transition-colors"
+              >
+                Browse activities →
+              </a>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {saved.map((s) => (
+                <div
+                  key={s.activity_id}
+                  className="border border-[#E8DFC8] rounded-[16px] p-4"
+                >
+                  <h3 className="font-['Cormorant_Garamond'] text-[20px] font-semibold text-[#1C3A4A] leading-snug">
+                    {s.title}
+                  </h3>
+                  {s.provider && (
+                    <p className="text-[13px] text-[#1A7A8A] font-medium">{s.provider}</p>
+                  )}
+                  <p className="text-[12px] text-[#7A9AAA] mt-1">
+                    {[s.category, s.neighborhood].filter(Boolean).join(' · ')}
+                    {s.age_min != null ? ` · Ages ${s.age_min}–${s.age_max}` : ''}
+                    {s.price != null ? ` · $${s.price}${s.price_unit ? `/${s.price_unit}` : ''}` : ''}
+                  </p>
+                  <div className="flex items-center gap-4 mt-3">
+                    {s.website && (
+                      <a
+                        href={s.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[13px] font-semibold text-[#1A7A8A] hover:text-[#0D5C6E]"
+                      >
+                        View details →
+                      </a>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveSaved(s.activity_id)}
+                      disabled={removingId === s.activity_id}
+                      className="text-[13px] font-medium text-[#7A9AAA] hover:text-[#C0544A] transition-colors disabled:opacity-50"
+                    >
+                      {removingId === s.activity_id ? 'Removing…' : 'Remove'}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Booking history — booking is out of Phase 1 scope, so there's no
+            feature (or data) behind this yet. Honest placeholder, not a fake. */}
+        <div className="bg-white/60 border border-[#E8DFC8] rounded-[20px] p-6">
+          <h2 className="font-['Cormorant_Garamond'] text-xl font-light text-[#1C3A4A] mb-1">
+            Booking history
+          </h2>
           <p className="text-[14px] text-[#5A7A8A]">
-            Saved activities and booking history are coming soon.{' '}
-            <a href="/discover" className="text-[#1A7A8A] underline underline-offset-2">
-              Browse activities →
-            </a>
+            Once you can book activities through Little Sound, your bookings will show up here.
           </p>
         </div>
       </div>

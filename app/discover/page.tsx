@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import staticActivities from '../data/activities.json';
+import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
 
 type Activity = typeof staticActivities[0] & { subcategory?: string; source?: string };
 
@@ -50,7 +51,15 @@ const CATEGORY_STYLES: Record<string, { from: string; to: string; emoji: string 
   'Language':        { from: '#B8E8D0', to: '#70C8A0', emoji: '🌍' },
 };
 
-function ActivityCard({ a }: { a: Activity }) {
+function ActivityCard({
+  a,
+  saved,
+  onToggleSave,
+}: {
+  a: Activity;
+  saved: boolean;
+  onToggleSave: (a: Activity) => void;
+}) {
   const style = CATEGORY_STYLES[a.category] ?? { from: '#C5D8E8', to: '#A8C8D8', emoji: '✨' };
   return (
     <article className="bg-white border border-[#E8DFC8] rounded-[20px] overflow-hidden hover:shadow-[0_12px_32px_rgba(10,74,90,0.14)] transition-shadow duration-300 flex flex-col">
@@ -64,6 +73,22 @@ function ActivityCard({ a }: { a: Activity }) {
         <span className="absolute top-4 left-4 px-3 py-1 rounded-full bg-white/80 text-[11px] font-semibold uppercase tracking-wide text-[#1A7A8A]">
           {a.category}
         </span>
+        <button
+          type="button"
+          onClick={(e) => { e.preventDefault(); onToggleSave(a); }}
+          aria-label={saved ? 'Remove from saved' : 'Save activity'}
+          aria-pressed={saved}
+          className="absolute top-3 right-3 z-20 w-9 h-9 rounded-full bg-white/85 backdrop-blur-sm flex items-center justify-center shadow-sm hover:bg-white transition-colors"
+        >
+          <svg
+            width="18" height="18" viewBox="0 0 24 24"
+            fill={saved ? '#0D5C6E' : 'none'}
+            stroke="#0D5C6E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z" />
+          </svg>
+        </button>
         <span className="px-3 py-1 rounded-full bg-white/70 font-['Cormorant_Garamond'] text-[14px] italic text-[#0D5C6E] relative z-10">
           {a.neighborhood}
         </span>
@@ -111,6 +136,8 @@ export default function Discover() {
   const [ageGroup, setAgeGroup] = useState(AGE_GROUPS[0]);
   const [sort, setSort] = useState('default');
   const [providerActivities, setProviderActivities] = useState<Activity[]>([]);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
 
   // Merge static seed data with approved provider submissions
   const activities = useMemo<Activity[]>(() => {
@@ -138,6 +165,24 @@ export default function Discover() {
         if (data.activities) setProviderActivities(data.activities);
       })
       .catch(() => {}); // Fail silently — static data still shows
+  }, []);
+
+  // Who's signed in + which activities they've already saved (for heart state).
+  // Logged-out visitors (past the site gate but with no family session) just
+  // get empty saved state; tapping a heart sends them to sign in.
+  useEffect(() => {
+    const supabase = createSupabaseBrowserClient();
+    supabase.auth.getUser().then(({ data: { user } }: { data: { user: { id: string } | null } }) => {
+      if (!user) return;
+      setUserId(user.id);
+      supabase
+        .from('saved_activities')
+        .select('activity_id')
+        .eq('user_id', user.id)
+        .then(({ data }: { data: { activity_id: string }[] | null }) => {
+          if (data) setSavedIds(new Set(data.map((r) => r.activity_id)));
+        });
+    });
   }, []);
 
   // Reset subcategory when category changes
@@ -206,6 +251,61 @@ export default function Discover() {
     setAgeGroup(AGE_GROUPS[0]);
     setSort('default');
   };
+
+  // Save / unsave an activity. Optimistic — revert on error. Writes go straight
+  // to Supabase from the browser (anon client); RLS scopes rows to this user.
+  async function toggleSave(a: Activity) {
+    if (!userId) {
+      // Not signed in — send to family sign in, then back to Discover.
+      window.location.href = '/families/login?next=/discover';
+      return;
+    }
+
+    const supabase = createSupabaseBrowserClient();
+    const isSaved = savedIds.has(a.id);
+
+    setSavedIds((prev) => {
+      const next = new Set(prev);
+      if (isSaved) next.delete(a.id);
+      else next.add(a.id);
+      return next;
+    });
+
+    const revert = () =>
+      setSavedIds((prev) => {
+        const next = new Set(prev);
+        if (isSaved) next.add(a.id);
+        else next.delete(a.id);
+        return next;
+      });
+
+    if (isSaved) {
+      const { error } = await supabase
+        .from('saved_activities')
+        .delete()
+        .eq('user_id', userId)
+        .eq('activity_id', a.id);
+      if (error) revert();
+    } else {
+      const { error } = await supabase.from('saved_activities').upsert(
+        {
+          user_id: userId,
+          activity_id: a.id,
+          title: a.title,
+          provider: a.provider,
+          category: a.category,
+          neighborhood: a.neighborhood,
+          age_min: a.ageMin,
+          age_max: a.ageMax,
+          price: a.price,
+          price_unit: a.priceUnit,
+          website: a.website,
+        },
+        { onConflict: 'user_id,activity_id', ignoreDuplicates: true }
+      );
+      if (error) revert();
+    }
+  }
 
   return (
     <main className="min-h-screen bg-white">
@@ -365,14 +465,18 @@ export default function Discover() {
                     <span className="text-[13px] text-[#7A9AAA]">{items.length} {items.length === 1 ? 'provider' : 'providers'}</span>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {items.map((a) => <ActivityCard key={a.id} a={a} />)}
+                    {items.map((a) => (
+                      <ActivityCard key={a.id} a={a} saved={savedIds.has(a.id)} onToggleSave={toggleSave} />
+                    ))}
                   </div>
                 </div>
               ))}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredResults.map((a) => <ActivityCard key={a.id} a={a} />)}
+              {filteredResults.map((a) => (
+                <ActivityCard key={a.id} a={a} saved={savedIds.has(a.id)} onToggleSave={toggleSave} />
+              ))}
             </div>
           )}
 

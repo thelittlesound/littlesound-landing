@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
-import DashboardClient, { type Profile } from './DashboardClient';
+import DashboardClient, { type Profile, type SavedActivity } from './DashboardClient';
 
 // Always render fresh — avoids ever serving a router-cached snapshot from
 // before a profile update or sign-in.
@@ -25,6 +25,14 @@ export default async function FamilyDashboardPage() {
     .eq('id', user.id)
     .maybeSingle();
 
+  // Activities this family has saved from Discover. RLS scopes this to the
+  // signed-in user's own rows. Newest first.
+  const { data: savedRows } = await supabase
+    .from('saved_activities')
+    .select('activity_id, title, provider, category, neighborhood, age_min, age_max, price, price_unit, website, created_at')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false });
+
   const initialProfile: Profile = {
     first_name: profile?.first_name ?? '',
     last_name: profile?.last_name ?? '',
@@ -34,5 +42,7 @@ export default async function FamilyDashboardPage() {
     preferences: profile?.preferences ?? [],
   };
 
-  return <DashboardClient profile={initialProfile} />;
+  const savedActivities: SavedActivity[] = (savedRows as SavedActivity[]) ?? [];
+
+  return <DashboardClient profile={initialProfile} savedActivities={savedActivities} />;
 }

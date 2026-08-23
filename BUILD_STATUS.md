@@ -183,6 +183,36 @@ Provider visits `/providers/signup` → fills out account + business info (now i
 
 **Not built yet (intentionally out of scope for this pass):** editing an already-submitted listing. The dashboard is view-only for now — the copy says to email hello@ for changes. Worth revisiting once there's real provider volume.
 
+### Family dashboard — saved activities (built 2026-08-23, pending manual SQL step)
+
+**What changed:** the family dashboard's "saved activities and booking history are coming soon" placeholder is replaced with a real **Saved Activities** feature. Families heart an activity on `/discover`; it appears on their dashboard, where they can open it or remove it. **Booking history** stays a deliberate placeholder (booking is out of Phase 1 scope — see Open Decisions), now worded honestly instead of implying a feature exists.
+
+**End-to-end flow:**
+Family browses `/discover` → taps the heart on any activity card (logged-out visitors are sent to `/families/login?next=/discover`) → a row is written to `saved_activities` straight from the browser (anon client, RLS-scoped) → `/families/dashboard` reads their saved rows server-side and lists them → Remove deletes the row and refreshes.
+
+**New files:**
+| File | Purpose |
+|------|---------|
+| `supabase/saved-activities.sql` | Creates `saved_activities` table + RLS (select/insert/delete own rows). **Run once in the Supabase SQL editor before this works in prod.** |
+
+**Changed files:**
+- `app/discover/page.tsx` — heart button on each activity card; loads the current user + their saved ids on mount; optimistic save/unsave via the browser Supabase client
+- `app/families/dashboard/page.tsx` — also loads the user's `saved_activities` (RLS-scoped) and passes them to the client
+- `app/families/dashboard/DashboardClient.tsx` — new Saved Activities section (list, View details, Remove) + honest Booking history placeholder; replaces the old combined "coming soon" block
+
+**Infrastructure:**
+- `saved_activities` table: composite PK `(user_id, activity_id)`; `user_id` → `auth.users(id) on delete cascade`; `activity_id` matches the Discover `Activity.id` (`"1".."79"` seed, `"sub_<uuid>"` provider); plus a **snapshot** of the card's display fields (title, provider, category, neighborhood, age_min/max, price, price_unit, website) captured at save time
+- RLS: **client-facing** select/insert/delete policies scoped to `auth.uid() = user_id` — unlike `profiles` / `provider_profiles` (service-role created), families write their own rows here, so RLS is the security boundary
+
+**Design decisions:**
+- **Snapshot, not join.** The dashboard is a server component and can't cheaply re-resolve an id against the live catalog (seed JSON is bundled into the client; provider listings come from an API). Snapshotting the card fields into the saved row means the dashboard just reads and renders, and a saved card survives the seed data being reordered or a provider editing their listing. Trade-off: a saved card shows details as they were when saved, not live.
+- **Client-side writes + RLS**, matching how the dashboard already edits `profiles` directly — no new API route.
+- Kept `export const dynamic = 'force-dynamic'` on the dashboard; unsave uses `router.refresh()` (no post-mutation cross-page navigation, so the plain-`<a>` rule isn't triggered here).
+
+**Status: ⏳ built + typechecked in sandbox, NOT yet run or deployed.** To make it live: (1) run `supabase/saved-activities.sql` in the Supabase SQL editor, (2) push (Vercel auto-deploys). Not yet exercised against a live Supabase — first manual test: sign in as a family, heart an activity on Discover, confirm it shows on the dashboard and Remove works.
+
+**Not built (out of scope for this pass):** booking history (no booking system yet), sharing saved lists, saved-count badges elsewhere in the UI, re-syncing a snapshot if the underlying listing changes.
+
 ### Previous work
 - Data verification pass on top 15 listings
 - Static pages: `/for-families`, `/for-providers`, `/about`
@@ -195,7 +225,7 @@ Provider visits `/providers/signup` → fills out account + business info (now i
 
 Priority order for the next work session (agreed with Evan 2026-08-23), tackle top-down:
 
-1. **Family dashboard placeholder features** — "saved activities" and "booking history" are currently just placeholder text with no feature behind them. Profile save/edit already works.
+1. ~~**Family dashboard placeholder features**~~ — ✅ **Done 2026-08-23** (see "Family dashboard — saved activities" under Completed Work). "Saved activities" is now a real feature; "booking history" is an honest placeholder (booking still out of Phase 1 scope). **Requires running `supabase/saved-activities.sql` before it works in prod.**
 2. **Provider dashboard listing editing** — providers can currently create new listings but not edit existing ones (they have to email hello@ for changes). Add edit capability.
 3. **Homepage "Create Your Account" CTA** — homepage only pushes the waitlist right now. Add a "Create Your Account" link alongside, mirroring what `/for-families` already does.
 4. **`sitemap.xml`** — irrelevant while the site is password-gated. Matters once public. Do last.
@@ -251,6 +281,8 @@ Priority order for the next work session (agreed with Evan 2026-08-23), tackle t
 | `app/api/families/signup/route.ts` | Family signup API (auth + profile) |
 | `middleware.ts` | Site gate + session refresh + `/families/*`, `/providers/*`, `/admin/*` route protection |
 | `supabase/family-profiles.sql` | `profiles` table + RLS (run manually) |
+| `supabase/saved-activities.sql` | `saved_activities` table + RLS (run manually) |
+| `app/families/dashboard/DashboardClient.tsx` | Family dashboard UI — profile + saved activities |
 | `lib/supabase.ts` | Supabase client instances (public + admin) |
 | `lib/supabase-browser.ts` | Cookie-backed Supabase client (client components) |
 | `lib/supabase-server.ts` | Cookie-backed Supabase client (server components) |
