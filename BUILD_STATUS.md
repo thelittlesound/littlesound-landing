@@ -256,8 +256,29 @@ Priority order for the next work session (agreed with Evan 2026-08-23), tackle t
 2. ~~**Provider dashboard listing editing**~~ — ✅ **Done 2026-08-23** (see "Provider listing editing" under Completed Work). Providers can edit their own listings; approved edits stay live on Discover but are flagged for team re-approval. **Requires running `supabase/listing-reapproval.sql` before it works in prod.**
 3. **Homepage "Create Your Account" CTA** — homepage only pushes the waitlist right now. Add a "Create Your Account" link alongside, mirroring what `/for-families` already does.
 4. **`sitemap.xml`** — irrelevant while the site is password-gated. Matters once public. Do last.
+5. **Provider listing claim / ownership transfer** — let a real provider claim a listing that already exists on the site (seed or pre-auth) so it lands on their dashboard and they can edit it. **Hold until #3 and #4 are done** (agreed with Evan 2026-08-23). Full design captured under "Planned — listing claim / ownership transfer" below.
 
 ---
+
+## Planned — listing claim / ownership transfer (NOT started; hold until Next Up #3 and #4)
+
+**Documented 2026-08-23, deliberately deferred.** Do #3 (homepage account CTA) and #4 (sitemap) first, then build this.
+
+**Goal:** let a real provider take ownership of a listing that already exists on the site (from our research), so it lands on their dashboard and they can edit it with the flow built in #2. This is the back half of the "Claim Your Listing" CTA and the "your listing is already live — help us get the details right" outreach motion. Editing (#2) is already done; claiming only needs to get the row associated with the right provider, after which the existing ownership check makes editing work.
+
+**Two kinds of "predated" listing — they claim differently:**
+- **Pre-auth `submissions` row** (`provider_id = null`): trivial. Transfer = set `provider_id` to the claiming provider's `auth.users` id. Editing then works immediately. (May be few or zero of these.)
+- **Static seed listing in `app/data/activities.json`** (the ~64 researched providers, ids `"1"`…`"79"`): NOT a DB row, so nothing to transfer. Claiming = *import* it: create a `submissions` row from the JSON content with `provider_id` = claimant and `status = 'approved'` (stays live), then stop Discover from showing it twice. Cleanest de-dup: tag the imported row with its original seed id (e.g. a `seed_id` column) and have Discover / `/api/activities` hide any static entry whose seed id now has an approved submission — avoids hand-editing the JSON on every claim.
+
+**The real problem is authorization, not the transfer.** Must prove the claimant actually runs the business — a no-check "click to claim" would let a competitor seize and edit someone's live listing.
+- **Phase 1 (recommended): admin-mediated.** Provider signs up → requests a listing ("Claim this listing" button, or emails hello@) → Kelly/Evan verify against the research contact info they already have → approve the transfer/import in `/admin`. Safe, low-volume, founder-run.
+- **Later automation (not now):** allow a self-serve claim only when the provider account's email domain matches the listing's website domain, or send a verification code to the listing's known contact.
+
+**Likely build (when we get to it):**
+- `submissions`: add `seed_id text` (nullable) linking an imported row back to its `activities.json` origin, for de-dup.
+- Discover / `/api/activities`: filter out static seed entries whose `seed_id` now has an approved submission.
+- A "Claim this listing" affordance (on Discover or the listing) + a claims-request path + an admin action that performs the transfer (pre-auth row) or the seed-import (JSON listing).
+- Ownership check from #2 is reused unchanged — once `provider_id` is set, editing already works.
 
 ## Open Decisions
 - **Family registration:** ✅ decided — full auth flow (Option B), built 2026-08-02
