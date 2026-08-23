@@ -1,208 +1,107 @@
-# Little Sound Landing Page — Setup & Deployment Guide
+# Little Sound — Deployment Guide
 
-## 🎯 What You Have
-
-A complete, production-ready Next.js landing page that:
-- ✅ Converts families to your waitlist via Brevo
-- ✅ Tracks analytics (waitlist signups, page views, time on site)
-- ✅ Mobile-first responsive design
-- ✅ Follows your Little Sound design tokens perfectly
-- ✅ Ready to deploy to Vercel in minutes
+Covers environment variables, third-party services, and how a deploy actually happens today. For what's built and what's left, see `BUILD_STATUS.md`.
 
 ---
 
-## 📋 Pre-Deployment Checklist
+## Services in use
 
-### 1. **Verify Brevo Setup** ✓
-Your API key is already in `.env.local`:
-```
-BREVO_API_KEY=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
-```
-
-But you need to **find your Brevo List ID** and update the API route:
-
-- Log into [Brevo](https://app.brevo.com)
-- Go to **Contacts → Lists**
-- Find or create a list called "Little Sound Waitlist"
-- Copy the **List ID** (it's a number like `2` or `5`)
-- Open `app/api/waitlist/route.ts` and replace `listIds: [2]` with your actual list ID
-
-### 2. **Get Your Google Analytics ID** (Optional but Recommended)
-To track conversions and user behavior:
-
-1. Go to [Google Analytics](https://analytics.google.com)
-2. Create a new property for thelittlesound.com
-3. Create a GA4 data stream
-4. Copy your **Measurement ID** (looks like `G-XXXXXXXXXX`)
-5. Update `.env.local`:
-   ```
-   NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
-   ```
-6. Update `app/layout.tsx`: replace both `G-XXXXXXXXXX` with your ID
-
-### 3. **Update Hero Images & Photos** (After Launch)
-Placeholder images are ready—just replace:
-- `/public/images/hero.jpg` — Main hero image (1920x1080px, Pacific Northwest family moment)
-- `/public/images/family.jpg` — Founder family photo (square, 1080x1080px)
-- `/public/og-image.png` — Social share preview (1200x630px)
-
-For now, the placeholders look great and you can swap them anytime.
+| Service | What it's for |
+|---|---|
+| **Vercel** | Hosting + auto-deploy on push to `main` |
+| **Supabase** | Postgres database, Supabase Auth (families, providers, admin), Row Level Security | 
+| **Brevo** | Waitlist contact list, provider contact list, and custom SMTP relay for branded auth emails |
+| **GitHub** | `github.com/thelittlesound/littlesound-landing` — Vercel deploys from here |
 
 ---
 
-## 🚀 Deployment to Vercel (No Coding Required!)
+## Environment variables
 
-### Step 1: Create GitHub Repo
-1. Go to [GitHub](https://github.com) and sign in
-2. Click **New repository**
-3. Name it: `littlesound-landing`
-4. Description: "Little Sound landing page & waitlist"
-5. Choose **Public**
-6. Click **Create repository**
+Set these in Vercel (**Project → Settings → Environment Variables**) and mirror them in a local `.env.local` for development. **Never commit real values to the repo** — `.env.local` is gitignored, and no real key should ever be pasted into a markdown file that gets committed (this happened once already with an old Brevo key; if you find one in git history, rotate it).
 
-### Step 2: Push Your Code to GitHub
-Open a terminal and run these commands (in the `/home/claude/littlesound` directory):
+```
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=          # server-only, never expose to the client
+
+# Brevo
+BREVO_API_KEY=
+BREVO_PROVIDER_LIST_ID=
+
+# Site-wide password gate
+SITE_ACCESS_PASSWORD=               # required in production — site fails closed if unset
+
+NEXT_PUBLIC_SITE_URL=https://www.thelittlesound.com
+```
+
+Locally, if `SITE_ACCESS_PASSWORD` isn't set, `npm run dev` falls back to a hardcoded dev password (`dev-preview`) so you can develop without setting it.
+
+---
+
+## Supabase setup
+
+The database schema lives in `supabase/*.sql` — these are **not** run automatically as migrations, they're run manually, once, in the Supabase SQL editor:
+
+- `supabase/family-profiles.sql` — `profiles` table (family accounts)
+- `supabase/provider-profiles.sql` — `provider_profiles` table + `submissions.provider_id` column
+- `supabase/admin-users.sql` — `admin_users` allowlist table
+
+If you ever spin up a fresh Supabase project (new environment, disaster recovery, etc.), run these three files in order, then add rows to `admin_users` for whoever should have admin access — there's no signup form for admin, it's manually granted.
+
+**Auth settings to check in Supabase (Authentication → Settings / URL Configuration):**
+- Site URL set to `https://www.thelittlesound.com`
+- Redirect URLs include `https://www.thelittlesound.com/**` and `http://localhost:3000/**`
+- "Confirm email" is ON
+- Custom SMTP configured (Brevo relay, `smtp-relay.brevo.com:587`, sender `hello@thelittlesound.com`) — required for branded auth emails and to avoid Supabase's default low rate limit
+- Email templates (confirm signup, reset password) — branded HTML versions are saved as reference copies in `supabase/email-templates/`, pasted directly into the Supabase dashboard
+
+---
+
+## Deploying
+
+Deploys are automatic: push to `main` on GitHub, Vercel builds and deploys within a couple minutes. There's no manual deploy step.
 
 ```bash
-cd /home/claude/littlesound
-git init
 git add .
-git commit -m "Initial commit: Little Sound landing page"
-git branch -M main
-git remote add origin https://github.com/YOUR-USERNAME/littlesound-landing.git
-git push -u origin main
+git commit -m "Describe the change"
+git push
 ```
 
-Replace `YOUR-USERNAME` with your actual GitHub username.
-
-### Step 3: Deploy to Vercel
-1. Go to [Vercel](https://vercel.com) and click **Sign Up**
-2. Choose "Continue with GitHub"
-3. Authorize Vercel to access your GitHub
-4. Click **Import Project**
-5. Select `littlesound-landing` repo
-6. Vercel auto-detects it's a Next.js project ✓
-7. In **Environment Variables**, add:
-   ```
-   BREVO_API_KEY = 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
-   NEXT_PUBLIC_GA_ID = G-XXXXXXXXXX (or leave blank for now)
-   NEXT_PUBLIC_SITE_URL = https://thelittlesound.com
-   ```
-8. Click **Deploy** and wait ~3 minutes
-
-### Step 4: Connect Your GoDaddy Domain
-Your site will be live at `littlesound-landing.vercel.app`. Now point `thelittlesound.com` there:
-
-1. In Vercel dashboard, go to your project → **Settings → Domains**
-2. Click **Add Domain**
-3. Enter `thelittlesound.com`
-4. Vercel gives you nameserver instructions
-5. Log into [GoDaddy](https://godaddy.com)
-6. Go to **My Products → Domains → thelittlesound.com**
-7. Click **Manage → Nameservers**
-8. Replace GoDaddy nameservers with Vercel's nameservers
-9. Wait 24–48 hours for DNS to propagate (usually faster, 30 min)
-
-Once DNS is live, your site is at **https://thelittlesound.com** ✓
+Check the deploy at [vercel.com](https://vercel.com) → your project → Deployments. Roll back to a previous deployment from the same screen if something breaks.
 
 ---
 
-## 📊 Tracking Conversions & Analytics
+## Domain
 
-### Brevo Form Submissions
-Every "Join the Waitlist" submission automatically:
-- Adds the family to your Brevo list
-- Logs their email in the Brevo dashboard
-- Sends them a welcome email (you can customize in Brevo)
-
-**Check submissions:**
-- Log into Brevo → **Contacts**
-- You'll see all waitlist signups here
-
-### Google Analytics (When Connected)
-Tracks:
-- **Page views** → How many people visit
-- **Time on site** → How long they stay
-- **CTA clicks** → "Join the Waitlist" button clicks
-- **Form submissions** → Successful signups
-- **Scroll depth** → What sections people read
-
-**View in GA4:**
-- Go to Google Analytics → **Reports**
-- Check **Engagement** metrics
+`thelittlesound.com` is pointed at Vercel via nameservers. If DNS ever needs to be redone: Vercel project → Settings → Domains → Add Domain → follow the nameserver instructions there, then update nameservers with the domain registrar.
 
 ---
 
-## 🛠️ Making Changes (Without Code)
+## Post-deploy checklist (when shipping something that touches auth or the database)
 
-### Update Text Copy
-You don't need to code! Edit the component files directly:
-
-**Example: Change hero headline**
-1. Open `app/components/Hero.tsx` in any text editor
-2. Find the line: `Less searching. <span>More living.</span>`
-3. Change it to whatever you want
-4. Save the file
-5. Push to GitHub: `git add . && git commit -m "Update hero copy" && git push`
-6. Vercel auto-deploys in ~1 minute ✓
-
-### Change Colors
-All colors are in `tailwind.config.js`. But you probably won't need to—they're already perfect per your design tokens!
-
-### Add a New Section
-Copy a component structure from an existing section and modify it.
+- [ ] Test the affected flow end-to-end in production (signup, login, password reset, listing submission, admin approve/reject — whichever applies)
+- [ ] Check Vercel function logs if anything errors (Project → Logs, filter by route)
+- [ ] Confirm Supabase Auth email delivery still works (branded, from `hello@thelittlesound.com`)
 
 ---
 
-## ✅ Post-Launch Checklist
+## Troubleshooting
 
-- [ ] DNS propagated & site live on thelittlesound.com
-- [ ] Google Analytics ID added and tracking
-- [ ] Brevo list ID confirmed & working
-- [ ] Test the waitlist form (submit your own email)
-- [ ] Check Brevo dashboard for signup
-- [ ] Check GA4 dashboard for form event
-- [ ] Share link with your waitlist! 🎉
+**Git lock errors (`index.lock` / `HEAD.lock`)**
+Caused by OneDrive syncing the repo folder while git is trying to write. Fix: `del .git\index.lock` (or `HEAD.lock`) in PowerShell. If it keeps recurring, pause OneDrive sync temporarily (tray icon → Pause syncing) while committing.
 
----
+**Auth email not arriving / rate-limited**
+Confirm custom SMTP (Brevo) is still configured in Supabase — if it's ever reset to Supabase's default email service, expect only a handful of emails/hour before you hit the rate limit.
 
-## 🆘 Troubleshooting
+**A signup silently fails / foreign-key or not-null error in logs**
+Check Vercel function logs for the specific error code. See "Bugs found + fixed" in `BUILD_STATUS.md` — a couple of subtle auth edge cases (duplicate email, stale dashboard cache) have already been hit and fixed; the fixes there are a good reference if something similar resurfaces.
 
-**"Waitlist form isn't working"**
-- Check Brevo API key in `.env.local`
-- Verify your List ID in `app/api/waitlist/route.ts`
-- Check browser console for errors (F12 → Console tab)
-
-**"Domain isn't pointing to Vercel"**
-- Make sure GoDaddy nameservers are updated
-- Give DNS 24–48 hours to propagate
-- Clear your browser cache (Ctrl+Shift+Del)
-
-**"I want to change the site but don't know how"**
-- All text is in the component files (`.tsx` files)
-- Colors are in `tailwind.config.js`
-- DM Kelly or Evan questions—they can always help!
+**Site won't load at all, redirects to `/unlock` in a loop**
+Check that `SITE_ACCESS_PASSWORD` is set correctly in Vercel and that the cookie domain matches.
 
 ---
 
-## 📞 Next Steps
+## Questions
 
-1. **Get GitHub account** → [github.com](https://github.com)
-2. **Create Vercel account** → [vercel.com](https://vercel.com)
-3. **Follow deployment steps** above
-4. **Test waitlist form** with your email
-5. **Share with your 100+ waitlist families!**
-
-Your landing page is ready to convert. Let's go. 🚀
-
----
-
-## Questions?
-
-**When stuck:**
-- Check this guide first
-- Google the error message
-- Reach out to Vercel support (they're amazing)
-- DM Kelly & Evan if all else fails
-
-You've got this! ✨
+Reach out to Kelly or Evan. For what's built, what's left, and known issues, `BUILD_STATUS.md` is the file to check first.

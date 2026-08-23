@@ -1,220 +1,107 @@
-# Little Sound Landing Page
+# Little Sound
 
-🎯 **The Family OS** — Discover, plan, and book kids' activities in one place.
+**The Family OS** — discover, compare, and connect with kids' activities and camps in one place. Built by Kelly and Evan Sherman for Seattle families.
 
----
-
-## What You Have
-
-✅ **Production-ready Next.js landing page** with:
-- Complete hero section with founder story
-- Problem → Solution narrative flow
-- Founders section with Kelly & Evan's origin story
-- Activity categories (placeholder)
-- Brevo waitlist integration (ready to convert families)
-- Google Analytics 4 tracking
-- Mobile-first responsive design
-- Little Sound design tokens baked in
-- Pre-configured environment variables
-
-✅ **Zero coding required to:**
-- Update text & copy
-- Change colors
-- Add/remove sections
-- Deploy to Vercel
-- Track conversions
+- **Live site:** https://www.thelittlesound.com (currently password-gated — see "Current phase" below)
+- **GitHub:** https://github.com/thelittlesound/littlesound-landing
+- **Hosting:** Vercel, auto-deploys on push to `main`
+- **For the full up-to-date build status, what's done, and what's next, see [`BUILD_STATUS.md`](./BUILD_STATUS.md) — that file is the source of truth, kept current after every build session.**
 
 ---
 
-## Quick Start (3 Steps)
+## Current phase
 
-### 1. **Setup Environment Variables**
-Edit `.env.local` (already done for you):
-```
-BREVO_API_KEY=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
-NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX (update after creating GA4)
-NEXT_PUBLIC_SITE_URL=https://thelittlesound.com
-```
-
-### 2. **Deploy to Vercel**
-Follow `DEPLOYMENT_GUIDE.md` (it's super easy—no coding!)
-
-### 3. **Connect Your Domain**
-Point `thelittlesound.com` to Vercel nameservers
+Phase 1 — Seattle Beta. The marketing site, discover/search page, and full account system (families, providers, admin) are built and live, but the site is password-gated behind `SITE_ACCESS_PASSWORD` because there are no real family or provider signups yet — the site isn't publicly launched.
 
 ---
 
-## Project Structure
+## Tech stack
+
+- **Framework:** Next.js 14 (App Router), TypeScript
+- **Styling:** Tailwind CSS — design tokens in `little-sound-design-tokens.css` / `app/globals.css`
+- **Auth + database:** Supabase (Postgres + Supabase Auth via `@supabase/ssr`, RLS enabled)
+- **Transactional email:** Brevo (waitlist list management, provider contact list, and custom SMTP relay for branded Supabase auth emails)
+- **Deployment:** Vercel
+
+---
+
+## What's actually built
+
+This isn't just a landing page anymore. Three real account systems exist, each with signup, login, password recovery, and a session-protected dashboard:
+
+- **Families** — `/families/signup`, `/families/login`, `/families/dashboard`
+- **Providers** — `/providers/signup`, `/providers/login`, `/providers/dashboard`, plus a 4-step listing creation flow at `/providers/listings/new`
+- **Admin** — `/admin/login`, `/admin` (allowlisted via a dedicated `admin_users` table — being logged in isn't enough on its own)
+
+Plus:
+- `/discover` — the family-facing search/browse page, merging static seed data (`app/data/activities.json`) with live approved provider submissions
+- Site-wide password gate (`/unlock`) in front of the entire site
+- `robots.txt` blocking known AI crawlers
+
+See `BUILD_STATUS.md` for the full file-by-file breakdown, infrastructure details, and a running log of bugs found and fixed.
+
+---
+
+## Project structure
 
 ```
-littlesound/
+littlesound-landing-page/
 ├── app/
+│   ├── admin/                    # Admin panel (login, dashboard)
+│   ├── families/                 # Family signup, login, dashboard, password recovery
+│   ├── providers/                # Provider signup, login, dashboard, listing creation, password recovery
+│   ├── discover/                 # Family-facing search/browse page
+│   ├── unlock/                   # Site-wide password gate entry
 │   ├── api/
-│   │   └── waitlist/route.ts       # Brevo form handler
-│   ├── components/                 # All page sections
-│   │   ├── Hero.tsx                # Hero + waitlist form
-│   │   ├── Problem.tsx             # Pain points
-│   │   ├── Solution.tsx            # Features
-│   │   ├── Founders.tsx            # Kelly & Evan story
-│   │   ├── Categories.tsx          # Activity categories
-│   │   ├── CTA.tsx                 # Final call-to-action
-│   │   ├── WaitlistForm.tsx        # Brevo form component
-│   │   └── Footer.tsx              # Footer
-│   ├── layout.tsx                  # Root layout + GA4
-│   ├── page.tsx                    # Main page
-│   └── globals.css                 # Global styles
-├── public/                         # Static assets
-├── .env.local                      # Environment variables
-├── tailwind.config.js              # Design tokens
-├── DEPLOYMENT_GUIDE.md             # How to deploy (READ THIS!)
-├── CONTENT_GUIDE.md                # How to edit copy
-└── README.md                       # This file
+│   │   ├── families/signup/      # Family account creation
+│   │   ├── providers/signup/     # Provider account creation
+│   │   ├── providers/submit/     # Listing submission (requires provider login)
+│   │   ├── admin/submissions/    # Admin: fetch + approve/reject submissions
+│   │   ├── activities/           # Public: approved listings for Discover
+│   │   ├── site-gate/            # Site-wide password check
+│   │   └── waitlist/             # Legacy family waitlist (Brevo)
+│   ├── components/               # Homepage sections + shared nav/footer
+│   ├── data/activities.json      # Static seed listings
+│   ├── for-families/, for-providers/, about/, terms/, privacy/   # Static marketing pages
+│   ├── layout.tsx
+│   ├── page.tsx                  # Homepage
+│   └── globals.css
+├── lib/
+│   ├── supabase.ts                # Public + service-role Supabase clients
+│   ├── supabase-browser.ts        # Cookie-backed client for client components
+│   ├── supabase-server.ts         # Cookie-backed client for server components
+│   ├── admin-auth.ts              # requireAdmin()
+│   └── provider-auth.ts           # requireProvider()
+├── supabase/                      # SQL migrations, run manually in Supabase SQL editor
+├── middleware.ts                  # Site gate, session refresh, route protection for all three portals
+├── little-sound-design-tokens.css
+├── tailwind.config.js
+├── BUILD_STATUS.md                # Source of truth for what's built and what's next
+├── DEPLOYMENT_GUIDE.md            # Env vars + deploy steps
+└── CONTENT_GUIDE.md               # Where to find and edit site copy
 ```
 
 ---
 
-## Key Features
+## Local development
 
-### 🎨 Design System
-- All Little Sound design tokens integrated
-- Tailwind CSS with custom color/spacing scale
-- Cormorant Garamond + DM Sans fonts
-- Responsive mobile-first layout
+```bash
+npm install
+npm run dev
+```
 
-### 📧 Brevo Integration
-- Waitlist form captures: first name, last name, email
-- Auto-adds to your Brevo "Little Sound Waitlist"
-- Form validation & error handling
-- Success/error messaging
-
-### 📊 Analytics Ready
-- Google Analytics 4 tracking
-- Event tracking for CTA clicks & form submissions
-- Page views, time on site, scroll depth
-- Conversion tracking
-
-### 🚀 Vercel Deployment
-- Next.js optimized for speed
-- Auto-deploys on GitHub push
-- Free tier handles your traffic
-- Custom domain support
+You'll need a `.env.local` with the variables listed in `DEPLOYMENT_GUIDE.md`. Locally, the site-wide password gate falls back to a hardcoded dev password (`dev-preview`) so you don't need `SITE_ACCESS_PASSWORD` set to develop.
 
 ---
 
-## Before You Deploy
+## Making changes
 
-1. **Verify Brevo List ID**
-   - Log into Brevo → Contacts → Lists
-   - Copy your list ID (default is `2`, might be different)
-   - Update `app/api/waitlist/route.ts` line with `listIds: [YOUR_ID]`
+- **Copy/content:** see `CONTENT_GUIDE.md`
+- **Deploying, env vars, Supabase/Brevo setup:** see `DEPLOYMENT_GUIDE.md`
+- **What's built, what's next, known issues:** see `BUILD_STATUS.md`
 
-2. **Get Google Analytics ID** (optional)
-   - Create GA4 property at analytics.google.com
-   - Copy Measurement ID (e.g., `G-XXXXXXXXXX`)
-   - Update `.env.local` & `app/layout.tsx`
-
-3. **Prepare Images**
-   - Hero image: 1920x1080px (Pacific Northwest family moment)
-   - Family photo: 1080x1080px (Kelly & Evan with kids)
-   - OG image: 1200x630px (social share preview)
-   - Save to `/public/images/`
+Push to `main` and Vercel auto-deploys.
 
 ---
 
-## Making Changes
-
-### Update Text
-Edit any `.tsx` file in `app/components/` and change the text directly. Push to GitHub → Vercel auto-deploys.
-
-### Change Colors
-Edit `tailwind.config.js` in the `colors` section.
-
-### Add Images
-Drop images in `/public/images/` and reference in components with `<Image>` tags.
-
-See `CONTENT_GUIDE.md` for detailed instructions.
-
----
-
-## Deployment Checklist
-
-- [ ] Brevo List ID verified
-- [ ] Google Analytics ID added (optional)
-- [ ] GitHub repo created & code pushed
-- [ ] Vercel project created & deployed
-- [ ] GoDaddy nameservers updated to Vercel's
-- [ ] Domain propagated (check in ~24h)
-- [ ] Waitlist form tested
-- [ ] Google Analytics connected
-- [ ] Shared with your 100+ waitlist! 🎉
-
----
-
-## Monitoring & Metrics
-
-### Brevo Dashboard
-- Check **Contacts** to see all waitlist signups
-- View **Campaigns** to send welcome emails
-- Track **Lists** growth over time
-
-### Google Analytics
-- **Engagement**: Page views, avg. session duration, bounce rate
-- **Events**: Waitlist CTA clicks, form submissions
-- **Traffic**: Where visitors come from
-- **Devices**: Mobile vs. desktop breakdown
-
-### Vercel Dashboard
-- **Analytics**: Page performance, core web vitals
-- **Deployments**: Rollback if needed
-- **Domains**: Check DNS propagation status
-
----
-
-## Support & Resources
-
-**Stuck on something?**
-1. Read `DEPLOYMENT_GUIDE.md` (most Q's answered there)
-2. Read `CONTENT_GUIDE.md` (for copy/design updates)
-3. Check Vercel docs: https://vercel.com/docs
-4. Google your error message
-5. Reach out to Vercel support (amazing help)
-
-**Want to customize further?**
-- This is vanilla Next.js—add any features you want
-- Component-based, easy to extend
-- Fully open source and yours to modify
-
----
-
-## Tech Stack
-
-- **Framework**: Next.js 14 (App Router)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **CMS/Forms**: Brevo API
-- **Analytics**: Google Analytics 4
-- **Deployment**: Vercel
-- **Hosting**: GoDaddy (domain only, Vercel handles serving)
-
----
-
-## What's Next?
-
-**Phase 2 (after waitlist launch):**
-- Discover/search page
-- Provider sign up flow
-- Family dashboard
-- Booking system
-- Provider dashboard
-
-**For now:** Get the landing page live, fill your waitlist, and build momentum! 🚀
-
----
-
-## Questions?
-
-✉️ Reach out to Kelly & Evan
-📖 Read the guides (they're comprehensive!)
-🔧 Explore the code (it's clean & well-structured)
-
-**You've got this.** Less searching. More living. Families first. ✨
+Less searching. More living. Families first.
