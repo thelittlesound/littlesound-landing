@@ -29,6 +29,8 @@ export interface Listing {
   neighborhood: string | null;
   admin_notes: string | null;
   reviewed_at: string | null;
+  reapproval_needed: boolean | null;
+  edited_at: string | null;
 }
 
 const STATUS_COPY = {
@@ -115,9 +117,16 @@ export default function ProviderDashboardClient({
                     <h2 className="font-['Cormorant_Garamond'] text-[22px] font-light text-[#1C3A4A] leading-tight">
                       {listing.title}
                     </h2>
-                    <span className={`text-xs px-2.5 py-1 rounded-full font-medium shrink-0 ${status.color}`}>
-                      {status.label}
-                    </span>
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                      <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${status.color}`}>
+                        {status.label}
+                      </span>
+                      {listing.status === 'approved' && listing.reapproval_needed && (
+                        <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-amber-100 text-amber-800">
+                          Changes pending review
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <p className="text-[13px] text-[#7A9AAA] mb-3">
                     {[listing.category, listing.subcategory].filter(Boolean).join(' › ')}
@@ -137,10 +146,19 @@ export default function ProviderDashboardClient({
                       <p className="text-[13px] text-[#8A3A32]">{listing.admin_notes}</p>
                     </div>
                   )}
-                  <p className="text-[12px] text-[#B0C8D0] mt-3">
-                    Submitted {new Date(listing.created_at).toLocaleDateString()}
-                    {listing.reviewed_at ? ` · Reviewed ${new Date(listing.reviewed_at).toLocaleDateString()}` : ''}
-                  </p>
+                  <div className="flex items-center justify-between gap-3 mt-4 pt-4 border-t border-[#E8DFC8]">
+                    <p className="text-[12px] text-[#B0C8D0]">
+                      Submitted {new Date(listing.created_at).toLocaleDateString()}
+                      {listing.edited_at ? ` · Edited ${new Date(listing.edited_at).toLocaleDateString()}` : ''}
+                      {listing.reviewed_at ? ` · Reviewed ${new Date(listing.reviewed_at).toLocaleDateString()}` : ''}
+                    </p>
+                    <Link
+                      href={`/providers/listings/${listing.id}/edit`}
+                      className="text-[13px] font-semibold text-[#1A7A8A] hover:text-[#0D5C6E] shrink-0"
+                    >
+                      Edit →
+                    </Link>
+                  </div>
                 </div>
               );
             })}
@@ -148,11 +166,11 @@ export default function ProviderDashboardClient({
         )}
 
         <p className="text-center text-[13px] text-[#7A9AAA] mt-8">
-          Need to update a listing? Email{' '}
+          Use “Edit” on any listing to update its details. Need something else — a change to your
+          account, or to remove a listing? Email{' '}
           <a href="mailto:hello@thelittlesound.com" className="text-[#1A7A8A] underline underline-offset-2">
             hello@thelittlesound.com
-          </a>{' '}
-          for now — self-serve editing is coming soon.
+          </a>.
         </p>
       </div>
     </main>

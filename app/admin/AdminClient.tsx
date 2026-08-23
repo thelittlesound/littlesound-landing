@@ -24,6 +24,8 @@ interface Submission {
   admin_notes: string | null;
   reviewed_at: string | null;
   reviewed_by: string | null;
+  reapproval_needed: boolean | null;
+  edited_at: string | null;
 }
 
 const STATUS_COLORS = {
@@ -191,6 +193,11 @@ export default function AdminClient({ adminEmail }: { adminEmail: string }) {
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLORS[s.status]}`}>
                         {s.status}
                       </span>
+                      {s.reapproval_needed && (
+                        <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-amber-100 text-amber-800">
+                          ✎ edited
+                        </span>
+                      )}
                       <span className="text-[#B0C8D0] text-xs">
                         {new Date(s.created_at).toLocaleDateString()}
                       </span>
@@ -214,6 +221,14 @@ export default function AdminClient({ adminEmail }: { adminEmail: string }) {
                   {selected.status}
                 </span>
               </div>
+
+              {selected.reapproval_needed && (
+                <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-4">
+                  <p className="text-[13px] text-amber-800 font-medium leading-relaxed">
+                    Provider edited this live listing{selected.edited_at ? ` on ${new Date(selected.edited_at).toLocaleDateString()}` : ''}. It stays on Discover — approve the changes to clear this flag.
+                  </p>
+                </div>
+              )}
 
               <dl className="space-y-2 text-sm mb-4">
                 <Row label="Contact" value={selected.contact_name} />
@@ -286,13 +301,24 @@ export default function AdminClient({ adminEmail }: { adminEmail: string }) {
               ) : (
                 <div className="flex gap-2">
                   {selected.status === 'approved' && (
-                    <button
-                      onClick={() => updateStatus(selected.id, 'rejected')}
-                      disabled={!!actionLoading}
-                      className="flex-1 bg-red-50 text-red-600 border border-red-200 rounded-full py-2.5 text-sm font-semibold hover:bg-red-100 transition-colors disabled:opacity-50"
-                    >
-                      Reject
-                    </button>
+                    <>
+                      {selected.reapproval_needed && (
+                        <button
+                          onClick={() => updateStatus(selected.id, 'approved')}
+                          disabled={!!actionLoading}
+                          className="flex-1 bg-[#0D5C6E] text-white rounded-full py-2.5 text-sm font-semibold hover:bg-[#1A7A8A] transition-colors disabled:opacity-50"
+                        >
+                          {actionLoading === selected.id + 'approved' ? '…' : 'Approve changes'}
+                        </button>
+                      )}
+                      <button
+                        onClick={() => updateStatus(selected.id, 'rejected')}
+                        disabled={!!actionLoading}
+                        className="flex-1 bg-red-50 text-red-600 border border-red-200 rounded-full py-2.5 text-sm font-semibold hover:bg-red-100 transition-colors disabled:opacity-50"
+                      >
+                        Reject
+                      </button>
+                    </>
                   )}
                   {selected.status === 'rejected' && (
                     <button

@@ -47,10 +47,24 @@ interface Props {
   contactEmail: string;
   businessName: string;
   defaultCategory: string;
+  mode?: 'create' | 'edit';
+  listingId?: string;
+  initial?: Partial<ListingFormState>;
+  currentStatus?: 'pending' | 'approved' | 'rejected';
 }
 
-export default function ListingForm({ contactName, contactEmail, businessName, defaultCategory }: Props) {
+export default function ListingForm({
+  contactName,
+  contactEmail,
+  businessName,
+  defaultCategory,
+  mode = 'create',
+  listingId,
+  initial,
+  currentStatus,
+}: Props) {
   const router = useRouter();
+  const isEdit = mode === 'edit';
 
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<ListingFormState>({
@@ -65,10 +79,12 @@ export default function ListingForm({ contactName, contactEmail, businessName, d
     neighborhood: '',
     website: '',
     phone: '',
+    ...initial,
   });
   const [errors, setErrors] = useState<Errors>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [result, setResult] = useState<{ status?: string; reapprovalNeeded?: boolean }>({});
 
   function set(field: keyof ListingFormState, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -112,16 +128,21 @@ export default function ListingForm({ contactName, contactEmail, businessName, d
   async function submit() {
     setSubmitting(true);
     try {
-      const res = await fetch('/api/providers/submit', {
-        method: 'POST',
+      const endpoint = isEdit ? `/api/providers/listings/${listingId}` : '/api/providers/submit';
+      const method = isEdit ? 'PATCH' : 'POST';
+      const res = await fetch(endpoint, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ contactName, contactEmail, ...form }),
       });
       if (res.status === 401) {
-        router.push('/providers/login?next=/providers/listings/new');
+        const next = isEdit ? `/providers/listings/${listingId}/edit` : '/providers/listings/new';
+        router.push(`/providers/login?next=${next}`);
         return;
       }
       if (!res.ok) throw new Error('Failed');
+      const data = await res.json().catch(() => ({}));
+      setResult({ status: data.status, reapprovalNeeded: data.reapprovalNeeded });
       setSubmitted(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch {
@@ -130,7 +151,13 @@ export default function ListingForm({ contactName, contactEmail, businessName, d
     }
   }
 
-  if (submitted) return <SuccessScreen businessName={form.title} />;
+  if (submitted) {
+    return isEdit ? (
+      <EditSuccessScreen title={form.title} status={result.status} reapprovalNeeded={result.reapprovalNeeded} />
+    ) : (
+      <SuccessScreen businessName={form.title} />
+    );
+  }
 
   return (
     <main className="min-h-screen bg-[#F5EFE0] flex flex-col items-center px-4 py-16 pt-28">
@@ -141,7 +168,7 @@ export default function ListingForm({ contactName, contactEmail, businessName, d
           ← Back to dashboard
         </Link>
         <h1 className="font-['Cormorant_Garamond'] text-[clamp(28px,4vw,44px)] font-light leading-[1.15] tracking-tight text-[#1C3A4A]">
-          Create your listing
+          {isEdit ? 'Edit your listing' : 'Create your listing'}
         </h1>
       </div>
 
@@ -187,7 +214,7 @@ export default function ListingForm({ contactName, contactEmail, businessName, d
             businessName={businessName}
           />
         )}
-        {step === 3 && <StepReview form={form} contactName={contactName} contactEmail={contactEmail} />}
+        {step === 3 && <StepReview form={form} contactName={contactName} contactEmail={contactEmail} isEdit={isEdit} currentStatus={currentStatus} />}
 
         {/* Nav */}
         <div className={`flex items-center mt-8 pt-6 border-t border-[#E8DFC8] ${step > 0 ? 'justify-between' : 'justify-end'}`}>
@@ -214,7 +241,9 @@ export default function ListingForm({ contactName, contactEmail, businessName, d
                 submitting ? 'opacity-60 cursor-not-allowed' : 'hover:bg-[#1A7A8A] hover:-translate-y-0.5'
               }`}
             >
-              {submitting ? 'Submitting…' : 'Submit listing →'}
+              {submitting
+                ? (isEdit ? 'Saving…' : 'Submitting…')
+                : (isEdit ? 'Save changes →' : 'Submit listing →')}
             </button>
           )}
         </div>
@@ -450,7 +479,19 @@ function StepLocation({
 
 // ─── Step 4: Review ───────────────────────────────────────────────────────────
 
-function StepReview({ form, contactName, contactEmail }: { form: ListingFormState; contactName: string; contactEmail: string }) {
+function StepReview({
+  form,
+  contactName,
+  contactEmail,
+  isEdit,
+  currentStatus,
+}: {
+  form: ListingFormState;
+  contactName: string;
+  contactEmail: string;
+  isEdit?: boolean;
+  currentStatus?: 'pending' | 'approved' | 'rejected';
+}) {
   const rows: { label: string; value: string }[] = [
     { label: 'Title', value: form.title },
     { label: 'Category', value: [form.category, form.subcategory].filter(Boolean).join(' › ') },
@@ -461,11 +502,25 @@ function StepReview({ form, contactName, contactEmail }: { form: ListingFormStat
     { label: 'Contact', value: `${contactName} · ${contactEmail}` },
   ];
 
+  const subhead = isEdit
+    ? 'Review your changes before saving.'
+    : 'Looks good? Hit submit — we’ll review and go live within 24 hours.';
+
+  const note = !isEdit
+    ? `After submission: our team reviews your listing within 24 hours, then it goes live in the Little Sound directory. You’ll hear from us at ${contactEmail}.`
+    : currentStatus === 'approved'
+    ? 'Your listing stays live on Discover while our team reviews these changes — usually within 24 hours.'
+    : currentStatus === 'rejected'
+    ? 'Saving resubmits your listing for review. We’ll take another look within 24 hours.'
+    : 'Your listing is still in review — these changes will be part of that review.';
+
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <h2 className="font-['Cormorant_Garamond'] text-[26px] font-light text-[#1C3A4A] mb-1">Review your listing</h2>
-        <p className="text-[14px] text-[#3A5A6A]">Looks good? Hit submit — we&apos;ll review and go live within 24 hours.</p>
+        <h2 className="font-['Cormorant_Garamond'] text-[26px] font-light text-[#1C3A4A] mb-1">
+          {isEdit ? 'Review your changes' : 'Review your listing'}
+        </h2>
+        <p className="text-[14px] text-[#3A5A6A]">{subhead}</p>
       </div>
 
       <div className="bg-[#F5EFE0] border border-[#E8DFC8] rounded-[16px] overflow-hidden">
@@ -486,7 +541,7 @@ function StepReview({ form, contactName, contactEmail }: { form: ListingFormStat
 
       <div className="bg-[#0D5C6E]/5 border border-[#0D5C6E]/15 rounded-[14px] px-5 py-4">
         <p className="text-[13px] text-[#0D5C6E] leading-relaxed font-medium">
-          After submission: our team reviews your listing within 24 hours, then it goes live in the Little Sound directory. You&apos;ll hear from us at {contactEmail}.
+          {note}
         </p>
       </div>
     </div>
@@ -527,6 +582,66 @@ function SuccessScreen({ businessName }: { businessName: string }) {
         <p className="text-[12px] text-[#7A9AAA] mt-6">
           Questions? <a href="mailto:hello@thelittlesound.com" className="underline underline-offset-2 text-[#1A7A8A]">hello@thelittlesound.com</a>
         </p>
+      </div>
+    </main>
+  );
+}
+
+// ─── Edit success screen ──────────────────────────────────────────────────────
+
+function EditSuccessScreen({
+  title,
+  status,
+  reapprovalNeeded,
+}: {
+  title: string;
+  status?: string;
+  reapprovalNeeded?: boolean;
+}) {
+  const heading = reapprovalNeeded
+    ? 'Changes saved — your listing stays live'
+    : status === 'pending'
+    ? 'Submitted for review'
+    : 'Changes saved';
+
+  const body = reapprovalNeeded
+    ? 'It stays live on Discover while our team reviews your edits — usually within 24 hours.'
+    : status === 'pending'
+    ? 'Your updated listing is in review. We will take another look within 24 hours.'
+    : 'Your listing has been updated.';
+
+  return (
+    <main className="min-h-screen bg-[#F5EFE0] flex items-center justify-center px-4 py-16">
+      <div className="bg-white rounded-[24px] shadow-[0_4px_32px_rgba(10,74,90,0.09)] w-full max-w-[480px] p-10 text-center">
+        <div className="w-14 h-14 rounded-full bg-[#0D5C6E]/10 flex items-center justify-center mx-auto mb-5">
+          <span className="text-[#0D5C6E] text-2xl">✓</span>
+        </div>
+        <h2 className="font-['Cormorant_Garamond'] text-[30px] font-light text-[#1C3A4A] mb-2">
+          {heading}
+        </h2>
+        <p className="text-[15px] text-[#1C3A4A] font-semibold leading-relaxed mb-1">
+          {title}
+        </p>
+        <p className="text-[15px] text-[#3A5A6A] leading-relaxed mb-8">
+          {body}
+        </p>
+        <div className="flex flex-col gap-3">
+          {/* Plain <a>, not next/link — a full navigation guarantees the
+              dashboard re-fetches fresh data server-side instead of serving a
+              router-cached snapshot from before this edit. */}
+          <a
+            href="/providers/dashboard"
+            className="inline-flex items-center justify-center h-12 rounded-full bg-[#0D5C6E] text-white font-semibold text-[15px] hover:bg-[#1A7A8A] transition-colors"
+          >
+            Back to your dashboard →
+          </a>
+          <Link
+            href="/discover"
+            className="inline-flex items-center justify-center h-12 rounded-full border-2 border-[#E8DFC8] text-[#0D5C6E] font-semibold text-[14px] hover:border-[#C5D8E8] transition-colors"
+          >
+            See the directory
+          </Link>
+        </div>
       </div>
     </main>
   );

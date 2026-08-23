@@ -181,7 +181,34 @@ Provider visits `/providers/signup` → fills out account + business info (now i
 
 **Status: ✅ done and verified live 2026-08-03.** `provider-profiles.sql` run, full flow tested end to end (signup → email confirm → login → create listing → shows "In review" on dashboard → approved in `/admin` → dashboard updates to "Live on Discover"). Two real bugs were caught and fixed during this testing pass — see "Bugs found + fixed" below.
 
-**Not built yet (intentionally out of scope for this pass):** editing an already-submitted listing. The dashboard is view-only for now — the copy says to email hello@ for changes. Worth revisiting once there's real provider volume.
+**~~Not built yet: editing an already-submitted listing.~~** ✅ Built 2026-08-23 — providers can now self-serve edit their listings. See "Provider listing editing" below.
+
+### Provider listing editing (built 2026-08-23, pending manual SQL step)
+
+**What changed:** providers can now edit their own listings from the dashboard — previously create-only, with "email hello@ for changes." The 4-step listing wizard (`ListingForm`) was made edit-aware and reused; no duplicate form.
+
+**How edits interact with review (agreed with Evan 2026-08-23):**
+- **pending** listing edited → stays pending.
+- **rejected** listing edited → resubmitted as pending; the stale rejection note is cleared.
+- **approved** (live) listing edited → **stays live on Discover** (status stays `approved`) but is **flagged for re-approval** (`reapproval_needed=true`) and hello@ is notified. The flag is deliberately separate from `status`: flipping status back to pending would pull the live listing off Discover, which we didn't want. The team clears the flag with **Approve changes** in `/admin` (any review action — approve or reject — clears it).
+
+**New files:**
+| File | Route | Purpose |
+|------|-------|---------|
+| `app/providers/listings/[id]/edit/page.tsx` | `/providers/listings/[id]/edit` | Server component, `force-dynamic`, auth + **ownership check** (redirects unless the listing's `provider_id` is the logged-in user); seeds `ListingForm` in edit mode |
+| `app/api/providers/listings/[id]/route.ts` | `PATCH /api/providers/listings/[id]` | Update route: `requireProvider()` + ownership check; updates content fields only (never contact/account); status transition + re-approval flag; notifies hello@ when the team needs to act |
+| `supabase/listing-reapproval.sql` | — | Adds `reapproval_needed` + `edited_at` to `submissions`. **Run once in Supabase before this works in prod.** |
+
+**Changed files:**
+- `app/providers/listings/new/ListingForm.tsx` — new optional `mode` / `listingId` / `initial` / `currentStatus` props; edit mode prefills every field, PATCHes the update endpoint, and shows an edit-specific review note + success screen. Create mode unchanged.
+- `app/providers/dashboard/page.tsx` + `ProviderDashboardClient.tsx` — "Edit →" on every listing card; "Changes pending review" badge on an approved listing with a pending edit; loads `reapproval_needed` / `edited_at`; softened the "email hello@" footer.
+- `app/admin/AdminClient.tsx` — "✎ edited" flag in the list, a re-approval banner + "Approve changes" button in the detail panel.
+- `app/api/admin/submissions/[id]/status/route.ts` — every review action also clears `reapproval_needed`.
+- `middleware.ts` — provider `protectedRoutes` broadened from `/providers/listings/new` to `/providers/listings`, so the edit route is session-gated too.
+
+**Security:** the edit page and the PATCH API both independently verify the listing's `provider_id` matches the logged-in user — a provider can't open or update someone else's listing by guessing an id (same defense-in-depth pattern as the admin routes).
+
+**Status: ⏳ built + typechecked in sandbox, NOT yet run or deployed.** To make it live: (1) run `supabase/listing-reapproval.sql`, (2) push (Vercel auto-deploys). Not yet tested against a live Supabase — first test: from the provider dashboard, edit a pending listing; then edit an approved (live) listing and confirm it stays on Discover, shows "changes pending review," appears flagged in `/admin`, and that "Approve changes" clears the flag.
 
 ### Family dashboard — saved activities (built 2026-08-23, pending manual SQL step)
 
@@ -226,7 +253,7 @@ Family browses `/discover` → taps the heart on any activity card (logged-out v
 Priority order for the next work session (agreed with Evan 2026-08-23), tackle top-down:
 
 1. ~~**Family dashboard placeholder features**~~ — ✅ **Done, deployed & verified live 2026-08-23** (see "Family dashboard — saved activities" under Completed Work). "Saved activities" is a real feature; "booking history" is an honest placeholder (booking still out of Phase 1 scope). `saved-activities.sql` has been run in Supabase.
-2. **Provider dashboard listing editing** — providers can currently create new listings but not edit existing ones (they have to email hello@ for changes). Add edit capability.
+2. ~~**Provider dashboard listing editing**~~ — ✅ **Done 2026-08-23** (see "Provider listing editing" under Completed Work). Providers can edit their own listings; approved edits stay live on Discover but are flagged for team re-approval. **Requires running `supabase/listing-reapproval.sql` before it works in prod.**
 3. **Homepage "Create Your Account" CTA** — homepage only pushes the waitlist right now. Add a "Create Your Account" link alongside, mirroring what `/for-families` already does.
 4. **`sitemap.xml`** — irrelevant while the site is password-gated. Matters once public. Do last.
 
@@ -259,7 +286,10 @@ Priority order for the next work session (agreed with Evan 2026-08-23), tackle t
 | `app/providers/reset-password/page.tsx` | Set new password from reset link |
 | `app/providers/dashboard/page.tsx` | Provider dashboard — their listings + status (session-protected) |
 | `app/providers/listings/new/page.tsx` | Provider listing creation entry (server component, auth check) |
-| `app/providers/listings/new/ListingForm.tsx` | The 4-step listing wizard UI |
+| `app/providers/listings/new/ListingForm.tsx` | The 4-step listing wizard UI (create + edit modes) |
+| `app/providers/listings/[id]/edit/page.tsx` | Provider listing edit (server component, auth + ownership) |
+| `app/api/providers/listings/[id]/route.ts` | Provider listing update API (PATCH, ownership check) |
+| `supabase/listing-reapproval.sql` | `submissions.reapproval_needed` + `edited_at` (run manually) |
 | `app/api/providers/signup/route.ts` | Provider signup API (auth + profile) |
 | `lib/provider-auth.ts` | `requireProvider()` helper for provider API routes |
 | `supabase/provider-profiles.sql` | `provider_profiles` table + `submissions.provider_id` (run manually) |

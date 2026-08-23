@@ -26,6 +26,9 @@ export async function POST(
       admin_notes: admin_notes || null,
       reviewed_at: new Date().toISOString(),
       reviewed_by: admin.email || 'admin',
+      // Any review action resolves a pending edit flag — the admin has now
+      // looked at the current version.
+      reapproval_needed: false,
     })
     .eq('id', id);
 

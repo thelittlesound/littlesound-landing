@@ -16,7 +16,7 @@ const PORTALS = [
     dashboardPath: '/families/dashboard',
   },
   {
-    protectedRoutes: ['/providers/dashboard', '/providers/listings/new'],
+    protectedRoutes: ['/providers/dashboard', '/providers/listings'],
     authRoutes: ['/providers/login', '/providers/signup'],
     loginPath: '/providers/login',
     dashboardPath: '/providers/dashboard',

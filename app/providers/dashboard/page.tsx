@@ -26,7 +26,7 @@ export default async function ProviderDashboardPage() {
 
   const { data: listingsRow } = await supabaseAdmin
     .from('submissions')
-    .select('id, created_at, status, title, category, subcategory, age_min, age_max, price, price_unit, neighborhood, admin_notes, reviewed_at')
+    .select('id, created_at, status, title, category, subcategory, age_min, age_max, price, price_unit, neighborhood, admin_notes, reviewed_at, reapproval_needed, edited_at')
     .eq('provider_id', user.id)
     .order('created_at', { ascending: false });
 
