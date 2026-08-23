@@ -209,7 +209,7 @@ Family browses `/discover` → taps the heart on any activity card (logged-out v
 - **Client-side writes + RLS**, matching how the dashboard already edits `profiles` directly — no new API route.
 - Kept `export const dynamic = 'force-dynamic'` on the dashboard; unsave uses `router.refresh()` (no post-mutation cross-page navigation, so the plain-`<a>` rule isn't triggered here).
 
-**Status: ⏳ built + typechecked in sandbox, NOT yet run or deployed.** To make it live: (1) run `supabase/saved-activities.sql` in the Supabase SQL editor, (2) push (Vercel auto-deploys). Not yet exercised against a live Supabase — first manual test: sign in as a family, heart an activity on Discover, confirm it shows on the dashboard and Remove works.
+**Status: ✅ done, deployed, and verified live 2026-08-23.** `saved-activities.sql` run in Supabase; pushed (commit 5310149) and auto-deployed via Vercel. Full flow tested on the live site: heart an activity on Discover → persists across refresh → appears on `/families/dashboard` → Remove works; logged-out heart routes to `/families/login?next=/discover`.
 
 **Not built (out of scope for this pass):** booking history (no booking system yet), sharing saved lists, saved-count badges elsewhere in the UI, re-syncing a snapshot if the underlying listing changes.
 
@@ -225,7 +225,7 @@ Family browses `/discover` → taps the heart on any activity card (logged-out v
 
 Priority order for the next work session (agreed with Evan 2026-08-23), tackle top-down:
 
-1. ~~**Family dashboard placeholder features**~~ — ✅ **Done 2026-08-23** (see "Family dashboard — saved activities" under Completed Work). "Saved activities" is now a real feature; "booking history" is an honest placeholder (booking still out of Phase 1 scope). **Requires running `supabase/saved-activities.sql` before it works in prod.**
+1. ~~**Family dashboard placeholder features**~~ — ✅ **Done, deployed & verified live 2026-08-23** (see "Family dashboard — saved activities" under Completed Work). "Saved activities" is a real feature; "booking history" is an honest placeholder (booking still out of Phase 1 scope). `saved-activities.sql` has been run in Supabase.
 2. **Provider dashboard listing editing** — providers can currently create new listings but not edit existing ones (they have to email hello@ for changes). Add edit capability.
 3. **Homepage "Create Your Account" CTA** — homepage only pushes the waitlist right now. Add a "Create Your Account" link alongside, mirroring what `/for-families` already does.
 4. **`sitemap.xml`** — irrelevant while the site is password-gated. Matters once public. Do last.
