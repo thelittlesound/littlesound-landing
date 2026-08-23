@@ -20,7 +20,7 @@ For what pages/features exist today, see `README.md`. For open items and fabrica
 | Footer | `app/components/Footer.tsx` | Site-wide footer links |
 | Nav | `app/components/Nav.tsx` | Site-wide nav — Browse Activities, For Families, For Providers, sign-in links |
 
-**⚠️ Known copy issue:** `Hero.tsx`, `CTA.tsx`, `for-families/page.tsx`, `for-providers/page.tsx`, `about/page.tsx`, and `providers/signup/page.tsx` currently contain aspirational stats ("100+ families," "57+ providers verified") that aren't real yet — no real signups exist. Don't add to this language, and see `BUILD_STATUS.md` for the plan to replace it with honest numbers before the site goes public.
+**Note on stats copy:** several pages reference aspirational figures like "100+ families" or "57+ providers verified." These aren't real signup counts — they're framing language. Fine as-is for now; just don't add more of it.
 
 ---
 

@@ -96,7 +96,7 @@ Family visits `/families/signup` → 2-step form (account: name/email/password �
 
 **Status: ✅ done and verified live 2026-08-03.** `SITE_ACCESS_PASSWORD` set in Vercel, unlock flow tested and working. Locally, `npm run dev` falls back to a hardcoded dev password (`dev-preview`) so the env var doesn't need to be set to test on your machine.
 
-**To go public again later:** remove or rename `SITE_ACCESS_PASSWORD` handling in `middleware.ts` (or just stop requiring it), once there's real traction and honest numbers to show. At that point, also revisit the fabricated "100+ families / 57+ providers" copy across `Hero.tsx`, `CTA.tsx`, `for-families/page.tsx`, `for-providers/page.tsx`, `about/page.tsx`, and `providers/signup/page.tsx` — replace with real live counts or honest qualitative language.
+**To go public again later:** remove or rename `SITE_ACCESS_PASSWORD` handling in `middleware.ts` (or just stop requiring it) once there's real traction.
 
 ### Admin panel real auth (fully complete)
 
@@ -199,7 +199,6 @@ Everything from the 2026-08-03 functional-gaps review is done except two low-pri
 
 **Before going public again:**
 - **Homepage CTA** — homepage still only pushes the waitlist; consider adding a "Create Your Account" link there too, same as `/for-families`
-- **Fix fabricated stats** — "100+ families," "57+ providers verified" language across the site needs replacing with real live counts or honest language (see Site-wide password gate section above for the full list of files)
 - **Provider dashboard listing editing** — currently view-only; providers have to email hello@ to change a listing
 
 ---
