@@ -193,13 +193,12 @@ Provider visits `/providers/signup` → fills out account + business info (now i
 
 ## Next Up
 
-Everything from the 2026-08-03 functional-gaps review is done except two low-priority items:
-1. **Family dashboard is mostly a placeholder beyond the profile** — neighborhood/kids/interests save for real, but "saved activities" and "booking history" are just placeholder text, no feature behind them yet.
-2. **No `sitemap.xml`** — irrelevant while the site is password-gated; matters once public again.
+Priority order for the next work session (agreed with Evan 2026-08-23), tackle top-down:
 
-**Before going public again:**
-- **Homepage CTA** — homepage still only pushes the waitlist; consider adding a "Create Your Account" link there too, same as `/for-families`
-- **Provider dashboard listing editing** — currently view-only; providers have to email hello@ to change a listing
+1. **Family dashboard placeholder features** — "saved activities" and "booking history" are currently just placeholder text with no feature behind them. Profile save/edit already works.
+2. **Provider dashboard listing editing** — providers can currently create new listings but not edit existing ones (they have to email hello@ for changes). Add edit capability.
+3. **Homepage "Create Your Account" CTA** — homepage only pushes the waitlist right now. Add a "Create Your Account" link alongside, mirroring what `/for-families` already does.
+4. **`sitemap.xml`** — irrelevant while the site is password-gated. Matters once public. Do last.
 
 ---
 
