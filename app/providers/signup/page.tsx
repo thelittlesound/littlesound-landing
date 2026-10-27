@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { safeNext } from '@/lib/safe-next';
 
 const CATEGORIES = [
   'Camps',
@@ -42,8 +43,13 @@ interface Errors {
   agreeToTerms?: string;
 }
 
-export default function ProviderSignupPage() {
+function ProviderSignupForm() {
   const router = useRouter();
+  // Where to go once the account exists — e.g. /providers/claim/42 when the
+  // provider arrived from a claim link. null = the default new-listing flow.
+  const next = safeNext(useSearchParams().get('next'), null);
+  const loginHref = next ? `/providers/login?next=${encodeURIComponent(next)}` : '/providers/login';
+  const isClaiming = !!next && next.startsWith('/providers/claim');
   const [form, setForm] = useState<FormState>({
     firstName: '',
     lastName: '',
@@ -105,6 +111,7 @@ export default function ProviderSignupPage() {
           category: form.category,
           website: form.website,
           phone: form.phone,
+          next,
         }),
       });
 
@@ -113,7 +120,7 @@ export default function ProviderSignupPage() {
       if (!res.ok) throw new Error(data.error || 'Submission failed');
 
       if (data.confirmedImmediately) {
-        router.push('/providers/listings/new');
+        router.push(next ?? '/providers/listings/new');
       } else {
         setCheckEmail(true);
         setSubmitting(false);
@@ -138,10 +145,10 @@ export default function ProviderSignupPage() {
           </h1>
           <p className="text-[#3A5A6A] text-[15px] leading-relaxed mb-6">
             We sent a confirmation link to <strong>{form.email}</strong>. Click it to activate
-            your account, then sign in to create your listing.
+            your account, then sign in to {isClaiming ? 'finish claiming your listing' : 'create your listing'}.
           </p>
           <Link
-            href="/providers/login"
+            href={loginHref}
             className="inline-flex h-12 items-center justify-center rounded-full bg-[#0D5C6E] text-white font-semibold text-[15px] px-8 hover:bg-[#1A7A8A] transition-colors"
           >
             Go to sign in
@@ -160,11 +167,22 @@ export default function ProviderSignupPage() {
           <span className="text-xs font-bold uppercase tracking-widest text-[#0D5C6E]">Provider Portal</span>
         </div>
         <h1 className="font-['Cormorant_Garamond'] text-[clamp(32px,5vw,52px)] font-light leading-[1.1] tracking-tight text-[#1C3A4A] mb-4">
-          List your activities<br />
-          <em className="italic text-[#0D5C6E]">on Little Sound.</em>
+          {isClaiming ? (
+            <>
+              Claim your listing<br />
+              <em className="italic text-[#0D5C6E]">on Little Sound.</em>
+            </>
+          ) : (
+            <>
+              List your activities<br />
+              <em className="italic text-[#0D5C6E]">on Little Sound.</em>
+            </>
+          )}
         </h1>
         <p className="text-[#3A5A6A] text-[16px] leading-relaxed max-w-[400px] mx-auto">
-          Reach Seattle families already searching for what you offer. Free during our beta launch.
+          {isClaiming
+            ? 'Create your free provider account, then confirm the listing is yours. Using your business email speeds up verification.'
+            : 'Reach Seattle families already searching for what you offer. Free during our beta launch.'}
         </p>
       </div>
 
@@ -312,7 +330,7 @@ export default function ProviderSignupPage() {
 
         <p className="text-center text-[13px] text-[#7A9AAA] mt-6">
           Already have an account?{' '}
-          <Link href="/providers/login" className="text-[#1A7A8A] underline underline-offset-2">
+          <Link href={loginHref} className="text-[#1A7A8A] underline underline-offset-2">
             Sign in
           </Link>
         </p>
@@ -359,5 +377,14 @@ function Field({ label, type = 'text', value, onChange, error, placeholder, auto
       />
       {error && <p className="text-[12px] text-[#C0544A]">{error}</p>}
     </div>
+  );
+}
+
+// useSearchParams needs a Suspense boundary in a client page.
+export default function ProviderSignupPage() {
+  return (
+    <Suspense fallback={null}>
+      <ProviderSignupForm />
+    </Suspense>
   );
 }

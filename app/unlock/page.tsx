@@ -2,11 +2,12 @@
 
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { safeNext } from '@/lib/safe-next';
 
 function UnlockForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const next = searchParams.get('next') || '/';
+  const next = safeNext(searchParams.get('next'), '/');
 
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);

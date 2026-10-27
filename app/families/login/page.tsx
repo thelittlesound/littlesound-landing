@@ -3,12 +3,13 @@
 import { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { safeNext } from '@/lib/safe-next';
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
 
 function FamilyLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const next = searchParams.get('next') || '/families/dashboard';
+  const next = safeNext(searchParams.get('next'), '/families/dashboard');
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

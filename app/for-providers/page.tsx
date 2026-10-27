@@ -51,7 +51,7 @@ const STEPS = [
 const FAQS = [
   {
     q: 'Is my listing already on Little Sound?',
-    a: "Probably. We've researched and catalogued 80+ Seattle activity providers. Search for your business on our Discover page — if you're there, reach out to claim and verify your listing.",
+    a: "Probably. We've researched and catalogued 80+ Seattle activity providers. Search for your business on our Discover page — if you're there, claim it from your provider account and we'll verify it's yours.",
   },
   {
     q: 'What does it cost?',
@@ -94,7 +94,7 @@ export default function ForProviders() {
 
             <div className="flex flex-row flex-wrap gap-3 mb-10">
               <a
-                href="mailto:hello@thelittlesound.com"
+                href="/providers/claim"
                 className="inline-flex items-center justify-center gap-2 bg-[#C4A882] hover:bg-[#A8865A] text-white font-semibold rounded-full px-5 py-3 text-[14px] transition-all duration-200 hover:-translate-y-0.5"
               >
                 Claim Your Listing →
@@ -322,7 +322,7 @@ export default function ForProviders() {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
-              href="mailto:hello@thelittlesound.com?subject=Provider Listing — Little Sound"
+              href="/providers/claim"
               className="inline-flex items-center justify-center gap-2 bg-[#C4A882] hover:bg-[#A8865A] text-white font-semibold rounded-full px-8 py-4 text-[15px] transition-all duration-200 hover:-translate-y-0.5"
             >
               Claim Your Listing →

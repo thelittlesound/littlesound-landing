@@ -138,11 +138,15 @@ export default function Discover() {
   const [providerActivities, setProviderActivities] = useState<Activity[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+  const [claimedSeedIds, setClaimedSeedIds] = useState<Set<string>>(new Set());
 
-  // Merge static seed data with approved provider submissions
+  // Merge static seed data with approved provider submissions. Seed listings a
+  // provider has claimed are dropped from the static set — the provider's own
+  // copy (same id) comes through providerActivities instead.
   const activities = useMemo<Activity[]>(() => {
-    return [...(staticActivities as Activity[]), ...providerActivities];
-  }, [providerActivities]);
+    const seeds = (staticActivities as Activity[]).filter((a) => !claimedSeedIds.has(a.id));
+    return [...seeds, ...providerActivities];
+  }, [providerActivities, claimedSeedIds]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -163,6 +167,7 @@ export default function Discover() {
       .then(r => r.json())
       .then(data => {
         if (data.activities) setProviderActivities(data.activities);
+        if (Array.isArray(data.claimedSeedIds)) setClaimedSeedIds(new Set(data.claimedSeedIds));
       })
       .catch(() => {}); // Fail silently — static data still shows
   }, []);
@@ -208,7 +213,10 @@ export default function Discover() {
     if (sort === 'age-asc')    arr.sort((a, b) => a.ageMin - b.ageMin);
     if (sort === 'age-desc')   arr.sort((a, b) => b.ageMin - a.ageMin);
     return arr;
-  }, [query, category, ageGroup, sort]);
+    // `activities` must be a dependency: provider listings arrive from the API
+    // after first render, and without it they never appeared until a filter
+    // changed.
+  }, [activities, query, category, ageGroup, sort]);
 
   // Subcategory pills — ordered, derived from current results
   const availableSubcategories = useMemo(() => {
@@ -498,6 +506,12 @@ export default function Discover() {
           >
             List your activity
           </a>
+          <p className="text-[14px] text-[#D6EEF2]/80 mt-6">
+            Already listed?{' '}
+            <a href="/providers/claim" className="text-white font-semibold underline underline-offset-2 hover:text-[#C4A882]">
+              Claim your listing →
+            </a>
+          </p>
         </div>
       </section>
 

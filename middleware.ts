@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { safeNext } from '@/lib/safe-next';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -16,7 +17,7 @@ const PORTALS = [
     dashboardPath: '/families/dashboard',
   },
   {
-    protectedRoutes: ['/providers/dashboard', '/providers/listings'],
+    protectedRoutes: ['/providers/dashboard', '/providers/listings', '/providers/claim'],
     authRoutes: ['/providers/login', '/providers/signup'],
     loginPath: '/providers/login',
     dashboardPath: '/providers/dashboard',
@@ -84,7 +85,10 @@ export async function middleware(request: NextRequest) {
     }
 
     if (isAuthRoute && user) {
-      return NextResponse.redirect(new URL(portal.dashboardPath, request.url));
+      // Already signed in: honor a same-site ?next= (e.g. a claim link that
+      // went through sign-in), otherwise go to the portal's dashboard.
+      const dest = safeNext(request.nextUrl.searchParams.get('next'), portal.dashboardPath);
+      return NextResponse.redirect(new URL(dest, request.url));
     }
   }
 

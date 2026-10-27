@@ -12,6 +12,13 @@ const CATEGORIES = [
 
 const PRICE_UNITS = ['session', 'class', 'week', 'month', 'camp', 'season', 'year'];
 
+// A listing being edited can carry a value that isn't in these option lists —
+// e.g. a claimed seed listing in "Martial Arts" or priced per "lesson". Keep
+// that value selectable so saving an edit doesn't silently change it.
+function withCurrent(options: string[], current: string): string[] {
+  return !current || options.includes(current) ? options : [current, ...options];
+}
+
 const NEIGHBORHOODS = [
   'Ballard', 'Beacon Hill', 'Capitol Hill', 'Central District', 'Columbia City',
   'Eastlake', 'First Hill', 'Fremont', 'Green Lake', 'Greenwood',
@@ -289,7 +296,7 @@ function StepDetails({ form, set, errors }: { form: ListingFormState; set: (f: k
         label="Category"
         value={form.category}
         onChange={(v) => set('category', v)}
-        options={CATEGORIES}
+        options={withCurrent(CATEGORIES, form.category)}
         placeholder="Select a category"
         error={errors.category}
       />
@@ -400,7 +407,7 @@ function StepPricing({ form, set, errors }: { form: ListingFormState; set: (f: k
                 onChange={(e) => set('priceUnit', e.target.value)}
                 className="h-12 rounded-[12px] border-2 border-[#E8DFC8] px-4 pr-8 text-[15px] font-['DM_Sans'] text-[#1C3A4A] bg-white w-full appearance-none transition-colors focus:outline-none focus:border-[#0D5C6E]"
               >
-                {PRICE_UNITS.map((u) => (
+                {withCurrent(PRICE_UNITS, form.priceUnit).map((u) => (
                   <option key={u} value={u}>{u}</option>
                 ))}
               </select>

@@ -4,11 +4,13 @@ import { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
+import { safeNext } from '@/lib/safe-next';
 
 function ProviderLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const next = searchParams.get('next') || '/providers/dashboard';
+  // Only same-site paths — never bounce a freshly signed-in user off-site.
+  const next = safeNext(searchParams.get('next'), '/providers/dashboard');
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -101,7 +103,11 @@ function ProviderLoginForm() {
 
         <p className="text-center text-[13px] text-[#7A9AAA] mt-6">
           New to Little Sound?{' '}
-          <Link href="/providers/signup" className="text-[#1A7A8A] underline underline-offset-2">
+          {/* Carry `next` so someone arriving from a claim link lands back on it after signing up. */}
+          <Link
+            href={next === '/providers/dashboard' ? '/providers/signup' : `/providers/signup?next=${encodeURIComponent(next)}`}
+            className="text-[#1A7A8A] underline underline-offset-2"
+          >
             List your activity
           </Link>
         </p>

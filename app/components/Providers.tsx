@@ -56,7 +56,7 @@ export default function Providers() {
           </a>
           <p className="text-[14px] text-[#3A5A6A]">
             Already listed?{' '}
-            <a href="mailto:hello@thelittlesound.com" className="text-[#0D5C6E] font-medium hover:underline">
+            <a href="/providers/claim" className="text-[#0D5C6E] font-medium hover:underline">
               Claim your listing
             </a>
           </p>

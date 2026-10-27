@@ -183,6 +183,49 @@ Provider visits `/providers/signup` → fills out account + business info (now i
 
 **~~Not built yet: editing an already-submitted listing.~~** ✅ Built 2026-08-23 — providers can now self-serve edit their listings. See "Provider listing editing" below.
 
+### Provider listing claims (built 2026-10-27, pending migration + deploy + test)
+
+**What it does:** a provider can take ownership of a listing that's already on Little Sound (one of our researched seed listings, or a pre-account `submissions` row), after Kelly/Evan verify them. Once approved, the listing is on their dashboard and editable via the #2 edit flow. This is what the outreach line "your listing is already live — help us get the details right" now links to.
+
+**End-to-end flow:**
+Provider opens a claim link (`/providers/claim/42`, e.g. from outreach) or searches at `/providers/claim` → if signed out, sign in or sign up, and the claim page is carried through login, signup, and email confirmation so they land back on it → picks their listing(s) (all of a business's unowned listings are offered as checkboxes — YMCA claims its 5 in one request) + role + optional verification note → pending `listing_claims` row, hello@ emailed → admin reviews in `/admin` → **Claims** tab (claimant, listings, note, and hints: email domain matches listing website? profile website matches?) → **Approve & transfer** or **Reject** (with an optional note that goes into the email to the provider) → provider emailed either way.
+
+**What approval does:**
+- **Seed listing** → copied into `submissions` (`status = approved`, `seed_id` = original id, owned by the claimant, contact fields from their profile, category mapped to the form's category where one exists).
+- **Pre-account submission** → `provider_id` set, via a conditional update that only succeeds while it's still null.
+- Ownership is re-checked at approval time; a listing that's since been claimed by someone else blocks approval with a clear message. Listings already transferred to this claimant are skipped, so retrying a partly-failed approval is safe.
+
+**Discover:** an imported listing keeps its original Discover id ("42"), so the provider's version replaces the seed card in place and families' saved hearts keep matching. `/api/activities` returns `claimedSeedIds` (every imported seed, any status), and Discover hides those static entries — so even if an imported listing is later rejected, the old seed card never resurfaces as unclaimed. Discover's provider section gets an "Already listed? Claim your listing" link (decided 2026-10-27: no per-card claim links, keep Discover family-facing).
+
+**Safeguards:**
+- Only accounts with a `provider_profiles` row can claim — a family account can't take a business's listing.
+- Can't claim a listing that's already owned; can't file a second pending claim for the same listing.
+- `submissions.seed_id` has a unique index, so a seed can't be imported twice even if two approvals race.
+- `listing_claims` has RLS on with no client policies — service-role only, like `submissions`.
+
+**New files:**
+| File | Purpose |
+|------|---------|
+| `supabase/listing-claims.sql` | `listing_claims` table + `submissions.seed_id` (unique). **Run before pushing.** |
+| `lib/claimable.ts` | Server-only: claimable listings, ownership resolution, seed→submission mapping, verification hints |
+| `lib/claim-roles.ts` | Role options shared by the form and API |
+| `lib/safe-next.ts` | Same-site-only `?next=` redirects (see bug #10) |
+| `lib/notify.ts` | Shared Brevo email helper + escaping (used by the claim routes) |
+| `app/providers/claim/page.tsx`, `[activityId]/page.tsx`, `ClaimClient.tsx`, `loadClaimContext.ts` | Claim search + direct claim link UI |
+| `app/api/providers/claims/route.ts` | `POST` — create a claim request |
+| `app/api/admin/claims/route.ts` | `GET` — admin review queue |
+| `app/api/admin/claims/[id]/route.ts` | `POST` — approve (transfer) / reject |
+| `app/admin/ClaimsPanel.tsx` | Claims tab UI in `/admin` |
+
+**Changed files:** `app/admin/AdminClient.tsx` (Listings / Claims tabs), `app/api/activities/route.ts` (seed ids, `claimedSeedIds`, business names, `force-dynamic`), `app/discover/page.tsx` (hide claimed seeds, memo fix, claim link), `app/providers/dashboard/*` (claim button, claim request statuses, "Claimed" label), `app/providers/listings/new/ListingForm.tsx` (keeps categories/price units outside its option lists — 17 seed listings use Martial Arts / Early Childhood / Cooking / Language, a few use hour / lesson / quarter), `app/providers/login/page.tsx` + `signup/page.tsx` + `app/api/providers/signup/route.ts` + `middleware.ts` (carry `?next=` through sign-in, sign-up and email confirmation; `/providers/claim` protected), `app/families/login/page.tsx` + `app/unlock/page.tsx` (safe `next`), `app/components/Providers.tsx` + `app/for-providers/page.tsx` (claim buttons → `/providers/claim` instead of mailto).
+
+**Deploy steps, in order:**
+1. Run `supabase/listing-claims.sql` in the Supabase SQL editor. (Code first would blank provider dashboards — they now select `seed_id` — and break claiming.)
+2. Supabase → Authentication → URL Configuration → **Redirect URLs**: add `https://www.thelittlesound.com/**` (and `https://thelittlesound.com/**` if the bare domain is used). Without it, confirmation emails fall back to the Site URL and new providers have to find their way back to the claim page.
+3. Push.
+
+**Status: ⏳ built, typechecked, and logic-tested in sandbox (24 checks: ownership rules, redirect safety, all 79 seed categories round-trip through import → Discover); not yet deployed.** First live test: as a new provider, open `/providers/claim/<a seed id>` signed out → sign up → confirm → land back on the claim page → submit → approve in `/admin` Claims → listing appears on the provider dashboard and on Discover under the business name, with no duplicate card.
+
 ### Homepage account CTAs (fully complete)
 
 **What changed:** the homepage only ever pushed the waitlist. It now leads with account creation, mirroring `/for-families` (decided with Evan 2026-10-16).
@@ -271,29 +314,12 @@ Priority order for the next work session (agreed with Evan 2026-08-23), tackle t
 2. ~~**Provider dashboard listing editing**~~ — ✅ **Done, deployed & verified live** (see "Provider listing editing" under Completed Work). Providers can edit their own listings; approved edits stay live on Discover but are flagged for team re-approval. `listing-reapproval.sql` has been run.
 3. ~~**Homepage "Create Your Account" CTA**~~ — ✅ **Done, deployed & verified live 2026-10-27** (see "Homepage account CTAs" under Completed Work). Hero now mirrors `/for-families`; nav button is "Create Account"; provider CTAs fixed; `#waitlist` anchor fixed. No SQL needed.
 4. **`sitemap.xml`** — irrelevant while the site is password-gated. Matters once public. Do last.
-5. **Provider listing claim / ownership transfer** — let a real provider claim a listing that already exists on the site (seed or pre-auth) so it lands on their dashboard and they can edit it. **Hold until #3 and #4 are done** (agreed with Evan 2026-08-23). Full design captured under "Planned — listing claim / ownership transfer" below.
+5. ~~**Provider listing claim / ownership transfer**~~ — ✅ **Built 2026-10-27, pending migration + deploy + test** (see "Provider listing claims" under Completed Work). Moved ahead of #4 (agreed with Evan 2026-10-27): the sitemap only matters once the site is public, and claiming is what provider outreach depends on. **Run `supabase/listing-claims.sql` before pushing.**
 
 ---
 
-## Planned — listing claim / ownership transfer (NOT started; hold until Next Up #3 and #4)
-
-**Documented 2026-08-23, deliberately deferred.** Do #3 (homepage account CTA) and #4 (sitemap) first, then build this.
-
-**Goal:** let a real provider take ownership of a listing that already exists on the site (from our research), so it lands on their dashboard and they can edit it with the flow built in #2. This is the back half of the "Claim Your Listing" CTA and the "your listing is already live — help us get the details right" outreach motion. Editing (#2) is already done; claiming only needs to get the row associated with the right provider, after which the existing ownership check makes editing work.
-
-**Two kinds of "predated" listing — they claim differently:**
-- **Pre-auth `submissions` row** (`provider_id = null`): trivial. Transfer = set `provider_id` to the claiming provider's `auth.users` id. Editing then works immediately. (May be few or zero of these.)
-- **Static seed listing in `app/data/activities.json`** (the ~64 researched providers, ids `"1"`…`"79"`): NOT a DB row, so nothing to transfer. Claiming = *import* it: create a `submissions` row from the JSON content with `provider_id` = claimant and `status = 'approved'` (stays live), then stop Discover from showing it twice. Cleanest de-dup: tag the imported row with its original seed id (e.g. a `seed_id` column) and have Discover / `/api/activities` hide any static entry whose seed id now has an approved submission — avoids hand-editing the JSON on every claim.
-
-**The real problem is authorization, not the transfer.** Must prove the claimant actually runs the business — a no-check "click to claim" would let a competitor seize and edit someone's live listing.
-- **Phase 1 (recommended): admin-mediated.** Provider signs up → requests a listing ("Claim this listing" button, or emails hello@) → Kelly/Evan verify against the research contact info they already have → approve the transfer/import in `/admin`. Safe, low-volume, founder-run.
-- **Later automation (not now):** allow a self-serve claim only when the provider account's email domain matches the listing's website domain, or send a verification code to the listing's known contact.
-
-**Likely build (when we get to it):**
-- `submissions`: add `seed_id text` (nullable) linking an imported row back to its `activities.json` origin, for de-dup.
-- Discover / `/api/activities`: filter out static seed entries whose `seed_id` now has an approved submission.
-- A "Claim this listing" affordance (on Discover or the listing) + a claims-request path + an admin action that performs the transfer (pre-auth row) or the seed-import (JSON listing).
-- Ownership check from #2 is reused unchanged — once `provider_id` is set, editing already works.
+## Planned — listing claim / ownership transfer
+Built 2026-10-27 — see "Provider listing claims" under Completed Work. The original plan (admin-mediated verification, seed import with a `seed_id` tag, Discover de-dup) is what shipped.
 
 ## Open Decisions
 - **Family registration:** ✅ decided — full auth flow (Option B), built 2026-08-02
@@ -326,6 +352,14 @@ Priority order for the next work session (agreed with Evan 2026-08-23), tackle t
 | `app/providers/listings/[id]/edit/page.tsx` | Provider listing edit (server component, auth + ownership) |
 | `app/api/providers/listings/[id]/route.ts` | Provider listing update API (PATCH, ownership check) |
 | `supabase/listing-reapproval.sql` | `submissions.reapproval_needed` + `edited_at` (run manually) |
+| `supabase/listing-claims.sql` | `listing_claims` table + `submissions.seed_id` (run manually, before push) |
+| `app/providers/claim/` | Claim search (`/providers/claim`) + direct claim links (`/providers/claim/[activityId]`) |
+| `app/api/providers/claims/route.ts` | Provider: create a claim request |
+| `app/api/admin/claims/` | Admin: review queue (`GET`) + approve/reject (`POST [id]`) |
+| `app/admin/ClaimsPanel.tsx` | Admin Claims tab |
+| `lib/claimable.ts` | Server-only claim logic (ownership, seed import, verification hints) |
+| `lib/safe-next.ts` | Same-site-only redirect helper for `?next=` |
+| `lib/notify.ts` | Brevo email helper |
 | `app/api/providers/signup/route.ts` | Provider signup API (auth + profile) |
 | `lib/provider-auth.ts` | `requireProvider()` helper for provider API routes |
 | `supabase/provider-profiles.sql` | `provider_profiles` table + `submissions.provider_id` (run manually) |
@@ -372,10 +406,15 @@ Priority order for the next work session (agreed with Evan 2026-08-23), tackle t
 - **Stale launch-timing copy** (noted 2026-10-16): hero eyebrow "Seattle Beta · Q3 2026", closing-CTA perk "Seattle beta — Q3 2026", and the waitlist success message "before the Seattle beta opens this summer" are all past-dated now. Update once the new launch timing is set.
 
 ## Bugs found + fixed
-Listed chronologically. #1–3 found and fixed 2026-08-03 while building and testing provider authentication; #4–5 found 2026-10-16 during the homepage CTA work.
+Listed chronologically. #1–3 found and fixed 2026-08-03 while building and testing provider authentication; #4–5 found 2026-10-16 during the homepage CTA work; #6–10 found 2026-10-27 while building listing claims.
 
 1. **Provider signup wrote two `submissions` rows per provider.** Both the account-creation step and the listing-creation step posted to the same `/api/providers/submit` endpoint, which always inserted into `submissions` regardless of type. Found while building provider auth (not from a live test). Fixed as part of that build — account creation no longer touches `submissions` at all.
 2. **Duplicate-email signup silently broke account creation.** Supabase's anti-enumeration protection means `auth.signUp()` doesn't error when called with an already-registered email — it returns a decoy user object with an id that doesn't exist in `auth.users`, so nothing leaks about whether the email is taken. Both `/api/families/signup` and `/api/providers/signup` took that at face value and tried to write a profile row for the fake id, causing a foreign-key error (`23503`) that cascaded into other failures downstream (a provider's first listing submission then failed with a not-null violation because their profile was never actually created). Found when Evan tested provider signup with `esherm7@gmail.com`, which already had an admin account. Fixed by checking `data.user.identities.length === 0` right after signUp — now returns a clear "an account with this email already exists" error instead of silently corrupting state.
 3. **Provider dashboard showed stale "no listings" right after submitting one.** The success screen's "Go to your dashboard" button used `next/link`, which Next.js prefetches in the background — so it cached a snapshot of the (empty) dashboard before the listing actually finished saving, then served that stale cache on click instead of fetching fresh. The listing itself saved correctly the whole time (confirmed via `/admin`). Fixed by using a plain `<a>` tag for that link (forces a full navigation, bypassing the router cache) and adding `export const dynamic = 'force-dynamic'` to `/providers/dashboard`, `/families/dashboard`, and `/admin` as defensive insurance against the same class of staleness.
 4. **Provider "List your activity" CTAs sent providers to the family waitlist.** The homepage Providers section and the Discover footer both linked "List your activity" to `/#waitlist` (the family email list) rather than `/providers/signup`, so a provider clicking the most prominent provider CTA never reached signup. BUILD_STATUS claimed these pointed at `/providers/signup`; the code disagreed. Found reading the homepage for Next Up #3. Fixed by repointing both to `/providers/signup`.
 5. **`/#waitlist` links scrolled nowhere on the homepage.** The nav's "Join Waitlist" button (desktop + mobile) and the provider CTA all linked to `/#waitlist`, but no element on the homepage had `id="waitlist"` (only `/for-families` did) — so they just dropped visitors at the top of the homepage. Fixed by adding `id="waitlist"` (with `scroll-mt-16` to clear the fixed nav) to the closing CTA section in `CTA.tsx`.
+6. **Discover showed the submitter's personal name as the provider.** `/api/activities` mapped `provider: s.contact_name`, so every provider-submitted card read "Jane Doe" instead of the business name. Would have made claimed listings read as a person's name too. Fixed by looking up `provider_profiles.business_name` (falls back to `contact_name` for pre-account rows).
+7. **Approved provider listings didn't appear on Discover until a filter changed.** The filtered-results `useMemo` depended on `[query, category, ageGroup, sort]` but not on the activity list, and provider listings arrive from the API after first render — so on page load they were silently left out. Fixed by adding `activities` to the dependencies.
+8. **`/api/activities` was likely frozen at build time.** A Next 14 `GET` route handler that doesn't read the request is static by default, so newly approved listings likely didn't reach Discover until the next deploy (not confirmed against a live build — but #7 would have hidden it anyway). Fixed defensively with `export const dynamic = 'force-dynamic'`, matching the dashboards.
+9. **Provider signup dropped where the user was headed.** Login's "sign up" link didn't carry `?next=`, signup ignored it, and the confirmation email returned to the Site URL — then signup sent everyone to *create a new listing*. A provider arriving from a claim link would have created a duplicate of the listing they came to claim. Fixed by carrying `next` through login → signup → `emailRedirectTo` → login, and through the middleware's signed-in bounce.
+10. **Open redirect via `?next=`.** Provider login, family login, and `/unlock` redirected to any `next` value, including other sites (`/providers/login?next=https://evil.example` would send someone there right after signing in). Fixed with `lib/safe-next.ts`, which only allows same-site paths.

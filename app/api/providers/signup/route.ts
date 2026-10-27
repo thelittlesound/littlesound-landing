@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
+import { safeNext } from '@/lib/safe-next';
 
 const BREVO_API_KEY = process.env.BREVO_API_KEY;
 const BREVO_API_URL = 'https://api.brevo.com/v3';
@@ -46,12 +47,23 @@ export async function POST(request: NextRequest) {
     // Cookie-aware server client — if the Supabase project has email
     // confirmations disabled, the session lands straight in cookies and the
     // provider goes right into creating their first listing.
+    //
+    // emailRedirectTo: the confirmation link lands on provider sign-in, carrying
+    // `next` (e.g. a claim page) so the provider ends up where they started.
+    // Supabase only honors this if the URL matches Authentication → URL
+    // Configuration → Redirect URLs; otherwise it falls back to the Site URL.
+    const next = safeNext(typeof body.next === 'string' ? body.next : null, null);
+    const emailRedirectTo = `${request.nextUrl.origin}/providers/login${
+      next ? `?next=${encodeURIComponent(next)}` : ''
+    }`;
+
     const supabase = await createSupabaseServerClient();
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: { first_name: firstName, last_name: lastName },
+        emailRedirectTo,
       },
     });
 

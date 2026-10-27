@@ -31,6 +31,16 @@ export interface Listing {
   reviewed_at: string | null;
   reapproval_needed: boolean | null;
   edited_at: string | null;
+  seed_id: string | null; // set when this listing came to you through a claim
+}
+
+export interface ClaimRequest {
+  id: string;
+  created_at: string;
+  status: 'pending' | 'rejected';
+  business_name: string | null;
+  admin_notes: string | null;
+  titles: string[];
 }
 
 const STATUS_COPY = {
@@ -42,9 +52,11 @@ const STATUS_COPY = {
 export default function ProviderDashboardClient({
   profile,
   listings,
+  claims,
 }: {
   profile: ProviderProfile;
   listings: Listing[];
+  claims: ClaimRequest[];
 }) {
   const router = useRouter();
   const [signingOut, setSigningOut] = useState(false);
@@ -83,13 +95,54 @@ export default function ProviderDashboardClient({
           </button>
         </div>
 
-        {/* Add listing CTA */}
-        <Link
-          href="/providers/listings/new"
-          className="inline-flex items-center justify-center h-12 rounded-full bg-[#0D5C6E] text-white font-semibold text-[15px] px-7 hover:bg-[#1A7A8A] hover:-translate-y-0.5 transition-all duration-200 mb-8"
-        >
-          + List another activity
-        </Link>
+        {/* Add / claim listing CTAs */}
+        <div className="flex flex-col sm:flex-row gap-3 mb-8">
+          <Link
+            href="/providers/listings/new"
+            className="inline-flex items-center justify-center h-12 rounded-full bg-[#0D5C6E] text-white font-semibold text-[15px] px-7 hover:bg-[#1A7A8A] hover:-translate-y-0.5 transition-all duration-200"
+          >
+            + List another activity
+          </Link>
+          <Link
+            href="/providers/claim"
+            className="inline-flex items-center justify-center h-12 rounded-full border-2 border-[#E8DFC8] bg-white text-[#0D5C6E] font-semibold text-[15px] px-7 hover:border-[#C5D8E8] transition-colors"
+          >
+            Claim an existing listing
+          </Link>
+        </div>
+
+        {/* Claim requests in review / turned down */}
+        {claims.length > 0 && (
+          <div className="flex flex-col gap-3 mb-8">
+            {claims.map((c) => (
+              <div key={c.id} className="bg-white/70 border border-[#E8DFC8] rounded-[18px] px-5 py-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-[12px] font-semibold uppercase tracking-wide text-[#7A9AAA] mb-0.5">Claim request</p>
+                    <p className="text-[15px] font-semibold text-[#1C3A4A]">{c.business_name ?? 'Listing claim'}</p>
+                    <p className="text-[13px] text-[#5A7A8A]">{c.titles.join(' · ')}</p>
+                  </div>
+                  <span
+                    className={`text-xs px-2.5 py-1 rounded-full font-medium shrink-0 ${
+                      c.status === 'pending' ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-700'
+                    }`}
+                  >
+                    {c.status === 'pending' ? 'In review' : 'Not approved'}
+                  </span>
+                </div>
+                {c.status === 'pending' ? (
+                  <p className="text-[12px] text-[#7A9AAA] mt-2">
+                    Submitted {new Date(c.created_at).toLocaleDateString()} — we&apos;ll email you once it&apos;s verified.
+                  </p>
+                ) : (
+                  c.admin_notes && (
+                    <p className="text-[13px] text-[#8A3A32] mt-2">Note from Little Sound: {c.admin_notes}</p>
+                  )
+                )}
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Listings */}
         {listings.length === 0 ? (
@@ -103,6 +156,13 @@ export default function ProviderDashboardClient({
             >
               Create your first listing →
             </Link>
+            <p className="text-[13px] text-[#7A9AAA] mt-5">
+              Already on Little Sound?{' '}
+              <Link href="/providers/claim" className="text-[#1A7A8A] font-medium underline underline-offset-2">
+                Claim your listing
+              </Link>{' '}
+              instead.
+            </p>
           </div>
         ) : (
           <div className="flex flex-col gap-4">
@@ -148,7 +208,7 @@ export default function ProviderDashboardClient({
                   )}
                   <div className="flex items-center justify-between gap-3 mt-4 pt-4 border-t border-[#E8DFC8]">
                     <p className="text-[12px] text-[#B0C8D0]">
-                      Submitted {new Date(listing.created_at).toLocaleDateString()}
+                      {listing.seed_id ? 'Claimed' : 'Submitted'} {new Date(listing.created_at).toLocaleDateString()}
                       {listing.edited_at ? ` · Edited ${new Date(listing.edited_at).toLocaleDateString()}` : ''}
                       {listing.reviewed_at ? ` · Reviewed ${new Date(listing.reviewed_at).toLocaleDateString()}` : ''}
                     </p>
