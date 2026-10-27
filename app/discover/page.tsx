@@ -493,7 +493,7 @@ export default function Discover() {
             Families are searching for what you offer. Get your listing featured on Little Sound.
           </p>
           <a
-            href="/#waitlist"
+            href="/providers/signup"
             className="inline-block px-8 py-4 rounded-full bg-[#C4A882] text-[#1C3A4A] text-[15px] font-semibold hover:bg-[#A8865A] hover:text-white transition-colors"
           >
             List your activity

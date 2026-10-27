@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 
 export default function CTA() {
   const [email, setEmail] = useState('');
@@ -28,7 +29,11 @@ export default function CTA() {
   };
 
   return (
-    <section className="bg-[#0A4A5A] py-24 px-6 md:px-10 lg:px-16 text-center">
+    // id="waitlist" is the target for every "/#waitlist" link on the site
+    // (nav, hero fallback). Before this, the homepage had no such anchor, so
+    // those links just landed at the top of the page. scroll-mt clears the
+    // fixed nav.
+    <section id="waitlist" className="scroll-mt-16 bg-[#0A4A5A] py-24 px-6 md:px-10 lg:px-16 text-center">
       <div className="max-w-[640px] mx-auto">
 
         {/* Eyebrow */}
@@ -52,7 +57,7 @@ export default function CTA() {
             <p className="text-white/60 text-sm">We'll be in touch before the Seattle beta opens this summer.</p>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="flex gap-3 max-w-[460px] mx-auto mb-4">
+          <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-[460px] mx-auto mb-4">
             <input
               type="email"
               value={email}
@@ -74,6 +79,16 @@ export default function CTA() {
         {status === 'error' && (
           <p className="text-red-300 text-sm mb-4">Something went wrong — please try again.</p>
         )}
+
+        <p className="text-white/60 text-[14px] mb-4">
+          Ready now?{' '}
+          <Link
+            href="/families/signup"
+            className="text-[#C4A882] font-semibold hover:text-white underline-offset-2 hover:underline transition-colors"
+          >
+            Create your account &rarr;
+          </Link>
+        </p>
 
         <p className="text-white/30 text-[12px] mb-8">
           We're Seattle parents. We hate spam as much as you do.

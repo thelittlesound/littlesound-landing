@@ -59,7 +59,7 @@ Provider visits `/providers/signup` → fills out account form → redirected to
 - Rejecting a listing removes it from Discover; no delete — all submissions kept for record
 
 **Homepage:**
-- Providers section has three CTA buttons: Claim Your Listing, See How We List Providers, List Your Activity → `/providers/signup`
+- Providers section: "List your activity →" → `/providers/signup` (until 2026-10-16 this actually pointed at the family waitlist `/#waitlist` — see Bugs found + fixed #4), plus an "Already listed? Claim your listing" mailto link to hello@. (This line previously described three buttons that didn't match the code.)
 
 ### Family auth (fully complete — Option B, full signup)
 
@@ -183,7 +183,20 @@ Provider visits `/providers/signup` → fills out account + business info (now i
 
 **~~Not built yet: editing an already-submitted listing.~~** ✅ Built 2026-08-23 — providers can now self-serve edit their listings. See "Provider listing editing" below.
 
-### Provider listing editing (built 2026-08-23, pending manual SQL step)
+### Homepage account CTAs (built 2026-10-16, pending deploy + check)
+
+**What changed:** the homepage only ever pushed the waitlist. It now leads with account creation, mirroring `/for-families` (decided with Evan 2026-10-16).
+
+- **Hero** (`app/components/Hero.tsx`): the inline waitlist email form is replaced by a gold **Create Your Account →** button (`/families/signup`) + a **Browse Activities** button (`/discover`), with a "Not ready yet? *Join the waitlist* instead" fallback that scrolls to the closing form. Same markup pattern as the `/for-families` hero. Hero no longer holds form state, so it's no longer a client component. Rationale: while the site is password-gated, anyone who sees it can already use the product — an account fits them better than a waitlist.
+- **Closing CTA** (`app/components/CTA.tsx`): now carries `id="waitlist"` (see bug #5), its form stacks on mobile instead of squeezing input + button into one row (it's now the only waitlist form), and it adds a "Ready now? Create your account →" link.
+- **Nav** (`app/components/Nav.tsx`): the site-wide gold "Join Waitlist" button (desktop + mobile) is now **Create Account** → `/families/signup`. "Sign In" unchanged.
+- **Provider CTAs**: "List your activity" on the homepage Providers section and the Discover footer now go to `/providers/signup` instead of the family waitlist (see bug #4).
+
+**Known quirk (pre-existing, not changed):** middleware treats *any* signed-in user as a family on `/families/login` + `/families/signup`, so a signed-in provider or admin who clicks "Create Account" is bounced to `/families/dashboard` (an empty family profile). Same thing already happened with "Sign In." Worth fixing if providers start using the main nav while signed in.
+
+**Status: ⏳ built + typechecked in sandbox, not yet deployed.** No migration. After push, check on the live site (mobile width especially): hero shows the two buttons + waitlist line; "Join the waitlist" scrolls to the closing form; nav shows Create Account; both "List your activity" links land on provider signup.
+
+### Provider listing editing (fully complete)
 
 **What changed:** providers can now edit their own listings from the dashboard — previously create-only, with "email hello@ for changes." The 4-step listing wizard (`ListingForm`) was made edit-aware and reused; no duplicate form.
 
@@ -208,9 +221,11 @@ Provider visits `/providers/signup` → fills out account + business info (now i
 
 **Security:** the edit page and the PATCH API both independently verify the listing's `provider_id` matches the logged-in user — a provider can't open or update someone else's listing by guessing an id (same defense-in-depth pattern as the admin routes).
 
-**Status: ⏳ built + typechecked in sandbox, NOT yet run or deployed.** To make it live: (1) run `supabase/listing-reapproval.sql`, (2) push (Vercel auto-deploys). Not yet tested against a live Supabase — first test: from the provider dashboard, edit a pending listing; then edit an approved (live) listing and confirm it stays on Discover, shows "changes pending review," appears flagged in `/admin`, and that "Approve changes" clears the flag.
+**Status: ✅ done, deployed, and verified live** (confirmed by Evan 2026-10-16). `listing-reapproval.sql` run in Supabase; pushed (commit baf3696). Edit + re-approval flow tested live.
 
-### Family dashboard — saved activities (built 2026-08-23, pending manual SQL step)
+**Deploy-order note for future migrations:** this feature's code reads/writes the new columns in pre-existing paths (the admin status route always writes `reapproval_needed`; the provider dashboard selects it), so deploying the code *before* running the SQL would have broken admin approve/reject and blanked provider dashboards — not just editing. Rule going forward: **run the migration first, then push.**
+
+### Family dashboard — saved activities (fully complete)
 
 **What changed:** the family dashboard's "saved activities and booking history are coming soon" placeholder is replaced with a real **Saved Activities** feature. Families heart an activity on `/discover`; it appears on their dashboard, where they can open it or remove it. **Booking history** stays a deliberate placeholder (booking is out of Phase 1 scope — see Open Decisions), now worded honestly instead of implying a feature exists.
 
@@ -253,8 +268,8 @@ Family browses `/discover` → taps the heart on any activity card (logged-out v
 Priority order for the next work session (agreed with Evan 2026-08-23), tackle top-down:
 
 1. ~~**Family dashboard placeholder features**~~ — ✅ **Done, deployed & verified live 2026-08-23** (see "Family dashboard — saved activities" under Completed Work). "Saved activities" is a real feature; "booking history" is an honest placeholder (booking still out of Phase 1 scope). `saved-activities.sql` has been run in Supabase.
-2. ~~**Provider dashboard listing editing**~~ — ✅ **Done 2026-08-23** (see "Provider listing editing" under Completed Work). Providers can edit their own listings; approved edits stay live on Discover but are flagged for team re-approval. **Requires running `supabase/listing-reapproval.sql` before it works in prod.**
-3. **Homepage "Create Your Account" CTA** — homepage only pushes the waitlist right now. Add a "Create Your Account" link alongside, mirroring what `/for-families` already does.
+2. ~~**Provider dashboard listing editing**~~ — ✅ **Done, deployed & verified live** (see "Provider listing editing" under Completed Work). Providers can edit their own listings; approved edits stay live on Discover but are flagged for team re-approval. `listing-reapproval.sql` has been run.
+3. ~~**Homepage "Create Your Account" CTA**~~ — ✅ **Built 2026-10-16, pending deploy + check** (see "Homepage account CTAs" under Completed Work). Hero now mirrors `/for-families`; nav button is "Create Account"; provider CTAs fixed; `#waitlist` anchor fixed. No SQL needed.
 4. **`sitemap.xml`** — irrelevant while the site is password-gated. Matters once public. Do last.
 5. **Provider listing claim / ownership transfer** — let a real provider claim a listing that already exists on the site (seed or pre-auth) so it lands on their dashboard and they can edit it. **Hold until #3 and #4 are done** (agreed with Evan 2026-08-23). Full design captured under "Planned — listing claim / ownership transfer" below.
 
@@ -354,10 +369,13 @@ Priority order for the next work session (agreed with Evan 2026-08-23), tackle t
 ## Known Issues
 - Git index.lock errors caused by OneDrive syncing the repo — fix with `del .git\index.lock` in PowerShell
 - Vercel deployment occasionally requires a manual re-push if the lock deletion interrupts the push
+- **Stale launch-timing copy** (noted 2026-10-16): hero eyebrow "Seattle Beta · Q3 2026", closing-CTA perk "Seattle beta — Q3 2026", and the waitlist success message "before the Seattle beta opens this summer" are all past-dated now. Update once the new launch timing is set.
 
 ## Bugs found + fixed
-Listed chronologically — all found and fixed 2026-08-03 while building and testing provider authentication.
+Listed chronologically. #1–3 found and fixed 2026-08-03 while building and testing provider authentication; #4–5 found 2026-10-16 during the homepage CTA work.
 
 1. **Provider signup wrote two `submissions` rows per provider.** Both the account-creation step and the listing-creation step posted to the same `/api/providers/submit` endpoint, which always inserted into `submissions` regardless of type. Found while building provider auth (not from a live test). Fixed as part of that build — account creation no longer touches `submissions` at all.
 2. **Duplicate-email signup silently broke account creation.** Supabase's anti-enumeration protection means `auth.signUp()` doesn't error when called with an already-registered email — it returns a decoy user object with an id that doesn't exist in `auth.users`, so nothing leaks about whether the email is taken. Both `/api/families/signup` and `/api/providers/signup` took that at face value and tried to write a profile row for the fake id, causing a foreign-key error (`23503`) that cascaded into other failures downstream (a provider's first listing submission then failed with a not-null violation because their profile was never actually created). Found when Evan tested provider signup with `esherm7@gmail.com`, which already had an admin account. Fixed by checking `data.user.identities.length === 0` right after signUp — now returns a clear "an account with this email already exists" error instead of silently corrupting state.
 3. **Provider dashboard showed stale "no listings" right after submitting one.** The success screen's "Go to your dashboard" button used `next/link`, which Next.js prefetches in the background — so it cached a snapshot of the (empty) dashboard before the listing actually finished saving, then served that stale cache on click instead of fetching fresh. The listing itself saved correctly the whole time (confirmed via `/admin`). Fixed by using a plain `<a>` tag for that link (forces a full navigation, bypassing the router cache) and adding `export const dynamic = 'force-dynamic'` to `/providers/dashboard`, `/families/dashboard`, and `/admin` as defensive insurance against the same class of staleness.
+4. **Provider "List your activity" CTAs sent providers to the family waitlist.** The homepage Providers section and the Discover footer both linked "List your activity" to `/#waitlist` (the family email list) rather than `/providers/signup`, so a provider clicking the most prominent provider CTA never reached signup. BUILD_STATUS claimed these pointed at `/providers/signup`; the code disagreed. Found reading the homepage for Next Up #3. Fixed by repointing both to `/providers/signup`.
+5. **`/#waitlist` links scrolled nowhere on the homepage.** The nav's "Join Waitlist" button (desktop + mobile) and the provider CTA all linked to `/#waitlist`, but no element on the homepage had `id="waitlist"` (only `/for-families` did) — so they just dropped visitors at the top of the homepage. Fixed by adding `id="waitlist"` (with `scroll-mt-16` to clear the fixed nav) to the closing CTA section in `CTA.tsx`.

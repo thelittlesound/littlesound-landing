@@ -49,7 +49,7 @@ export default function Providers() {
 
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
           <a
-            href="/#waitlist"
+            href="/providers/signup"
             className="inline-block px-8 py-4 rounded-full bg-[#0D5C6E] text-white text-[15px] font-semibold hover:bg-[#1A7A8A] transition-colors"
           >
             List your activity →

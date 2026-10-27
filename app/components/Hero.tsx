@@ -1,32 +1,9 @@
-'use client';
+import Link from 'next/link';
 
-import { useState } from 'react';
-
+// Hero CTAs mirror /for-families: account creation is the primary action,
+// browsing is secondary, and the waitlist is a fallback that scrolls to the
+// form in the closing CTA section (#waitlist, in CTA.tsx).
 export default function Hero() {
-  const [email, setEmail] = useState('');
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email) return;
-    setStatus('loading');
-    try {
-      const res = await fetch('/api/waitlist', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-      if (res.ok) {
-        setStatus('success');
-        setEmail('');
-      } else {
-        setStatus('error');
-      }
-    } catch {
-      setStatus('error');
-    }
-  };
-
   const activities = [
     {
       icon: '⚽',
@@ -107,48 +84,30 @@ export default function Hero() {
             <p className="text-[#C4A882] text-[12px] mt-2 font-semibold">&mdash; Kelly Sherman, Co-founder &amp; Seattle mom of two</p>
           </div>
 
-          {/* Form */}
-          {status === 'success' ? (
-            <div className="bg-white/10 border border-white/20 rounded-2xl px-6 py-5 max-w-[460px]">
-              <p className="text-white font-semibold mb-1">You&apos;re on the list! 🎉</p>
-              <p className="text-white/60 text-sm">We&apos;ll be in touch before the Seattle beta opens.</p>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="flex gap-3 max-w-[460px] mb-5">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Your email address"
-                required
-                className="flex-1 bg-white text-[#1C3A4A] placeholder-[#7A9AAA] rounded-full px-5 py-4 text-[15px] outline-none focus:ring-2 focus:ring-[#C4A882]/50"
-              />
-              <button
-                type="submit"
-                disabled={status === 'loading'}
-                className="bg-[#C4A882] hover:bg-[#A8865A] text-white font-semibold rounded-full px-6 py-4 text-[15px] whitespace-nowrap transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-60"
-              >
-                {status === 'loading' ? 'Joining…' : 'Get Early Access'}
-              </button>
-            </form>
-          )}
-
-          {status === 'error' && (
-            <p className="text-red-300 text-sm mb-4">Something went wrong &mdash; please try again.</p>
-          )}
-
-          {/* Browse Discover */}
-          <div className="mb-8">
-            <a
-              href="/discover"
-              className="group inline-flex items-center gap-2 text-white/80 hover:text-white text-[15px] font-medium transition-colors"
+          {/* Primary CTAs — same pattern as /for-families */}
+          <div className="flex flex-col sm:flex-row flex-wrap gap-4 mb-4">
+            <Link
+              href="/families/signup"
+              className="inline-flex items-center justify-center gap-2 bg-[#C4A882] hover:bg-[#A8865A] text-white font-semibold rounded-full px-7 py-4 text-[15px] transition-all duration-200 hover:-translate-y-0.5"
             >
-              <span className="border-b border-[#C4A882]/40 group-hover:border-[#C4A882] pb-0.5 transition-colors">
-                Browse Seattle activities now
-              </span>
-              <span className="text-[#C4A882] transition-transform group-hover:translate-x-1">&rarr;</span>
-            </a>
+              Create Your Account &rarr;
+            </Link>
+            <Link
+              href="/discover"
+              className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-full px-7 py-4 text-[15px] transition-all duration-200 border border-white/20"
+            >
+              Browse Activities
+            </Link>
           </div>
+
+          {/* Waitlist fallback — scrolls to the form in CTA.tsx */}
+          <p className="text-white/50 text-[13px] mb-8">
+            Not ready yet?{' '}
+            <a href="#waitlist" className="text-white/75 underline underline-offset-2 hover:text-white">
+              Join the waitlist
+            </a>{' '}
+            instead.
+          </p>
 
           {/* Trust pills */}
           <div className="flex flex-wrap gap-5">

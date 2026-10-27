@@ -51,12 +51,12 @@ export default function Nav() {
           >
             Sign In
           </Link>
-          <a
-            href="/#waitlist"
+          <Link
+            href="/families/signup"
             className="inline-flex bg-[#C4A882] hover:bg-[#A8865A] text-white text-sm font-semibold rounded-full px-5 py-2.5 transition-colors"
           >
-            Join Waitlist
-          </a>
+            Create Account
+          </Link>
         </div>
 
         {/* Mobile hamburger */}
@@ -93,13 +93,13 @@ export default function Nav() {
           >
             Family Sign In
           </Link>
-          <a
-            href="/#waitlist"
+          <Link
+            href="/families/signup"
             onClick={() => setOpen(false)}
             className="block mt-4 text-center bg-[#C4A882] hover:bg-[#A8865A] text-white font-semibold rounded-full px-5 py-3 text-[15px] transition-colors"
           >
-            Join Waitlist
-          </a>
+            Create Account
+          </Link>
         </div>
       )}
     </nav>
