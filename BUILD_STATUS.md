@@ -183,7 +183,7 @@ Provider visits `/providers/signup` → fills out account + business info (now i
 
 **~~Not built yet: editing an already-submitted listing.~~** ✅ Built 2026-08-23 — providers can now self-serve edit their listings. See "Provider listing editing" below.
 
-### Homepage account CTAs (built 2026-10-16, pending deploy + check)
+### Homepage account CTAs (fully complete)
 
 **What changed:** the homepage only ever pushed the waitlist. It now leads with account creation, mirroring `/for-families` (decided with Evan 2026-10-16).
 
@@ -194,7 +194,7 @@ Provider visits `/providers/signup` → fills out account + business info (now i
 
 **Known quirk (pre-existing, not changed):** middleware treats *any* signed-in user as a family on `/families/login` + `/families/signup`, so a signed-in provider or admin who clicks "Create Account" is bounced to `/families/dashboard` (an empty family profile). Same thing already happened with "Sign In." Worth fixing if providers start using the main nav while signed in.
 
-**Status: ⏳ built + typechecked in sandbox, not yet deployed.** No migration. After push, check on the live site (mobile width especially): hero shows the two buttons + waitlist line; "Join the waitlist" scrolls to the closing form; nav shows Create Account; both "List your activity" links land on provider signup.
+**Status: ✅ done, deployed, and verified live** (confirmed by Evan 2026-10-27). Pushed as commit 917053a; no migration. Checked on the live site: hero shows Create Your Account + Browse Activities with the waitlist fallback, "Join the waitlist" scrolls to the closing form, nav shows Create Account, and both "List your activity" links land on provider signup.
 
 ### Provider listing editing (fully complete)
 
@@ -269,7 +269,7 @@ Priority order for the next work session (agreed with Evan 2026-08-23), tackle t
 
 1. ~~**Family dashboard placeholder features**~~ — ✅ **Done, deployed & verified live 2026-08-23** (see "Family dashboard — saved activities" under Completed Work). "Saved activities" is a real feature; "booking history" is an honest placeholder (booking still out of Phase 1 scope). `saved-activities.sql` has been run in Supabase.
 2. ~~**Provider dashboard listing editing**~~ — ✅ **Done, deployed & verified live** (see "Provider listing editing" under Completed Work). Providers can edit their own listings; approved edits stay live on Discover but are flagged for team re-approval. `listing-reapproval.sql` has been run.
-3. ~~**Homepage "Create Your Account" CTA**~~ — ✅ **Built 2026-10-16, pending deploy + check** (see "Homepage account CTAs" under Completed Work). Hero now mirrors `/for-families`; nav button is "Create Account"; provider CTAs fixed; `#waitlist` anchor fixed. No SQL needed.
+3. ~~**Homepage "Create Your Account" CTA**~~ — ✅ **Done, deployed & verified live 2026-10-27** (see "Homepage account CTAs" under Completed Work). Hero now mirrors `/for-families`; nav button is "Create Account"; provider CTAs fixed; `#waitlist` anchor fixed. No SQL needed.
 4. **`sitemap.xml`** — irrelevant while the site is password-gated. Matters once public. Do last.
 5. **Provider listing claim / ownership transfer** — let a real provider claim a listing that already exists on the site (seed or pre-auth) so it lands on their dashboard and they can edit it. **Hold until #3 and #4 are done** (agreed with Evan 2026-08-23). Full design captured under "Planned — listing claim / ownership transfer" below.
 
