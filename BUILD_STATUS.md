@@ -183,14 +183,14 @@ Provider visits `/providers/signup` → fills out account + business info (now i
 
 **~~Not built yet: editing an already-submitted listing.~~** ✅ Built 2026-08-23 — providers can now self-serve edit their listings. See "Provider listing editing" below.
 
-### Sitemap + robots (built 2026-11-11, pending deploy)
+### Sitemap + robots (fully complete)
 
 - `app/sitemap.ts` → `/sitemap.xml`: the 7 public pages (home, Discover, For Families, For Providers, About, Privacy, Terms). Leaves out sign-in/sign-up, dashboards, the claim flow, `/admin`, `/api`, and `/unlock`. No `lastModified`, because the pages don't track edit dates.
 - `app/robots.ts` now includes a `Sitemap:` line pointing at it.
 - `lib/site.ts`: a single `SITE_URL` constant (`https://www.thelittlesound.com`) used by both. If the canonical domain changes, change it there.
 - While the password gate is up, crawlers hit `/unlock` like everyone else, so none of this takes effect until launch.
 
-**Status: ⏳ built + typechecked against Next's sitemap/robots types; not yet deployed.** After push, check `/robots.txt` and `/sitemap.xml` in a browser (past the gate).
+**Status: ✅ done, deployed, and verified live** (confirmed by Evan 2026-11-11). Pushed as commits 0fe9528/1a9d2c7. `/robots.txt` ends with `Sitemap: https://www.thelittlesound.com/sitemap.xml`, and `/sitemap.xml` lists all 7 pages on the `www` host. Search engines can't reach either file until the password gate is removed.
 
 ### Provider listing claims (deployed; live claim test skipped)
 
@@ -322,7 +322,7 @@ Priority order for the next work session (agreed with Evan 2026-08-23), tackle t
 1. ~~**Family dashboard placeholder features**~~ — ✅ **Done, deployed & verified live 2026-08-23** (see "Family dashboard — saved activities" under Completed Work). "Saved activities" is a real feature; "booking history" is an honest placeholder (booking still out of Phase 1 scope). `saved-activities.sql` has been run in Supabase.
 2. ~~**Provider dashboard listing editing**~~ — ✅ **Done, deployed & verified live** (see "Provider listing editing" under Completed Work). Providers can edit their own listings; approved edits stay live on Discover but are flagged for team re-approval. `listing-reapproval.sql` has been run.
 3. ~~**Homepage "Create Your Account" CTA**~~ — ✅ **Done, deployed & verified live 2026-10-27** (see "Homepage account CTAs" under Completed Work). Hero now mirrors `/for-families`; nav button is "Create Account"; provider CTAs fixed; `#waitlist` anchor fixed. No SQL needed.
-4. ~~**`sitemap.xml`**~~ — ✅ **Built 2026-11-11** (see "Sitemap + robots" under Completed Work). Only becomes reachable to search engines when the password gate comes down at launch.
+4. ~~**`sitemap.xml`**~~ — ✅ **Done, deployed & verified live 2026-11-11** (see "Sitemap + robots" under Completed Work). Search engines can't reach it until the password gate comes down at launch.
 5. ~~**Provider listing claim / ownership transfer**~~ — ✅ **Deployed; live claim test skipped by choice** (see "Provider listing claims" under Completed Work for the safe partial test to run before outreach). Built ahead of #4 (agreed with Evan 2026-10-27).
 
 ---
