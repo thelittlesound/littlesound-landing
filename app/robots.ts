@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next';
+import { SITE_URL } from '@/lib/site';
 
 // Keeps the site open to regular search engines (SEO matters for the
 // waitlist/provider funnel) while opting out of known AI training crawlers
@@ -37,5 +38,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: '/',
       })),
     ],
+    sitemap: `${SITE_URL}/sitemap.xml`,
   };
 }

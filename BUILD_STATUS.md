@@ -183,7 +183,16 @@ Provider visits `/providers/signup` → fills out account + business info (now i
 
 **~~Not built yet: editing an already-submitted listing.~~** ✅ Built 2026-08-23 — providers can now self-serve edit their listings. See "Provider listing editing" below.
 
-### Provider listing claims (built 2026-10-27, pending migration + deploy + test)
+### Sitemap + robots (built 2026-11-11, pending deploy)
+
+- `app/sitemap.ts` → `/sitemap.xml`: the 7 public pages (home, Discover, For Families, For Providers, About, Privacy, Terms). Leaves out sign-in/sign-up, dashboards, the claim flow, `/admin`, `/api`, and `/unlock`. No `lastModified`, because the pages don't track edit dates.
+- `app/robots.ts` now includes a `Sitemap:` line pointing at it.
+- `lib/site.ts`: a single `SITE_URL` constant (`https://www.thelittlesound.com`) used by both. If the canonical domain changes, change it there.
+- While the password gate is up, crawlers hit `/unlock` like everyone else, so none of this takes effect until launch.
+
+**Status: ⏳ built + typechecked against Next's sitemap/robots types; not yet deployed.** After push, check `/robots.txt` and `/sitemap.xml` in a browser (past the gate).
+
+### Provider listing claims (deployed; live claim test skipped)
 
 **What it does:** a provider can take ownership of a listing that's already on Little Sound (one of our researched seed listings, or a pre-account `submissions` row), after Kelly/Evan verify them. Once approved, the listing is on their dashboard and editable via the #2 edit flow. This is what the outreach line "your listing is already live — help us get the details right" now links to.
 
@@ -224,7 +233,7 @@ Provider opens a claim link (`/providers/claim/42`, e.g. from outreach) or searc
 2. Supabase → Authentication → URL Configuration → **Redirect URLs**: add `https://www.thelittlesound.com/**` (and `https://thelittlesound.com/**` if the bare domain is used). Without it, confirmation emails fall back to the Site URL and new providers have to find their way back to the claim page.
 3. Push.
 
-**Status: ⏳ built, typechecked, and logic-tested in sandbox (24 checks: ownership rules, redirect safety, all 79 seed categories round-trip through import → Discover); not yet deployed.** First live test: as a new provider, open `/providers/claim/<a seed id>` signed out → sign up → confirm → land back on the claim page → submit → approve in `/admin` Claims → listing appears on the provider dashboard and on Discover under the business name, with no duplicate card.
+**Status: ✅ deployed 2026-11 (commit 2e71587; `listing-claims.sql` run in Supabase) — ⚠️ end-to-end live test deliberately skipped.** Evan chose not to run the full flow, because approving a test claim would make a test account the real owner of a seed listing. Pre-deploy verification: typecheck plus 24 logic checks in the sandbox (ownership rules, redirect safety, all 79 seed categories round-trip through import → Discover). **Before the first real outreach claim, do a safe partial test:** submit a claim from a test provider account, then **Reject** it in `/admin` → Claims. That exercises everything except the ownership transfer. Also confirm deploy step 2 (Supabase redirect URL) was done.
 
 ### Homepage account CTAs (fully complete)
 
@@ -313,8 +322,8 @@ Priority order for the next work session (agreed with Evan 2026-08-23), tackle t
 1. ~~**Family dashboard placeholder features**~~ — ✅ **Done, deployed & verified live 2026-08-23** (see "Family dashboard — saved activities" under Completed Work). "Saved activities" is a real feature; "booking history" is an honest placeholder (booking still out of Phase 1 scope). `saved-activities.sql` has been run in Supabase.
 2. ~~**Provider dashboard listing editing**~~ — ✅ **Done, deployed & verified live** (see "Provider listing editing" under Completed Work). Providers can edit their own listings; approved edits stay live on Discover but are flagged for team re-approval. `listing-reapproval.sql` has been run.
 3. ~~**Homepage "Create Your Account" CTA**~~ — ✅ **Done, deployed & verified live 2026-10-27** (see "Homepage account CTAs" under Completed Work). Hero now mirrors `/for-families`; nav button is "Create Account"; provider CTAs fixed; `#waitlist` anchor fixed. No SQL needed.
-4. **`sitemap.xml`** — irrelevant while the site is password-gated. Matters once public. Do last.
-5. ~~**Provider listing claim / ownership transfer**~~ — ✅ **Built 2026-10-27, pending migration + deploy + test** (see "Provider listing claims" under Completed Work). Moved ahead of #4 (agreed with Evan 2026-10-27): the sitemap only matters once the site is public, and claiming is what provider outreach depends on. **Run `supabase/listing-claims.sql` before pushing.**
+4. ~~**`sitemap.xml`**~~ — ✅ **Built 2026-11-11** (see "Sitemap + robots" under Completed Work). Only becomes reachable to search engines when the password gate comes down at launch.
+5. ~~**Provider listing claim / ownership transfer**~~ — ✅ **Deployed; live claim test skipped by choice** (see "Provider listing claims" under Completed Work for the safe partial test to run before outreach). Built ahead of #4 (agreed with Evan 2026-10-27).
 
 ---
 
@@ -404,6 +413,7 @@ Built 2026-10-27 — see "Provider listing claims" under Completed Work. The ori
 - Git index.lock errors caused by OneDrive syncing the repo — fix with `del .git\index.lock` in PowerShell
 - Vercel deployment occasionally requires a manual re-push if the lock deletion interrupts the push
 - **Stale launch-timing copy** (noted 2026-10-16): hero eyebrow "Seattle Beta · Q3 2026", closing-CTA perk "Seattle beta — Q3 2026", and the waitlist success message "before the Seattle beta opens this summer" are all past-dated now. Update once the new launch timing is set.
+- **Canonical domain not pinned** (noted 2026-11-11): a fetch tool got the homepage with HTTP 200 on *both* `thelittlesound.com` and `www.thelittlesound.com`, with no redirect between them. Unverified, because the sandbox network can't reach the site to read headers directly. If it's true, search engines see two copies of the site. Fix in Vercel → Project → Settings → Domains: make `www.thelittlesound.com` primary and set the bare domain to redirect to it (308). Related: `app/layout.tsx` Open Graph URLs and the Brevo email links use the bare domain while the sitemap uses `www`. Align them once the primary is set.
 
 ## Bugs found + fixed
 Listed chronologically. #1–3 found and fixed 2026-08-03 while building and testing provider authentication; #4–5 found 2026-10-16 during the homepage CTA work; #6–10 found 2026-10-27 while building listing claims.
