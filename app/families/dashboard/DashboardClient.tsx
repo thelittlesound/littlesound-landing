@@ -50,9 +50,11 @@ export interface SavedActivity {
 export default function DashboardClient({
   profile,
   savedActivities,
+  dateLines,
 }: {
   profile: Profile;
   savedActivities: SavedActivity[];
+  dateLines: Record<string, string>;
 }) {
   const router = useRouter();
 
@@ -390,6 +392,15 @@ export default function DashboardClient({
                     {s.age_min != null ? ` · Ages ${s.age_min}–${s.age_max}` : ''}
                     {s.price != null ? ` · $${s.price}${s.price_unit ? `/${s.price_unit}` : ''}` : ''}
                   </p>
+                  {dateLines[s.activity_id] && (
+                    <p className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#7A5A2E] bg-[#C4A882]/15 rounded-full px-3 py-1 mt-2">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#A8865A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <rect x="3" y="5" width="18" height="16" rx="2" />
+                        <path d="M16 3v4M8 3v4M3 10h18" />
+                      </svg>
+                      {dateLines[s.activity_id]}
+                    </p>
+                  )}
                   <div className="flex items-center gap-4 mt-3">
                     {s.website && (
                       <a

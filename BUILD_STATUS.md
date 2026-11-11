@@ -183,6 +183,27 @@ Provider visits `/providers/signup` → fills out account + business info (now i
 
 **~~Not built yet: editing an already-submitted listing.~~** ✅ Built 2026-08-23 — providers can now self-serve edit their listings. See "Provider listing editing" below.
 
+### Calendar agent Phase 1, Step A: activity dates (built 2026-11-11, pending migration + API key + deploy)
+
+**What it does:** gives listings real dates. In `/admin` → **Dates**, pick a listing (the list shows coverage, e.g. "12 of 79 listings have dates", and filters to ones still needing dates), open the provider's site, paste their schedule text, and click **Extract dates with AI**. Claude drafts **sessions** (date range, weekly days, times) and **registration windows** (opens/closes), each with the exact quote it came from plus any warnings to double-check. You fix anything wrong, add or remove rows by hand, and **Save**. Families then see one line per listing on Discover cards and their saved activities, e.g. "Registration opens Mar 3 at 9am", "Registration open · closes Apr 1", "Next session starts Jun 21", or "Running now · Tue, Thu".
+
+**How it's built:**
+- `activity_dates` table, keyed by Discover id. A claimed seed keeps its id, so its dates carry over. All dates and times are **Seattle wall-clock** values (no UTC conversion), so the calendar feed in Step B can attach the time zone explicitly.
+- Saving replaces a listing's dates inside one Postgres function, `replace_activity_dates()`, so a failed save can't leave a listing half-updated. The function is locked to the server key (new functions are callable by anyone over Supabase's API by default).
+- AI extraction (`lib/extract-dates.ts`) calls the Anthropic API with a forced tool, so the output is always structured data. The pasted page is treated as untrusted data, and extraction never saves anything: the result is only a draft until a person saves it. Each AI item is validated; bad ones are dropped with a warning. Up to 50,000 characters per paste; 60-second limit.
+- The card line prefers registration over sessions (it's the time-sensitive one) and ignores past dates. "Today" is computed in Seattle time.
+- Dates are never parsed with `new Date('YYYY-MM-DD')`, which reads them as UTC midnight and shows them a day early in Seattle.
+
+**New files:** `supabase/activity-dates.sql`, `lib/activity-dates.ts` (pure: summaries, formatting, validation; safe in the browser), `lib/activity-dates-server.ts`, `lib/extract-dates.ts`, `app/api/admin/dates/route.ts` (listings + coverage), `app/api/admin/dates/extract/route.ts`, `app/api/admin/dates/[activityId]/route.ts` (GET/PUT), `app/admin/DatesPanel.tsx`.
+**Changed:** `app/admin/AdminClient.tsx` (Dates tab), `app/api/activities/route.ts` (`dateLines`), `app/discover/page.tsx` (date pill on cards), `app/families/dashboard/page.tsx` + `DashboardClient.tsx` (date pill on saved activities).
+
+**Deploy steps, in order:**
+1. Run `supabase/activity-dates.sql` in the Supabase SQL editor (paste the file's *contents*). Run it before pushing.
+2. Create an API key at console.anthropic.com (add billing/credits), then in Vercel → Settings → Environment Variables add `ANTHROPIC_API_KEY`. Optionally add `ANTHROPIC_MODEL` to override the default model (`claude-sonnet-4-5`) if it's retired. Then redeploy. Without the key, the Dates tab still works for entering dates by hand; only the AI button is disabled.
+3. Push.
+
+**Status: ⏳ built; typecheck clean; 48 logic checks pass.** The checks cover Seattle-vs-UTC "today", card summaries, formatting, validation, and extraction against a fake Anthropic API (success, bad AI items dropped, missing key, 401/404/429/529/500, timeout, oversized input). Not yet deployed. First live test: Dates tab → pick a listing → paste its schedule → extract → save → the date line appears on its Discover card.
+
 ### Sitemap + robots (fully complete)
 
 - `app/sitemap.ts` → `/sitemap.xml`: the 7 public pages (home, Discover, For Families, For Providers, About, Privacy, Terms). Leaves out sign-in/sign-up, dashboards, the claim flow, `/admin`, `/api`, and `/unlock`. No `lastModified`, because the pages don't track edit dates.
@@ -317,15 +338,47 @@ Family browses `/discover` → taps the heart on any activity card (logged-out v
 
 ## Next Up
 
-Priority order for the next work session (agreed with Evan 2026-08-23), tackle top-down:
+The 2026-08-23 list (family saved activities, provider listing editing, homepage account CTA, sitemap, listing claims) is **complete**; see Completed Work.
 
-1. ~~**Family dashboard placeholder features**~~ — ✅ **Done, deployed & verified live 2026-08-23** (see "Family dashboard — saved activities" under Completed Work). "Saved activities" is a real feature; "booking history" is an honest placeholder (booking still out of Phase 1 scope). `saved-activities.sql` has been run in Supabase.
-2. ~~**Provider dashboard listing editing**~~ — ✅ **Done, deployed & verified live** (see "Provider listing editing" under Completed Work). Providers can edit their own listings; approved edits stay live on Discover but are flagged for team re-approval. `listing-reapproval.sql` has been run.
-3. ~~**Homepage "Create Your Account" CTA**~~ — ✅ **Done, deployed & verified live 2026-10-27** (see "Homepage account CTAs" under Completed Work). Hero now mirrors `/for-families`; nav button is "Create Account"; provider CTAs fixed; `#waitlist` anchor fixed. No SQL needed.
-4. ~~**`sitemap.xml`**~~ — ✅ **Done, deployed & verified live 2026-11-11** (see "Sitemap + robots" under Completed Work). Search engines can't reach it until the password gate comes down at launch.
-5. ~~**Provider listing claim / ownership transfer**~~ — ✅ **Deployed; live claim test skipped by choice** (see "Provider listing claims" under Completed Work for the safe partial test to run before outreach). Built ahead of #4 (agreed with Evan 2026-10-27).
+New priorities (agreed with Evan 2026-11-11), tackle top-down:
+
+1. **Calendar agent, Phase 1 Step B:** each family's private calendar subscription link (works with Google/Apple/Outlook), "Add to my calendar" on a saved activity's sessions, and email alerts through Brevo: registration opening (a week before and the morning of) plus a change notice when updated dates are approved for something they saved. Design in "Calendar agent — roadmap" below.
+2. **Fill in dates** via `/admin` → Dates (ongoing, Kelly/Evan). Aim to cover the most-saved and summer-camp listings before camp registration season.
+3. **Calendar agent, Phase 2:** weekly family digest email; kids' names on profiles so calendar items belong to a specific kid.
+4. **Calendar agent, Phase 3:** text alerts, scheduling help, and direct Google Calendar connect. Start the slow external approvals early (Twilio/10DLC registration, Google app verification).
+
+**Launch readiness: these must be done before the password gate comes down:**
+- **Honesty pass:** 13 placeholder stats across 7 files ("100+ families" has no real signups behind it; "80+"/"70+" providers vs the real **66 providers / 79 programs** in the seed data; "57+ verified"). Also 8 stale timing mentions ("Q3 2026", "this summer"), including in `/terms`.
+- **Provider outreach kit:** a sheet of every seed business with its programs, website, and personal claim link, plus a draft email. Run the safe partial claim test first.
+- **Small fixes:**
+  - `/api/providers/submit` accepts any signed-in account, including a family account (the claim flow already blocks this).
+  - A signed-in provider/admin clicking "Create Account" is bounced to an empty family dashboard.
+  - Open Graph / email links use the bare domain instead of `www`.
 
 ---
+
+## Calendar agent — roadmap
+
+**Goal (Evan, 2026-11-11):** an automated agent that keeps families up to date and makes scheduling easier. It fits the core pitch-deck problem: families spend 20–30+ hours a season planning across disconnected tools.
+
+**Jobs (all four wanted):** registration alerts · family calendar · change updates · scheduling help.
+
+**Where dates come from: AI-assisted, human-approved.** Kelly/Evan paste a provider's schedule text into `/admin` → Dates. Claude drafts the sessions and registration windows, and a human corrects and approves them. Only approved dates are stored or shown. No automatic website monitoring (scraping was ruled out earlier as months of work plus permanent upkeep). Claimed providers may later enter their own dates.
+
+**Families pick sessions, they don't type them:** a saved program can have many sessions, so the family taps "Add to my calendar" on the one they're in (Step B).
+
+**Delivery (all four wanted), and the catch with each:**
+- **Calendar subscription** (private link per family; no Google sign-in or app review). Calendar apps refresh subscribed feeds on their own schedule (Google can take up to ~a day), so it suits schedules, not urgent alerts.
+- **Email** (Brevo, already set up): registration alerts, change notices, weekly digest. Driven by a daily scheduled job; Vercel's free plan runs scheduled jobs at most once a day.
+- **Direct Google Calendar connect:** needs Google's app verification for calendar access (plan on weeks); until then, an "unverified app" warning and a test-user cap.
+- **Text messages:** needs Twilio (or similar), per-message cost, opt-in/STOP handling, and US carrier (10DLC) registration before texts deliver reliably.
+
+**Scheduling help needs data we don't store yet:** kids' names (profiles only have ages) and better locations (only neighborhoods). That's why it comes last.
+
+**Phases:**
+- **Phase 1:** Step A, the date foundation (✅ built 2026-11-11, see Completed Work); Step B, calendar subscription + Add-to-calendar + email alerts.
+- **Phase 2:** weekly digest; kids' names on profiles.
+- **Phase 3:** texts, direct Google Calendar, scheduling help (clashes, pickup overlaps, "fits your week").
 
 ## Planned — listing claim / ownership transfer
 Built 2026-10-27 — see "Provider listing claims" under Completed Work. The original plan (admin-mediated verification, seed import with a `seed_id` tag, Discover de-dup) is what shipped.
@@ -369,6 +422,12 @@ Built 2026-10-27 — see "Provider listing claims" under Completed Work. The ori
 | `lib/claimable.ts` | Server-only claim logic (ownership, seed import, verification hints) |
 | `lib/safe-next.ts` | Same-site-only redirect helper for `?next=` |
 | `lib/notify.ts` | Brevo email helper |
+| `supabase/activity-dates.sql` | `activity_dates` + `replace_activity_dates()` (run manually, before push) |
+| `lib/activity-dates.ts` | Pure date helpers: card summaries, formatting, validation (client-safe) |
+| `lib/activity-dates-server.ts` | Reads dates; date lines for Discover/dashboard; listings for the Dates tab |
+| `lib/extract-dates.ts` | Anthropic API call that drafts dates from pasted page text |
+| `app/api/admin/dates/` | Admin: listings + coverage, AI extract, per-listing GET/PUT |
+| `app/admin/DatesPanel.tsx` | Admin Dates tab |
 | `app/api/providers/signup/route.ts` | Provider signup API (auth + profile) |
 | `lib/provider-auth.ts` | `requireProvider()` helper for provider API routes |
 | `supabase/provider-profiles.sql` | `provider_profiles` table + `submissions.provider_id` (run manually) |

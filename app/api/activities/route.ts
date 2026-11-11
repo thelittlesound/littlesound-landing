@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { getDateLines } from '@/lib/activity-dates-server';
 
 // Map provider form categories → Discover page categories
 const CATEGORY_MAP: Record<string, string> = {
@@ -23,7 +24,7 @@ const CATEGORY_MAP: Record<string, string> = {
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  const [{ data, error }, { data: seedRows }] = await Promise.all([
+  const [{ data, error }, { data: seedRows }, dateLines] = await Promise.all([
     supabaseAdmin
       .from('submissions')
       .select('*')
@@ -34,11 +35,14 @@ export async function GET() {
     // including if the imported listing is later rejected, so an old seed
     // card never resurfaces as if it were unclaimed.
     supabaseAdmin.from('submissions').select('seed_id').not('seed_id', 'is', null),
+    // One upcoming-date line per listing ("Registration opens Mar 3"), keyed by
+    // Discover id — covers seed listings too, not just provider ones.
+    getDateLines(),
   ]);
 
   if (error) {
     console.error('Supabase fetch error:', error);
-    return NextResponse.json({ activities: [], claimedSeedIds: [] });
+    return NextResponse.json({ activities: [], claimedSeedIds: [], dateLines });
   }
 
   const claimedSeedIds = ((seedRows ?? []) as { seed_id: string }[]).map((r) => r.seed_id);
@@ -71,5 +75,5 @@ export async function GET() {
     source: 'provider', // flag so we can distinguish in UI if needed
   }));
 
-  return NextResponse.json({ activities, claimedSeedIds });
+  return NextResponse.json({ activities, claimedSeedIds, dateLines });
 }

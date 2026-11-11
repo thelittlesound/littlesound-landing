@@ -55,10 +55,12 @@ function ActivityCard({
   a,
   saved,
   onToggleSave,
+  dateLine,
 }: {
   a: Activity;
   saved: boolean;
   onToggleSave: (a: Activity) => void;
+  dateLine?: string; // e.g. "Registration opens Mar 3" — from approved dates only
 }) {
   const style = CATEGORY_STYLES[a.category] ?? { from: '#C5D8E8', to: '#A8C8D8', emoji: '✨' };
   return (
@@ -100,6 +102,15 @@ function ActivityCard({
         <p className="text-[13px] text-[#1A7A8A] font-medium mb-3">
           {a.provider}
         </p>
+        {dateLine && (
+          <p className="inline-flex items-center gap-1.5 self-start text-[12px] font-semibold text-[#7A5A2E] bg-[#C4A882]/15 rounded-full px-3 py-1 mb-3">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#A8865A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <rect x="3" y="5" width="18" height="16" rx="2" />
+              <path d="M16 3v4M8 3v4M3 10h18" />
+            </svg>
+            {dateLine}
+          </p>
+        )}
         <p className="text-[14px] leading-[1.7] text-[#3A5A6A] mb-5 flex-1">
           {a.description}
         </p>
@@ -139,6 +150,7 @@ export default function Discover() {
   const [userId, setUserId] = useState<string | null>(null);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const [claimedSeedIds, setClaimedSeedIds] = useState<Set<string>>(new Set());
+  const [dateLines, setDateLines] = useState<Record<string, string>>({});
 
   // Merge static seed data with approved provider submissions. Seed listings a
   // provider has claimed are dropped from the static set — the provider's own
@@ -168,6 +180,7 @@ export default function Discover() {
       .then(data => {
         if (data.activities) setProviderActivities(data.activities);
         if (Array.isArray(data.claimedSeedIds)) setClaimedSeedIds(new Set(data.claimedSeedIds));
+        if (data.dateLines && typeof data.dateLines === 'object') setDateLines(data.dateLines);
       })
       .catch(() => {}); // Fail silently — static data still shows
   }, []);
@@ -474,7 +487,7 @@ export default function Discover() {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {items.map((a) => (
-                      <ActivityCard key={a.id} a={a} saved={savedIds.has(a.id)} onToggleSave={toggleSave} />
+                      <ActivityCard key={a.id} a={a} saved={savedIds.has(a.id)} onToggleSave={toggleSave} dateLine={dateLines[a.id]} />
                     ))}
                   </div>
                 </div>
@@ -483,7 +496,7 @@ export default function Discover() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredResults.map((a) => (
-                <ActivityCard key={a.id} a={a} saved={savedIds.has(a.id)} onToggleSave={toggleSave} />
+                <ActivityCard key={a.id} a={a} saved={savedIds.has(a.id)} onToggleSave={toggleSave} dateLine={dateLines[a.id]} />
               ))}
             </div>
           )}

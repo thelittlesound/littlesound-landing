@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
+import { getDateLines } from '@/lib/activity-dates-server';
 import DashboardClient, { type Profile, type SavedActivity } from './DashboardClient';
 
 // Always render fresh — avoids ever serving a router-cached snapshot from
@@ -44,5 +45,8 @@ export default async function FamilyDashboardPage() {
 
   const savedActivities: SavedActivity[] = (savedRows as SavedActivity[]) ?? [];
 
-  return <DashboardClient profile={initialProfile} savedActivities={savedActivities} />;
+  // Upcoming registration / session dates for what they've saved.
+  const dateLines = await getDateLines(savedActivities.map((s) => s.activity_id));
+
+  return <DashboardClient profile={initialProfile} savedActivities={savedActivities} dateLines={dateLines} />;
 }
