@@ -160,3 +160,28 @@ export function dedupeKey(business: string, title: string): string {
   const n = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
   return `${n(business)}|${n(title)}`;
 }
+
+/** The same provider's other listings: same business name or same website host. */
+export function sameProviderTitles(
+  listing: { activityId: string; business: string; website: string | null },
+  catalog: { activityId: string; business: string; title: string; website: string | null }[]
+): string[] {
+  const n = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  const host = (w: string | null) => {
+    if (!w) return '';
+    try {
+      return new URL(/^https?:\/\//i.test(w) ? w : `https://${w}`).hostname.replace(/^www\./, '').toLowerCase();
+    } catch {
+      return '';
+    }
+  };
+  const biz = n(listing.business);
+  const h = host(listing.website);
+  return [
+    ...new Set(
+      catalog
+        .filter((l) => l.activityId !== listing.activityId && ((biz && n(l.business) === biz) || (h && host(l.website) === h)))
+        .map((l) => l.title)
+    ),
+  ];
+}

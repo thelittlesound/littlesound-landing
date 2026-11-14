@@ -6,7 +6,7 @@ import { findWidgets, platformList, type Widget } from '@/lib/booking-widgets';
 import { extractDates, type OtherProgram } from '@/lib/extract-dates';
 import { seattleToday, type DateItem } from '@/lib/activity-dates';
 import {
-  AGENT, decide, dedupeKey, excerptOnPage, isAgentApproval, isPast, normalizeForMatch,
+  AGENT, decide, dedupeKey, excerptOnPage, isAgentApproval, isPast, normalizeForMatch, sameProviderTitles,
 } from '@/lib/date-agent-logic';
 
 // Server-only. The date agent: for one listing, read its website, find the
@@ -114,7 +114,12 @@ export async function checkListing(
 
   // ── 3. Extract ─────────────────────────────────────────────────────────────
   const today = seattleToday();
-  const ext = await extractDates({ pages: pages.map((p) => ({ url: p.url, text: p.text })), listing, today });
+  const ext = await extractDates({
+    pages: pages.map((p) => ({ url: p.url, text: p.text })),
+    listing,
+    today,
+    knownTitles: sameProviderTitles(listing, opts.catalog),
+  });
   // Don't store the hash on failure, so the next check retries the AI.
   if ('error' in ext) return done('error', ext.error, { checked_urls });
 

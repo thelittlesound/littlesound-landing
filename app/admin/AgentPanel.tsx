@@ -97,8 +97,9 @@ export default function AgentPanel({ onToast }: { onToast: (msg: string, ok: boo
   const [log, setLog] = useState<LogLine[]>([]);
   const [acting, setActing] = useState<string | null>(null);
   const [showAll, setShowAll] = useState(false);
-  const [confirmAddAll, setConfirmAddAll] = useState(false);
-  const [bulk, setBulk] = useState<{ done: number; total: number } | null>(null);
+  const [confirmBulk, setConfirmBulk] = useState<'add' | 'dismiss' | null>(null);
+  const [bulk, setBulk] = useState<{ action: 'add' | 'dismiss'; done: number; total: number } | null>(null);
+  const [forceAI, setForceAI] = useState(false);
   const stopRef = useRef(false);
   const today = seattleToday();
 
@@ -145,7 +146,7 @@ export default function AgentPanel({ onToast }: { onToast: (msg: string, ok: boo
           const res = await fetch('/api/admin/agent/check', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ activityId: l.activityId }),
+            body: JSON.stringify({ activityId: l.activityId, force: forceAI }),
           });
           if (res.status === 401) { stopRef.current = true; toastRef.current('Signed out — sign in again to continue', false); return; }
           const r = await res.json().catch(() => ({}));
@@ -183,13 +184,14 @@ export default function AgentPanel({ onToast }: { onToast: (msg: string, ok: boo
     }
   }
 
-  // Adds every pending suggestion, 3 at a time, through the same endpoint as
-  // a single Add (which claims each one first, so nothing is added twice).
-  async function addAllSuggestions() {
+  // Adds (or dismisses) every pending suggestion, 3 at a time, through the
+  // same endpoint as a single click (which claims each one first, so nothing
+  // is added twice).
+  async function bulkSuggestions(action: 'add' | 'dismiss') {
     if (!data) return;
     const queue = data.suggestions.map((s) => s.id);
-    setConfirmAddAll(false);
-    setBulk({ done: 0, total: queue.length });
+    setConfirmBulk(null);
+    setBulk({ action, done: 0, total: queue.length });
     let next = 0;
     let added = 0;
     let failed = 0;
@@ -201,7 +203,7 @@ export default function AgentPanel({ onToast }: { onToast: (msg: string, ok: boo
           const res = await fetch(`/api/admin/agent/suggestions/${id}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'add' }),
+            body: JSON.stringify({ action }),
           });
           if (res.status === 401) signedOut = true;
           if (res.ok) added += 1;
@@ -217,7 +219,7 @@ export default function AgentPanel({ onToast }: { onToast: (msg: string, ok: boo
     toastRef.current(
       signedOut
         ? 'Signed out — sign in again to finish'
-        : `Added ${added} listing${added === 1 ? '' : 's'} to Discover${failed ? ` · ${failed} failed (still in the list)` : ''}`,
+        : `${action === 'add' ? 'Added' : 'Dismissed'} ${added} suggestion${added === 1 ? '' : 's'}${action === 'add' ? ' to Discover' : ''}${failed ? ` · ${failed} failed (still in the list)` : ''}`,
       !signedOut && failed === 0
     );
     load();
@@ -332,6 +334,10 @@ export default function AgentPanel({ onToast }: { onToast: (msg: string, ok: boo
                 Retry couldn&apos;t-read ({unreadable.length})
               </button>
             )}
+            <label className="basis-full flex items-center gap-2 text-xs text-[#7A9AAA] mt-1 cursor-pointer select-none">
+              <input type="checkbox" checked={forceAI} onChange={(e) => setForceAI(e.target.checked)} className="accent-[#0D5C6E]" />
+              Ask Claude again even if a site hasn&apos;t changed (uses AI for every listing checked: roughly $0.05–0.10 each)
+            </label>
           </div>
         )}
 
@@ -425,31 +431,46 @@ export default function AgentPanel({ onToast }: { onToast: (msg: string, ok: boo
           </div>
           {data.suggestions.length > 1 &&
             (bulk ? (
-              <p className="text-sm text-[#0D5C6E] font-medium">Adding {bulk.done} of {bulk.total}…</p>
-            ) : confirmAddAll ? (
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-[#1C3A4A]">Put all {data.suggestions.length} on Discover?</span>
+              <p className="text-sm text-[#0D5C6E] font-medium">
+                {bulk.action === 'add' ? 'Adding' : 'Dismissing'} {bulk.done} of {bulk.total}…
+              </p>
+            ) : confirmBulk ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm text-[#1C3A4A]">
+                  {confirmBulk === 'add'
+                    ? `Put all ${data.suggestions.length} on Discover?`
+                    : `Dismiss all ${data.suggestions.length}? They won’t be suggested again.`}
+                </span>
                 <button
-                  onClick={addAllSuggestions}
+                  onClick={() => bulkSuggestions(confirmBulk)}
                   className="bg-[#0D5C6E] text-white rounded-full px-4 py-1.5 text-sm font-semibold hover:bg-[#1A7A8A]"
                 >
-                  Yes, add all
+                  {confirmBulk === 'add' ? 'Yes, add all' : 'Yes, dismiss all'}
                 </button>
                 <button
-                  onClick={() => setConfirmAddAll(false)}
+                  onClick={() => setConfirmBulk(null)}
                   className="border border-[#E8DFC8] text-[#3A5A6A] rounded-full px-4 py-1.5 text-sm hover:border-[#C5D8E8]"
                 >
                   Cancel
                 </button>
               </div>
             ) : (
-              <button
-                onClick={() => setConfirmAddAll(true)}
-                disabled={!!acting}
-                className="bg-[#0D5C6E] text-white rounded-full px-4 py-1.5 text-sm font-semibold hover:bg-[#1A7A8A] disabled:opacity-50 shrink-0"
-              >
-                Add all {data.suggestions.length}
-              </button>
+              <div className="flex gap-2 shrink-0">
+                <button
+                  onClick={() => setConfirmBulk('add')}
+                  disabled={!!acting}
+                  className="bg-[#0D5C6E] text-white rounded-full px-4 py-1.5 text-sm font-semibold hover:bg-[#1A7A8A] disabled:opacity-50"
+                >
+                  Add all {data.suggestions.length}
+                </button>
+                <button
+                  onClick={() => setConfirmBulk('dismiss')}
+                  disabled={!!acting}
+                  className="border border-[#E8DFC8] text-[#3A5A6A] rounded-full px-4 py-1.5 text-sm hover:border-[#C5D8E8] disabled:opacity-50"
+                >
+                  Dismiss all
+                </button>
+              </div>
             ))}
         </div>
         {data.suggestions.length === 0 ? (

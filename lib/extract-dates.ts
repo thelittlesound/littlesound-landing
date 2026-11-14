@@ -63,7 +63,8 @@ const TOOL = {
       },
       other_programs: {
         type: 'array',
-        description: 'Other kids’ programs (for ages 18 and under) on these pages that are NOT this listing, e.g. camps on a lessons page. Skip adult programs, general open hours, and anything already over.',
+        description:
+          'Other kids’ PROGRAMS (ages 18 and under) on these pages that are NOT this listing and not already listed, e.g. camps on a lessons page. One entry per program, not per event: one-off workshops or events of the same kind are grouped into one program (e.g. "Holiday Art Workshops") with each workshop as a dated item labeled with its name. Skip adult programs, general open hours, and anything already over.',
         items: {
           type: 'object',
           properties: {
@@ -158,6 +159,8 @@ export async function extractDates(opts: {
   pages: { url: string | null; text: string }[];
   listing: { title: string; business: string; website: string | null };
   today: string;
+  /** This provider's other listings already on Little Sound (never re-suggested). */
+  knownTitles?: string[];
 }): Promise<ExtractResult> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
@@ -194,6 +197,17 @@ Rules:
 - Only record what the text actually states. Never guess or fill gaps. Leave fields null when not stated.
 - items: only this listing's program. Pages often mix several (lessons, camps, open hours, adult programs).
 - Other kids' programs on the pages go in other_programs (with their dates, ages, price), not in items, warnings or notes.
+- other_programs are programs, not events. Group one-off workshops, events or single-day classes of the same kind into ONE program with a general name (e.g. "Holiday Art Workshops", "Saturday Family Workshops"), each workshop as a dated item labeled with its name. An ongoing class, a camp (with its weeks as items), or a seasonal series is one program.
+- If a workshop or event fits this listing (it's the same kind of thing this listing is about), record it in items with its name as the label, not in other_programs.${
+    opts.knownTitles?.length
+      ? `
+- Already on Little Sound for this provider (never put these, renamed versions of them, or their individual sessions in other_programs):
+${opts.knownTitles
+          .slice(0, 40)
+          .map((t) => `  • ${t}`)
+          .join('\n')}`
+      : ''
+  }
 - General opening/admission hours are not a program session. Don't record them unless the listing is itself about that drop-in time.
 - Leave out anything already over. Don't mention past dates anywhere.
 - Dates as YYYY-MM-DD. A year in a nearby heading (e.g. "Winter 2027 classes") counts as stated. If the page gives no year at all, use the next occurrence on or after today and set year_inferred true.
