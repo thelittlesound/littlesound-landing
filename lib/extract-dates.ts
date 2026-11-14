@@ -7,8 +7,11 @@ import { validateItem, type DateItem } from '@/lib/activity-dates';
 
 const API_URL = 'https://api.anthropic.com/v1/messages';
 // Override with ANTHROPIC_MODEL in Vercel if this model is retired or you
-// want a different one (see the model list at console.anthropic.com).
-const DEFAULT_MODEL = 'claude-sonnet-4-5';
+// want a different one — e.g. claude-haiku-5-5 (cheaper/faster) or
+// claude-opus-5-5 (most careful). Current IDs: platform.claude.com/docs →
+// Models overview; retirement dates: the Model deprecations page.
+// (Was claude-sonnet-4-5 — deprecated, retiring 2026-11-30.)
+const DEFAULT_MODEL = 'claude-sonnet-5-5';
 const MAX_INPUT_CHARS = 50_000;
 
 const TOOL = {
@@ -125,7 +128,7 @@ Rules:
       res.status === 401
         ? 'The Anthropic API key was rejected. Check ANTHROPIC_API_KEY in Vercel.'
         : res.status === 404
-        ? `Model "${model}" isn't available to this API key. Set ANTHROPIC_MODEL in Vercel to a current model from console.anthropic.com.`
+        ? `Model "${model}" isn't available to this API key. Set ANTHROPIC_MODEL in Vercel to a current model ID (platform.claude.com/docs → Models overview).`
         : res.status === 429
         ? 'Too many AI requests right now. Wait a minute and try again.'
         : res.status === 529
