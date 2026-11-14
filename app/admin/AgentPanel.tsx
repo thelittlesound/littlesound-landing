@@ -114,10 +114,16 @@ export default function AgentPanel({ onToast }: { onToast: (msg: string, ok: boo
   }, []);
   useEffect(() => { load(); }, [load]);
 
-  async function run(onlyUnchecked: boolean) {
+  async function run(mode: 'unchecked' | 'unreadable' | 'all') {
     if (!data) return;
     const queue = data.listings
-      .filter((l) => !onlyUnchecked || !l.lastCheckedAt)
+      .filter((l) =>
+        mode === 'unchecked'
+          ? !l.lastCheckedAt
+          : mode === 'unreadable'
+          ? l.lastStatus === 'unreadable' || l.lastStatus === 'error'
+          : true
+      )
       .sort((a, b) => (a.lastCheckedAt ?? '').localeCompare(b.lastCheckedAt ?? ''));
     if (!queue.length) { toastRef.current('Nothing to check', true); return; }
 
@@ -262,19 +268,28 @@ export default function AgentPanel({ onToast }: { onToast: (msg: string, ok: boo
         ) : (
           <div className="flex flex-wrap gap-2">
             <button
-              onClick={() => run(true)}
+              onClick={() => run('unchecked')}
               disabled={!data.aiConfigured || data.tablesMissing || checked === L.length}
               className="bg-[#0D5C6E] text-white rounded-full px-5 py-2 text-sm font-semibold hover:bg-[#1A7A8A] disabled:opacity-50"
             >
               Check unchecked listings ({L.length - checked})
             </button>
             <button
-              onClick={() => run(false)}
+              onClick={() => run('all')}
               disabled={!data.aiConfigured || data.tablesMissing}
               className="border border-[#C5D8E8] text-[#0D5C6E] rounded-full px-5 py-2 text-sm font-semibold hover:bg-[#C5D8E8]/20 disabled:opacity-50"
             >
               Re-check all {L.length}
             </button>
+            {unreadable.length > 0 && (
+              <button
+                onClick={() => run('unreadable')}
+                disabled={!data.aiConfigured || data.tablesMissing}
+                className="border border-[#C5D8E8] text-[#0D5C6E] rounded-full px-5 py-2 text-sm font-semibold hover:bg-[#C5D8E8]/20 disabled:opacity-50"
+              >
+                Retry couldn&apos;t-read ({unreadable.length})
+              </button>
+            )}
           </div>
         )}
 

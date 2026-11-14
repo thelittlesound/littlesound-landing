@@ -88,12 +88,27 @@ export function parseRobots(body: string): { allow: string[]; disallow: string[]
   return { allow: g?.allow ?? [], disallow: g?.disallow ?? [] };
 }
 
+// RFC 9309 matching: rules match from the start of path+query, "*" matches
+// any run of characters, a trailing "$" anchors the end. The longest matching
+// rule wins and Allow wins ties. (Squarespace's default robots.txt has rules
+// like "/*?author=*", which must only block author-filtered URLs.)
+function ruleMatches(rule: string, target: string): boolean {
+  const anchored = rule.endsWith('$');
+  const body = anchored ? rule.slice(0, -1) : rule;
+  const re = body
+    .split('*')
+    .map((part) => part.replace(/[.+?^${}()|[\]\\]/g, '\\$&'))
+    .join('.*');
+  return new RegExp(`^${re}${anchored ? '$' : ''}`).test(target);
+}
+
 export function robotsAllows(rules: { allow: string[]; disallow: string[] }, path: string): boolean {
-  const match = (rule: string) => path.startsWith(rule.replace(/\*.*$/, '').replace(/\$$/, ''));
-  const dis = rules.disallow.filter(match).sort((a, b) => b.length - a.length)[0];
+  const longest = (list: string[]) =>
+    list.filter((r) => ruleMatches(r, path)).sort((a, b) => b.length - a.length)[0];
+  const dis = longest(rules.disallow);
   if (!dis) return true;
-  const allow = rules.allow.filter(match).sort((a, b) => b.length - a.length)[0];
-  return !!allow && allow.length >= dis.length; // longest rule wins, Allow wins ties
+  const allow = longest(rules.allow);
+  return !!allow && allow.length >= dis.length;
 }
 
 const robotsCache = new Map<string, { allow: string[]; disallow: string[] }>();
@@ -212,14 +227,29 @@ export function pickScheduleLinks(links: Link[], pageUrl: string, max = 3): stri
 
 // ── Fetch ────────────────────────────────────────────────────────────────────
 
+// Turns Node's network error codes into something an admin can act on.
+function connectError(e: unknown): string {
+  const cause = (e as { cause?: { code?: string } } | null)?.cause;
+  const code = cause?.code ?? '';
+  if (code === 'ENOTFOUND' || code === 'EAI_AGAIN') return 'Could not connect: the web address doesn’t exist (check the listing’s website)';
+  if (code === 'ECONNREFUSED' || code === 'ECONNRESET') return 'Could not connect: the site refused the connection';
+  if (/CERT|SSL|TLS|SELF_SIGNED|UNABLE_TO_(VERIFY|GET)/.test(code)) {
+    return 'Could not connect: the site’s security certificate is incomplete or invalid (browsers often work around this; paste the schedule in the Dates tab)';
+  }
+  if (code === 'UND_ERR_CONNECT_TIMEOUT') return 'The site took too long to respond';
+  return code ? `Could not connect to the site (${code})` : 'Could not connect to the site';
+}
+
 export async function fetchPage(raw: string, timeoutMs = 8000): Promise<FetchResult> {
   let url = safeUrl(raw);
   if (!url) return { error: 'Not a public web address' };
 
-  const rules = await robotsFor(url.origin);
-  if (!robotsAllows(rules, url.pathname)) return { error: 'The site asks bots not to read this page (robots.txt)' };
-
   for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
+    // Checked on every hop: a redirect can land on another site or path.
+    const rules = await robotsFor(url.origin);
+    if (!robotsAllows(rules, url.pathname + url.search)) {
+      return { error: 'The site asks bots not to read this page (robots.txt)' };
+    }
     let res: Response;
     try {
       res = await fetch(url.toString(), {
@@ -229,7 +259,7 @@ export async function fetchPage(raw: string, timeoutMs = 8000): Promise<FetchRes
       });
     } catch (e) {
       const timedOut = e instanceof Error && (e.name === 'TimeoutError' || e.name === 'AbortError');
-      return { error: timedOut ? 'The site took too long to respond' : 'Could not connect to the site' };
+      return { error: timedOut ? 'The site took too long to respond' : connectError(e) };
     }
 
     if (res.status >= 300 && res.status < 400) {
