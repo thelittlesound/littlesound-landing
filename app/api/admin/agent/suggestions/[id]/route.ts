@@ -32,6 +32,16 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     return NextResponse.json({ success: true });
   }
 
+  // Claim it first (pending → added in one step), so two Adds at once —
+  // e.g. "Add all" plus a single click — can't create the listing twice.
+  const { data: claimed } = await supabaseAdmin
+    .from('suggested_listings')
+    .update({ status: 'added', ...reviewed })
+    .eq('id', s.id)
+    .eq('status', 'pending')
+    .select('id');
+  if (!claimed?.length) return NextResponse.json({ error: 'Already handled.' }, { status: 409 });
+
   const { data: created, error: insertError } = await supabaseAdmin
     .from('submissions')
     .insert({
@@ -57,6 +67,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     .single();
   if (insertError || !created) {
     console.error('add suggestion error:', insertError);
+    await supabaseAdmin.from('suggested_listings').update({ status: 'pending', reviewed_by: null, reviewed_at: null }).eq('id', s.id);
     return NextResponse.json({ error: 'Could not create the listing.' }, { status: 500 });
   }
   const activityId = `sub_${created.id}`;
@@ -73,9 +84,6 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     if (error) console.error('suggestion dates error:', error);
   }
 
-  await supabaseAdmin
-    .from('suggested_listings')
-    .update({ status: 'added', added_activity_id: activityId, ...reviewed })
-    .eq('id', s.id);
+  await supabaseAdmin.from('suggested_listings').update({ added_activity_id: activityId }).eq('id', s.id);
   return NextResponse.json({ success: true, activityId });
 }

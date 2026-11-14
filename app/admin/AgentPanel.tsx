@@ -97,6 +97,8 @@ export default function AgentPanel({ onToast }: { onToast: (msg: string, ok: boo
   const [log, setLog] = useState<LogLine[]>([]);
   const [acting, setActing] = useState<string | null>(null);
   const [showAll, setShowAll] = useState(false);
+  const [confirmAddAll, setConfirmAddAll] = useState(false);
+  const [bulk, setBulk] = useState<{ done: number; total: number } | null>(null);
   const stopRef = useRef(false);
   const today = seattleToday();
 
@@ -179,6 +181,46 @@ export default function AgentPanel({ onToast }: { onToast: (msg: string, ok: boo
     } finally {
       setActing(null);
     }
+  }
+
+  // Adds every pending suggestion, 3 at a time, through the same endpoint as
+  // a single Add (which claims each one first, so nothing is added twice).
+  async function addAllSuggestions() {
+    if (!data) return;
+    const queue = data.suggestions.map((s) => s.id);
+    setConfirmAddAll(false);
+    setBulk({ done: 0, total: queue.length });
+    let next = 0;
+    let added = 0;
+    let failed = 0;
+    let signedOut = false;
+    const worker = async () => {
+      while (!signedOut && next < queue.length) {
+        const id = queue[next++];
+        try {
+          const res = await fetch(`/api/admin/agent/suggestions/${id}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'add' }),
+          });
+          if (res.status === 401) signedOut = true;
+          if (res.ok) added += 1;
+          else if (res.status !== 409) failed += 1; // 409 = already handled
+        } catch {
+          failed += 1;
+        }
+        setBulk((b) => (b ? { ...b, done: b.done + 1 } : b));
+      }
+    };
+    await Promise.all([worker(), worker(), worker()]);
+    setBulk(null);
+    toastRef.current(
+      signedOut
+        ? 'Signed out — sign in again to finish'
+        : `Added ${added} listing${added === 1 ? '' : 's'} to Discover${failed ? ` · ${failed} failed (still in the list)` : ''}`,
+      !signedOut && failed === 0
+    );
+    load();
   }
 
   async function act(kind: 'drafts' | 'suggestions', id: string, action: string, okMsg: string) {
@@ -376,8 +418,40 @@ export default function AgentPanel({ onToast }: { onToast: (msg: string, ok: boo
 
       {/* Suggestions */}
       <div className={card}>
-        <h3 className="text-sm font-semibold text-[#1C3A4A] mb-1">Suggested new listings ({data.suggestions.length})</h3>
-        <p className="text-xs text-[#7A9AAA] mb-3">Kids&apos; programs the agent found on provider sites that aren&apos;t on Little Sound yet. Adding one puts it on Discover (claimable by the provider later).</p>
+        <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
+          <div>
+            <h3 className="text-sm font-semibold text-[#1C3A4A] mb-1">Suggested new listings ({data.suggestions.length})</h3>
+            <p className="text-xs text-[#7A9AAA]">Kids&apos; programs the agent found on provider sites that aren&apos;t on Little Sound yet. Adding one puts it on Discover (claimable by the provider later).</p>
+          </div>
+          {data.suggestions.length > 1 &&
+            (bulk ? (
+              <p className="text-sm text-[#0D5C6E] font-medium">Adding {bulk.done} of {bulk.total}…</p>
+            ) : confirmAddAll ? (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-[#1C3A4A]">Put all {data.suggestions.length} on Discover?</span>
+                <button
+                  onClick={addAllSuggestions}
+                  className="bg-[#0D5C6E] text-white rounded-full px-4 py-1.5 text-sm font-semibold hover:bg-[#1A7A8A]"
+                >
+                  Yes, add all
+                </button>
+                <button
+                  onClick={() => setConfirmAddAll(false)}
+                  className="border border-[#E8DFC8] text-[#3A5A6A] rounded-full px-4 py-1.5 text-sm hover:border-[#C5D8E8]"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setConfirmAddAll(true)}
+                disabled={!!acting}
+                className="bg-[#0D5C6E] text-white rounded-full px-4 py-1.5 text-sm font-semibold hover:bg-[#1A7A8A] disabled:opacity-50 shrink-0"
+              >
+                Add all {data.suggestions.length}
+              </button>
+            ))}
+        </div>
         {data.suggestions.length === 0 ? (
           <p className="text-sm text-[#7A9AAA]">None right now.</p>
         ) : (
@@ -405,14 +479,14 @@ export default function AgentPanel({ onToast }: { onToast: (msg: string, ok: boo
                 <div className="flex gap-2">
                   <button
                     onClick={() => act('suggestions', s.id, 'add', `Added "${s.title}" to Discover`)}
-                    disabled={!!acting}
+                    disabled={!!acting || !!bulk}
                     className="bg-[#0D5C6E] text-white rounded-full px-4 py-1.5 text-sm font-semibold hover:bg-[#1A7A8A] disabled:opacity-50"
                   >
                     {acting === s.id + 'add' ? '…' : 'Add listing'}
                   </button>
                   <button
                     onClick={() => act('suggestions', s.id, 'dismiss', 'Dismissed')}
-                    disabled={!!acting}
+                    disabled={!!acting || !!bulk}
                     className="border border-[#E8DFC8] text-[#3A5A6A] rounded-full px-4 py-1.5 text-sm hover:border-[#C5D8E8] disabled:opacity-50"
                   >
                     Dismiss
