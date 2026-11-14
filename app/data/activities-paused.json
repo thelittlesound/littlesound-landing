@@ -1,0 +1,58 @@
+[
+  {
+    "id": "53",
+    "title": "Itty Bitty Camps \u2014 Parent & Child Nature",
+    "provider": "Itty Bitty Camps",
+    "category": "Early Childhood",
+    "neighborhood": "Magnolia",
+    "ageMin": 1,
+    "ageMax": 5,
+    "price": 195,
+    "priceUnit": "session",
+    "description": "A parent-and-child nature program based out of Discovery Park. Only $30 per session to add a sibling, which makes it workable for families with more than one little one.",
+    "website": "https://ittybittycamps.com",
+    "subcategory": "Nature Programs"
+  },
+  {
+    "id": "64",
+    "title": "Rhythmic Gymnastics Camp",
+    "provider": "Evergreen Rhythmics",
+    "category": "Sports",
+    "neighborhood": "North Seattle",
+    "ageMin": 5,
+    "ageMax": 14,
+    "price": 350,
+    "priceUnit": "week",
+    "description": "Multilingual coaches teach ballet, ribbon, hoops, and tumbling alongside free play, games, and crafts. Only one week offered per age group in July.",
+    "website": "https://www.evergreenrhythmics.com",
+    "subcategory": "Gymnastics"
+  },
+  {
+    "id": "71",
+    "title": "Year-Round Swim Lessons & Open Swim",
+    "provider": "Blue Ridge Swimming Pool",
+    "category": "Swimming",
+    "neighborhood": "Crown Hill",
+    "ageMin": 2,
+    "ageMax": 18,
+    "price": 105,
+    "priceUnit": "month",
+    "description": "Community pool in Crown Hill offering year-round swim lessons in small classes for ages 2 and up. Monthly membership-based pricing with open swim times for families.",
+    "website": "https://www.blueridgepool.org/",
+    "subcategory": "Year-Round"
+  },
+  {
+    "id": "76",
+    "title": "Junior Chef Classes in Real Restaurant Kitchens",
+    "provider": "Junior Sous Chef",
+    "category": "Cooking",
+    "subcategory": "Classes & Workshops",
+    "neighborhood": "Citywide",
+    "ageMin": 5,
+    "ageMax": 12,
+    "price": 150,
+    "priceUnit": "class",
+    "description": "Pop-up cooking school held in working restaurant kitchens across Seattle. Kids learn safe knife skills, recipe reading, and proper techniques from professional chefs in an authentic culinary environment.",
+    "website": "https://www.juniorsouschef.com/"
+  }
+]

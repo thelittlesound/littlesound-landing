@@ -234,6 +234,10 @@ Provider visits `/providers/signup` → fills out account + business info (now i
   - Discovery Park Nature Trek: Seattle Parks moved pages (404); e.g. `seattle.gov/parks/allparks/discovery-park/discovery-park-visitor-center`.
   - Itty Bitty Camps (`ittybittycamps.com`), Evergreen Rhythmics (`evergreenrhythmics.com`; also listed in **Kent**, not Seattle), Junior Sous Chef (`juniorsouschef.com`), Blue Ridge Pool (`blueridgepool.org`): domains gone. Possibly closed. Confirm before launch.
 
+**Dead addresses resolved (2026-11-14, Evan: "fix 2, hide the rest"):**
+- **Fixed:** Broadway Bound → `https://broadwaybound.org` (confirmed: Broadway Bound Children's Theatre, University Heights). Discovery Park Nature Trek → `https://www.seattle.gov/parks/learning-and-childcare/camps` (loads, and is the Seattle Parks page that describes and links Nature Adventure Trek registration; the visitor-center page would not load for our reader).
+- **Hidden from Discover** until confirmed still operating: Itty Bitty Camps (#53), Evergreen Rhythmics (#64), Blue Ridge Swimming Pool (#71), Junior Sous Chef (#76). They were moved, unchanged, from `app/data/activities.json` to `app/data/activities-paused.json`, which nothing reads. **To restore one:** move its block back into `activities.json` (with a working website). Seed data is now **62 providers / 75 programs**.
+
 **Booking-system widgets (built 2026-11-14):** many providers keep their schedule in an embedded booking widget (Jackrabbit, iClassPro, Sawyer, ActiveNet, Daxko/YMCA, Amilia, Mindbody, Pike13, CampMinder, GoMotion… ~40 systems in `lib/booking-widgets.ts`). The page around it reads fine, so the agent used to report "no dates". Now it collects `<iframe>`/`<script>` sources and links on the provider's pages, spots known systems, and reads up to 2 of their public pages per listing (same URL-safety and robots.txt rules). Jackrabbit's JavaScript table (`…/Openings/OpeningsJS?OrgID=…`, legacy `Openings.asp?id=`, and `regv2.asp?id=` links) is switched to its plain-HTML twin `…/Openings/OpeningsDirect?OrgID=…` (Jackrabbit's documented "Direct Method"). If a system is found but can't be read (needs JavaScript too, or blocked) and no dates turn up elsewhere, the listing moves to **Couldn't read** with the system named, e.g. "Its schedule seems to be in iClassPro… Paste it in the Dates tab." Other programs in a widget's table become suggestions as usual. Possible next step if many listings name the same system: a dedicated reader for that system's public data. 101 agent checks pass.
 
 **Dedicated booking-system readers (2026-11-14):** after the widget run, 26 listings were in Couldn't read, most naming a system. What each allows:
@@ -420,7 +424,7 @@ New priorities (agreed with Evan 2026-11-11), tackle top-down:
    - Review the 50 existing suggestions first to judge their quality before trusting auto-add.
 
 **Launch readiness: these must be done before the password gate comes down:**
-- **Honesty pass:** 13 placeholder stats across 7 files ("100+ families" has no real signups behind it; "80+"/"70+" providers vs the real **66 providers / 79 programs** in the seed data; "57+ verified"). Also 8 stale timing mentions ("Q3 2026", "this summer"), including in `/terms`.
+- **Honesty pass:** 13 placeholder stats across 7 files ("100+ families" has no real signups behind it; "80+"/"70+" providers vs the real **62 providers / 75 programs** in the seed data (after hiding 4 with dead websites on 2026-11-14; plus whatever was added from agent suggestions); "57+ verified"). Also 8 stale timing mentions ("Q3 2026", "this summer"), including in `/terms`.
 - **Provider outreach kit:** a sheet of every seed business with its programs, website, and personal claim link, plus a draft email. Run the safe partial claim test first.
 - **Small fixes:**
   - `/api/providers/submit` accepts any signed-in account, including a family account (the claim flow already blocks this).

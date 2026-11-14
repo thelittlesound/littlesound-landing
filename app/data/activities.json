@@ -38,7 +38,7 @@
     "price": 350,
     "priceUnit": "week",
     "description": "Four habitats \u2014 freshwater, saltwater, forest, and meadow \u2014 explored through hands-on activities, songs, crafts, and games. Two miles of protected beach and dramatic sea cliffs.",
-    "website": "https://www.seattle.gov/parks/find/centers/discovery-park-environmental-learning-center",
+    "website": "https://www.seattle.gov/parks/learning-and-childcare/camps",
     "subcategory": "Nature & Forest"
   },
   {
@@ -584,7 +584,7 @@
     "price": 495,
     "priceUnit": "session",
     "description": "Junior productions for ages 5 to 10 and full-length shows for ages 11 to 18. Known for elaborate costumes and sets. Families contribute volunteer time or buy out the requirement.",
-    "website": "https://broadwayboundseattle.org",
+    "website": "https://broadwaybound.org",
     "subcategory": "Youth Productions"
   },
   {
@@ -698,20 +698,6 @@
     "description": "Wildlife-themed camps teaching STEAM skills, scientific inquiry, and global conservation. Extended day care and financial assistance available.",
     "website": "https://zoo.org/programs/",
     "subcategory": "Zoo Programs"
-  },
-  {
-    "id": "53",
-    "title": "Itty Bitty Camps \u2014 Parent & Child Nature",
-    "provider": "Itty Bitty Camps",
-    "category": "Early Childhood",
-    "neighborhood": "Magnolia",
-    "ageMin": 1,
-    "ageMax": 5,
-    "price": 195,
-    "priceUnit": "session",
-    "description": "A parent-and-child nature program based out of Discovery Park. Only $30 per session to add a sibling, which makes it workable for families with more than one little one.",
-    "website": "https://ittybittycamps.com",
-    "subcategory": "Nature Programs"
   },
   {
     "id": "54",
@@ -854,20 +840,6 @@
     "subcategory": "Multi-Sport"
   },
   {
-    "id": "64",
-    "title": "Rhythmic Gymnastics Camp",
-    "provider": "Evergreen Rhythmics",
-    "category": "Sports",
-    "neighborhood": "North Seattle",
-    "ageMin": 5,
-    "ageMax": 14,
-    "price": 350,
-    "priceUnit": "week",
-    "description": "Multilingual coaches teach ballet, ribbon, hoops, and tumbling alongside free play, games, and crafts. Only one week offered per age group in July.",
-    "website": "https://www.evergreenrhythmics.com",
-    "subcategory": "Gymnastics"
-  },
-  {
     "id": "65",
     "title": "Year-Round Swim Lessons",
     "provider": "Goldfish Swim School",
@@ -952,20 +924,6 @@
     "subcategory": "Private Lessons"
   },
   {
-    "id": "71",
-    "title": "Year-Round Swim Lessons & Open Swim",
-    "provider": "Blue Ridge Swimming Pool",
-    "category": "Swimming",
-    "neighborhood": "Crown Hill",
-    "ageMin": 2,
-    "ageMax": 18,
-    "price": 105,
-    "priceUnit": "month",
-    "description": "Community pool in Crown Hill offering year-round swim lessons in small classes for ages 2 and up. Monthly membership-based pricing with open swim times for families.",
-    "website": "https://www.blueridgepool.org/",
-    "subcategory": "Year-Round"
-  },
-  {
     "id": "72",
     "title": "Year-Round Swim Lessons",
     "provider": "British Swim School",
@@ -1020,20 +978,6 @@
     "priceUnit": "session",
     "description": "Hands-on, age-appropriate cooking sessions at YMCA locations across Seattle. Kids learn basic kitchen skills, nutrition fundamentals, and build confidence through making real food.",
     "website": "https://www.seattleymca.org/programs/youth-family/youth-enrichment-programs/kids-cooking-classes"
-  },
-  {
-    "id": "76",
-    "title": "Junior Chef Classes in Real Restaurant Kitchens",
-    "provider": "Junior Sous Chef",
-    "category": "Cooking",
-    "subcategory": "Classes & Workshops",
-    "neighborhood": "Citywide",
-    "ageMin": 5,
-    "ageMax": 12,
-    "price": 150,
-    "priceUnit": "class",
-    "description": "Pop-up cooking school held in working restaurant kitchens across Seattle. Kids learn safe knife skills, recipe reading, and proper techniques from professional chefs in an authentic culinary environment.",
-    "website": "https://www.juniorsouschef.com/"
   },
   {
     "id": "77",
