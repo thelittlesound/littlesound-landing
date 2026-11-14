@@ -11,6 +11,7 @@
 // which still applies URL safety and each host's robots.txt).
 
 import type { Link } from './fetch-page';
+import { addDays } from './date-agent-logic';
 
 export interface Platform {
   name: string;
@@ -78,18 +79,27 @@ export function platformFor(rawUrl: string): Platform | null {
 // (regv2.asp?id=…) carry the same organization ID.
 function jackrabbitDirect(u: URL): string | null {
   if (!/(^|\.)jackrabbitclass\.com$/i.test(u.hostname)) return null;
+  // Sites write the ID parameter as OrgID, orgID, orgId, id… so match any case.
   const params = new URLSearchParams(u.search);
-  const org = params.get('OrgID') ?? params.get('orgid') ?? params.get('id') ?? params.get('ID');
-  if (!org || !/^\d+$/.test(org)) return null;
+  const idKeys = [...params.keys()].filter((k) => /^(orgid|id)$/i.test(k));
+  const org = idKeys.map((k) => params.get(k)).find((v) => v && /^\d+$/.test(v));
+  if (!org) return null;
   if (/\/Openings\/Openings(JS|Direct)$/i.test(u.pathname)) {
     // Keep their filters (category, columns), normalize the ID name.
-    params.delete('orgid');
-    params.delete('id');
-    params.delete('ID');
-    params.set('OrgID', org);
-    return `https://app.jackrabbitclass.com/jr3.0/Openings/OpeningsDirect?${params.toString()}`;
+    const rest = [...params.entries()].filter(([k]) => !/^(orgid|id)$/i.test(k));
+    const out = new URLSearchParams([['OrgID', org], ...rest]);
+    return `https://app.jackrabbitclass.com/jr3.0/Openings/OpeningsDirect?${out.toString()}`;
   }
   return `https://app.jackrabbitclass.com/jr3.0/Openings/OpeningsDirect?OrgID=${org}`;
+}
+
+// Sawyer: a business's public schedule lives at hisawyer.com/<business>/schedules.
+// Sites often link somewhere else inside it (gift cards, one class's checkout).
+function sawyerSchedules(u: URL): string | null {
+  if (!/(^|\.)hisawyer\.com$/i.test(u.hostname)) return null;
+  const seg = u.pathname.split('/').filter(Boolean);
+  if (seg.length < 2 || seg[1] !== 'schedules' || !/^[a-z0-9_-]{2,80}$/i.test(seg[0])) return null;
+  return `https://www.hisawyer.com/${seg[0]}/schedules`;
 }
 
 export interface Widget {
@@ -108,10 +118,12 @@ export interface Widget {
 function iclassproCode(u: URL): string | null {
   if (!/(^|\.)iclasspro\.com$/i.test(u.hostname)) return null;
   const seg = u.pathname.split('/').filter(Boolean);
+  // portal.iclasspro.com/<code>/…, embed.iclasspro.com/portal/<code>/…,
+  // app.iclasspro.com/a/<code>/… and the catalog itself (…/api/open/v1/<code>/…).
   let code: string | undefined;
-  if (/^portal\./i.test(u.hostname)) code = seg[0];
-  else if (/^app\./i.test(u.hostname) && seg[0] === 'api' && seg[1] === 'open') code = seg[3];
-  else if (/^app\./i.test(u.hostname) && (seg[0] === 'a' || seg[0] === 'portal')) code = seg[1];
+  if (seg[0] === 'api' && seg[1] === 'open') code = seg[3];
+  else if (seg[0] === 'portal' || seg[0] === 'a') code = seg[1];
+  else if (/^portal\./i.test(u.hostname)) code = seg[0];
   return code && /^[a-z0-9_-]{2,60}$/i.test(code) ? code.toLowerCase() : null;
 }
 export function iclassproCatalogUrl(code: string, kind: 'classes' | 'camps' = 'classes'): string {
@@ -157,7 +169,7 @@ export function findWidgets(pages: { links: Link[]; embeds: string[] }[], max = 
       }
       return;
     }
-    const direct = jackrabbitDirect(u);
+    const direct = jackrabbitDirect(u) ?? sawyerSchedules(u);
     let url: string | null = direct;
     if (!url) {
       const isScript = /\.js$/i.test(u.pathname) || /\/OpeningsJS$/i.test(u.pathname);
@@ -224,15 +236,29 @@ function scheduleText(v: unknown): string {
  * Openings counts are left out on purpose: they change daily (which would
  * re-run the AI every day) and some businesses choose not to show them.
  */
-export function iclassproToText(json: unknown, heading: string): string {
+export function iclassproRows(json: unknown): Record<string, unknown>[] {
   const env = (json ?? {}) as Record<string, unknown>;
   const rows = Array.isArray(env.data) ? env.data : Array.isArray(json) ? (json as unknown[]) : [];
+  return rows.filter((r): r is Record<string, unknown> => !!r && typeof r === 'object');
+}
+export function iclassproTotal(json: unknown): number {
+  const n = Number(((json ?? {}) as Record<string, unknown>).totalRecords);
+  return Number.isFinite(n) && n > 0 ? n : 0;
+}
+
+export function iclassproToText(json: unknown, heading: string, opts: { today?: string; total?: number } = {}): string {
+  const rows = iclassproRows(json);
+  const soon = opts.today ? addDays(opts.today, 14) : '';
   const lines: string[] = [];
-  for (const raw of rows.slice(0, 300)) {
-    const r = (raw ?? {}) as Record<string, unknown>;
+  for (const r of rows.slice(0, 300)) {
     const name = str(r.name) || str(r.title);
     if (!name) continue;
-    const dates = [day(r.startDate), day(r.endDate)].filter(Boolean).join(' to ');
+    // An ongoing class has no end date, and its "start date" is just its next
+    // meeting (it moves every week). Show a start only when it's a real
+    // future start, so ongoing classes read as weekly and the text is stable.
+    const start = day(r.startDate);
+    const end = day(r.endDate);
+    const dates = start && end ? `${start} to ${end}` : start && soon && start > soon ? `starts ${start}` : end ? `until ${end}` : '';
     const reg = [day(r.regStartDate), day(r.regEndDate)].filter(Boolean).join(' to ');
     const parts = [
       name,
@@ -244,5 +270,7 @@ export function iclassproToText(json: unknown, heading: string): string {
     ].filter(Boolean);
     lines.push(parts.join(' | '));
   }
-  return lines.length ? `${heading}\n${lines.join('\n')}` : '';
+  if (!lines.length) return '';
+  const more = opts.total && opts.total > lines.length ? `\n(Showing ${lines.length} of ${opts.total}; the rest are on the provider’s booking page.)` : '';
+  return `${heading}\n${lines.join('\n')}${more}`;
 }

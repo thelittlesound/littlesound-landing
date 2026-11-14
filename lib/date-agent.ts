@@ -4,7 +4,7 @@ import { type DatesListing } from '@/lib/activity-dates-server';
 import {
   fetchJson, fetchPage, fetchPdfPages, listingTerms, pickPdfLinks, pickScheduleLinks, selectPdfPages, type FetchedPage,
 } from '@/lib/fetch-page';
-import { findWidgets, iclassproToText, platformList, type Widget } from '@/lib/booking-widgets';
+import { findWidgets, iclassproRows, iclassproToText, iclassproTotal, platformList, type Widget } from '@/lib/booking-widgets';
 import { extractDates, type OtherProgram } from '@/lib/extract-dates';
 import { seattleToday, type DateItem } from '@/lib/activity-dates';
 import {
@@ -107,8 +107,10 @@ export async function checkListing(
   const unreadWidgets = widgets
     .filter((w) => !w.url || widgetPages.failed.includes(w.url))
     .filter((w) => !widgetPages.read.some((p) => p.platform === w.platform));
+  // Say why, so a fixable cause (a link form we don't know yet) is visible.
+  const whyUnread = unreadWidgets.map((w) => (w.url ? widgetPages.why[w.url] : '') || 'no link to this business’s schedule there')[0];
   const widgetHint = unreadWidgets.length
-    ? `Its schedule seems to be in ${platformList(unreadWidgets.map((w) => w.platform))} (a booking system the agent can’t read). Paste it in the Dates tab.`
+    ? `Its schedule seems to be in ${platformList(unreadWidgets.map((w) => w.platform))}, which the agent couldn’t read (${whyUnread}). Paste it in the Dates tab.`
     : '';
 
   const totalText = pages.reduce((n, p) => n + p.text.length, 0);
@@ -252,32 +254,71 @@ async function saveSuggestions(
 // (or is an error page) and counts as failed.
 async function readWidgets(
   widgets: Widget[]
-): Promise<{ read: (FetchedPage & { platform: string })[]; failed: string[] }> {
+): Promise<{ read: (FetchedPage & { platform: string })[]; failed: string[]; why: Record<string, string> }> {
   const targets = widgets.filter((w): w is Widget & { url: string } => !!w.url);
   const results = await Promise.all(targets.map((w) => (w.reader === 'iclasspro' ? readIclassPro(w.url) : fetchPage(w.url, 6000))));
   const read: (FetchedPage & { platform: string })[] = [];
   const failed: string[] = [];
+  const why: Record<string, string> = {};
   results.forEach((r, i) => {
+    const t = targets[i];
     // A dedicated reader's text is already just the schedule, so a short one is fine.
-    if ('error' in r || r.text.length < (targets[i].reader ? 20 : WIDGET_MIN_TEXT)) failed.push(targets[i].url);
-    else read.push({ ...r, platform: targets[i].platform });
+    const tooShort = !('error' in r) && r.text.length < (t.reader ? 20 : WIDGET_MIN_TEXT);
+    if ('error' in r || tooShort) {
+      failed.push(t.url);
+      const reason = 'error' in r ? r.error : t.reader ? 'its class list came back empty' : 'its page needs JavaScript';
+      why[t.url] = reason.replace(/^The /, 'the ').replace(/\.$/, '').slice(0, 120);
+    } else read.push({ ...r, platform: t.platform });
   });
-  return { read, failed };
+  return { read, failed, why };
 }
 
 // iClassPro's public catalog: classes plus camps (camps is optional; many
 // gyms have none). Rendered as plain lines the AI can read and quote.
 async function readIclassPro(classesUrl: string): Promise<FetchedPage | { error: string }> {
   const campsUrl = classesUrl.replace(/\/classes\?/, '/camps?');
-  const [classes, camps] = await Promise.all([fetchJson(classesUrl, 6000), fetchJson(campsUrl, 6000)]);
+  const [classes, camps] = await Promise.all([iclassproAll(classesUrl), iclassproAll(campsUrl)]);
   if ('error' in classes) return classes;
+  const today = seattleToday();
   const text = [
-    iclassproToText(classes.data, 'Classes (from the iClassPro parent portal):'),
-    'error' in camps ? '' : iclassproToText(camps.data, 'Camps (from the iClassPro parent portal):'),
+    iclassproToText({ data: classes.rows }, 'Classes (from the iClassPro parent portal):', { today, total: classes.total }),
+    'error' in camps ? '' : iclassproToText({ data: camps.rows }, 'Camps (from the iClassPro parent portal):', { today, total: camps.total }),
   ]
     .filter(Boolean)
     .join('\n\n');
   return { url: classes.url, text, links: [], embeds: [] };
+}
+
+// The catalog comes ~19 records at a time whatever page size is asked for
+// (seen 2026-11: 139 classes at one swim school, 535 at another), so read
+// the following pages too, up to a cap. Records are de-duplicated by id in
+// case the page number is ignored as well.
+const ICLASS_MAX_PAGES = 8;
+async function iclassproAll(
+  url: string
+): Promise<{ url: string; rows: Record<string, unknown>[]; total: number } | { error: string }> {
+  const first = await fetchJson(url, 6000);
+  if ('error' in first) return first;
+  const rows = iclassproRows(first.data);
+  const total = Math.max(iclassproTotal(first.data), rows.length);
+  if (rows.length > 0 && total > rows.length) {
+    const pages = Math.min(Math.ceil(total / rows.length), ICLASS_MAX_PAGES);
+    const rest = await Promise.all(
+      Array.from({ length: pages - 1 }, (_, i) => fetchJson(`${url}&page=${i + 2}`, 6000))
+    );
+    const seen = new Set(rows.map((r) => String(r.id ?? JSON.stringify(r))));
+    for (const page of rest) {
+      if ('error' in page) continue;
+      for (const r of iclassproRows(page.data)) {
+        const key = String(r.id ?? JSON.stringify(r));
+        if (!seen.has(key)) {
+          seen.add(key);
+          rows.push(r);
+        }
+      }
+    }
+  }
+  return { url: first.url, rows, total };
 }
 
 // A schedule PDF as a page: only the PDF pages most about this listing (a

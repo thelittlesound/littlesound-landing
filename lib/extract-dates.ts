@@ -1,4 +1,4 @@
-import { validateItem, type DateItem } from '@/lib/activity-dates';
+import { validateItem, type DateItem, MAX_ITEMS_PER_LISTING } from '@/lib/activity-dates';
 
 // Server-only: asks Claude to pull schedule facts out of provider web pages —
 // either text an admin pasted (Dates tab) or pages the date agent fetched
@@ -194,6 +194,7 @@ Record two kinds of items for THIS listing with the record_schedule tool:
 - registration: when signups open (start_date/start_time) and close (end_date/end_time).
 
 Rules:
+- At most 40 items for this listing. If the pages list more sessions or time slots than that (a swim school's weekly grid, a city-wide brochure), record 40 that cover the range (the soonest dated ones; for ongoing weekly classes a spread across days and levels) and say in notes how many there are in total.
 - Only record what the text actually states. Never guess or fill gaps. Leave fields null when not stated.
 - items: only this listing's program. Pages often mix several (lessons, camps, open hours, adult programs).
 - Other kids' programs on the pages go in other_programs (with their dates, ages, price), not in items, warnings or notes.
@@ -292,6 +293,11 @@ Always answer by calling the record_schedule tool exactly once, even when there 
       yearInferred.push(!!(raw as { year_inferred?: unknown }).year_inferred);
     }
   });
+  if (items.length > MAX_ITEMS_PER_LISTING) {
+    notes.push(`The AI listed ${items.length} sessions; kept the first ${MAX_ITEMS_PER_LISTING}.`);
+    items.length = MAX_ITEMS_PER_LISTING;
+    yearInferred.length = MAX_ITEMS_PER_LISTING;
+  }
   const otherPrograms = (Array.isArray(input.other_programs) ? input.other_programs : [])
     .map(cleanProgram)
     .filter((p): p is OtherProgram => p !== null)
