@@ -183,7 +183,7 @@ Provider visits `/providers/signup` → fills out account + business info (now i
 
 **~~Not built yet: editing an already-submitted listing.~~** ✅ Built 2026-08-23 — providers can now self-serve edit their listings. See "Provider listing editing" below.
 
-### Date agent: finds dates automatically (built 2026-11-14, pending migration + CRON_SECRET + deploy)
+### Date agent: finds dates automatically (built + deployed 2026-11-14; first run done)
 
 **What it does:** for each listing, it does the following:
 1. Fetches the listing's website and picks up to 3 same-site pages that look like schedule/camp/registration pages (link words like camp, schedule, class, register; skips about/blog/shop, outside sites, and PDFs).
@@ -197,7 +197,7 @@ Provider visits `/providers/signup` → fills out account + business info (now i
 | All quotes verified, no doubts | **Published automatically** (tagged `approved_by = agent`) |
 | A quote isn't on the page | Inbox |
 | Year not stated, date >90 days out (could be last year's schedule) | Inbox |
-| AI raised a doubt | Inbox |
+| AI raised a real doubt (TBA, conflicting dates, date may belong to another program) | Inbox. **FYI notes** (no registration dates, signup by email, undated sessions) don't hold anything back; they show next to the published dates. |
 | Live dates were typed by hand in the Dates tab | Inbox. **Hand edits are never overwritten.** |
 | Dates disappeared from the site | Inbox (keep or clear) |
 | No dates, none live | Recorded as "no dates on site" |
@@ -225,7 +225,16 @@ Provider visits `/providers/signup` → fills out account + business info (now i
 2. In Vercel, add `CRON_SECRET`: any long random text, e.g. 40+ characters from a password generator. Production environment. Without it, the daily run stays off; the Agent tab still works.
 3. Push. Then `/admin` → Agent → **Check unchecked listings**.
 
-**Status: ⏳ built; typecheck clean; 148 logic checks pass** (67 for the agent, 57 dates, 24 claims). The agent checks cover: URL safety (13 blocked address patterns), robots rules, HTML→text, schedule-link picking, quote verification, every decision rule, and full runs against a simulated skatepark site + AI + database (publish, unchanged-skip, no duplicate suggestions, unverified→inbox, one draft per listing, hand-edit protection, AI-failure retry, robots refusal, metadata-address refusal, JavaScript-only site, no website). The sandbox can't reach the internet, so the first real run in the Agent tab is the live test.
+**First live run (2026-11-14), after three fixes:** 79/79 checked → 1 published, 13 in the review inbox, **50 suggested new listings**, 13 couldn't read. The fixes (also in Bugs found #11–13): Claude 5 models reject a forced tool choice; robots.txt wildcards wrongly blocked every Squarespace site; FYI notes were treated as doubts. A **Retry couldn't-read** button was added.
+
+**The 13 it can't read:**
+- **Block bots (paste once in the Dates tab, or skip):** Woodland Park Zoo ×2 (403), School of Rock (403), International Montessori ×2 (403), Westlake Dance (robots.txt), Studio-Kids (JavaScript-only site).
+- **Bad website addresses in our data** (these also send Discover visitors to dead links):
+  - Broadway Bound: `broadwayboundseattle.org` doesn't exist; real site appears to be `broadwaybound.org`.
+  - Discovery Park Nature Trek: Seattle Parks moved pages (404); e.g. `seattle.gov/parks/allparks/discovery-park/discovery-park-visitor-center`.
+  - Itty Bitty Camps (`ittybittycamps.com`), Evergreen Rhythmics (`evergreenrhythmics.com`; also listed in **Kent**, not Seattle), Junior Sous Chef (`juniorsouschef.com`), Blue Ridge Pool (`blueridgepool.org`): domains gone. Possibly closed. Confirm before launch.
+
+**Earlier status: built; typecheck clean; 148 logic checks pass** (67 for the agent, 57 dates, 24 claims). The agent checks cover: URL safety (13 blocked address patterns), robots rules, HTML→text, schedule-link picking, quote verification, every decision rule, and full runs against a simulated skatepark site + AI + database (publish, unchanged-skip, no duplicate suggestions, unverified→inbox, one draft per listing, hand-edit protection, AI-failure retry, robots refusal, metadata-address refusal, JavaScript-only site, no website). The sandbox can't reach the internet, so the first real run in the Agent tab is the live test.
 
 ### Calendar agent Phase 1, Step A: activity dates (built 2026-11-11, pending migration + API key + deploy)
 
@@ -389,9 +398,15 @@ The 2026-08-23 list (family saved activities, provider listing editing, homepage
 New priorities (agreed with Evan 2026-11-11), tackle top-down:
 
 1. **Calendar agent, Phase 1 Step B:** each family's private calendar subscription link (works with Google/Apple/Outlook), "Add to my calendar" on a saved activity's sessions, and email alerts through Brevo: registration opening (a week before and the morning of) plus a change notice when updated dates are approved for something they saved. Design in "Calendar agent — roadmap" below.
-2. **Run the date agent** once its setup is done (`/admin` → Agent → "Check unchecked listings"). Then work the small inbox: anything it couldn't verify, plus suggested new listings. After that it re-checks every site daily on its own.
+2. **Finish the date agent's first pass:** approve/dismiss the 13 drafts in the review inbox (one-time; they were held under the old rule where any AI note blocked publishing), and fix or remove the stale website addresses listed under the date agent in Completed Work. After that it re-checks every site daily on its own.
 3. **Calendar agent, Phase 2:** weekly family digest email; kids' names on profiles so calendar items belong to a specific kid.
 4. **Calendar agent, Phase 3:** text alerts, scheduling help, and direct Google Calendar connect. Start the slow external approvals early (Twilio/10DLC registration, Google app verification).
+5. **Automate new listings** (**parked by Evan 2026-11-14 until the calendar agent work is done**). Today the date agent spots other programs on sites it already reads and saves them as Suggestions (50 on the first run); each needs an **Add** click. Open questions with Claude's suggested defaults, not yet decided:
+   - *Going live:* auto-add when solid (kids' program, in the service area, working site, ages + category, not a duplicate) with a daily "added" list and undo; anything doubtful waits. Alternatives: batch approve with checkboxes, or keep one-by-one.
+   - *Finding new providers:* weekly Claude web search by category × neighborhood, then facts from each provider's **own** site. Parent directories (ParentMap, Seattle's Child, Seattle Parks catalogs) only as a source of names, never copying their write-ups.
+   - *Area:* Seattle city only for the beta (the first run already surfaced a Kent provider).
+   - *Budget:* about $20/month of Anthropic usage for weekly searches.
+   - Review the 50 existing suggestions first to judge their quality before trusting auto-add.
 
 **Launch readiness: these must be done before the password gate comes down:**
 - **Honesty pass:** 13 placeholder stats across 7 files ("100+ families" has no real signups behind it; "80+"/"70+" providers vs the real **66 providers / 79 programs** in the seed data; "57+ verified"). Also 8 stale timing mentions ("Q3 2026", "this summer"), including in `/terms`.
@@ -529,7 +544,7 @@ Built 2026-10-27 — see "Provider listing claims" under Completed Work. The ori
 - ~~**Canonical domain not pinned**~~ — ✅ resolved 2026-11-11: Evan confirmed in a browser that `thelittlesound.com` redirects to `https://www.thelittlesound.com/`. `www` is the primary, which matches `SITE_URL` in `lib/site.ts` (used by the sitemap). Earlier fetch tools had followed the redirect silently, which made both hosts look like they served pages directly. Minor leftover: `app/layout.tsx` Open Graph URLs and Brevo email links still use the bare domain. They work, via the redirect, but could be switched to `www` sometime.
 
 ## Bugs found + fixed
-Listed chronologically. #1–3 found and fixed 2026-08-03 while building and testing provider authentication; #4–5 found 2026-10-16 during the homepage CTA work; #6–10 found 2026-10-27 while building listing claims.
+Listed chronologically. #1–3 found and fixed 2026-08-03 while building and testing provider authentication; #4–5 found 2026-10-16 during the homepage CTA work; #6–10 found 2026-10-27 while building listing claims; #11–13 found 2026-11-14 on the date agent's first live run.
 
 1. **Provider signup wrote two `submissions` rows per provider.** Both the account-creation step and the listing-creation step posted to the same `/api/providers/submit` endpoint, which always inserted into `submissions` regardless of type. Found while building provider auth (not from a live test). Fixed as part of that build — account creation no longer touches `submissions` at all.
 2. **Duplicate-email signup silently broke account creation.** Supabase's anti-enumeration protection means `auth.signUp()` doesn't error when called with an already-registered email — it returns a decoy user object with an id that doesn't exist in `auth.users`, so nothing leaks about whether the email is taken. Both `/api/families/signup` and `/api/providers/signup` took that at face value and tried to write a profile row for the fake id, causing a foreign-key error (`23503`) that cascaded into other failures downstream (a provider's first listing submission then failed with a not-null violation because their profile was never actually created). Found when Evan tested provider signup with `esherm7@gmail.com`, which already had an admin account. Fixed by checking `data.user.identities.length === 0` right after signUp — now returns a clear "an account with this email already exists" error instead of silently corrupting state.
@@ -541,3 +556,6 @@ Listed chronologically. #1–3 found and fixed 2026-08-03 while building and tes
 8. **`/api/activities` was likely frozen at build time.** A Next 14 `GET` route handler that doesn't read the request is static by default, so newly approved listings likely didn't reach Discover until the next deploy (not confirmed against a live build — but #7 would have hidden it anyway). Fixed defensively with `export const dynamic = 'force-dynamic'`, matching the dashboards.
 9. **Provider signup dropped where the user was headed.** Login's "sign up" link didn't carry `?next=`, signup ignored it, and the confirmation email returned to the Site URL — then signup sent everyone to *create a new listing*. A provider arriving from a claim link would have created a duplicate of the listing they came to claim. Fixed by carrying `next` through login → signup → `emailRedirectTo` → login, and through the middleware's signed-in bounce.
 10. **Open redirect via `?next=`.** Provider login, family login, and `/unlock` redirected to any `next` value, including other sites (`/providers/login?next=https://evil.example` would send someone there right after signing in). Fixed with `lib/safe-next.ts`, which only allows same-site paths.
+11. **Every date-agent check failed on the first run.** `claude-sonnet-5-5` rejects a forced `tool_choice` (`"tool"`/`"any"` → HTTP 400), which `lib/extract-dates.ts` sent on every request, so all 79 listings showed "couldn't read". The sandbox tests used a fake AI, so only the live API could reveal it. Fixed: Claude 5-family models get `tool_choice: auto` (the prompt says to always call the tool) plus `effort: medium`; older models keep the forced tool; a clear error if the AI skips the tool.
+12. **robots.txt wildcards blocked whole sites.** `robotsAllows` cut each rule at its first `*`, so Squarespace's default `Disallow: /*?author=*` became `Disallow: /` and every Squarespace site read as "asks bots not to read this page". Fixed with RFC 9309 matching (wildcards, `$` anchor, path + query, longest rule wins), robots re-checked on every redirect hop, and connection errors now say why (bad address, refused, invalid certificate). "Couldn't read" dropped from 35 to 13.
+13. **Harmless AI notes held verified dates for review.** Any AI warning sent a listing to the inbox, including FYIs like "registration is by email" or "holiday sessions not dated yet", so only 1 of 14 listings with dates published. Fixed: the AI now separates doubts (block publishing) from notes (shown only); a year in a nearby heading counts as stated.
