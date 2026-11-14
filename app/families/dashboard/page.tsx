@@ -1,7 +1,12 @@
 import { redirect } from 'next/navigation';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
-import { getDateLines } from '@/lib/activity-dates-server';
-import DashboardClient, { type Profile, type SavedActivity } from './DashboardClient';
+import { getDatesByActivity, getDateLines } from '@/lib/activity-dates-server';
+import { seattleToday } from '@/lib/activity-dates';
+import { describeItem } from '@/lib/date-agent-logic';
+import { sessionKey, upcomingSessions } from '@/lib/family-calendar';
+import { feedUrl, getOrCreateFeedToken, getPicks } from '@/lib/family-calendar-server';
+import { supabaseAdmin } from '@/lib/supabase';
+import DashboardClient, { type CalendarData, type Profile, type SavedActivity } from './DashboardClient';
 
 // Always render fresh — avoids ever serving a router-cached snapshot from
 // before a profile update or sign-in.
@@ -46,7 +51,43 @@ export default async function FamilyDashboardPage() {
   const savedActivities: SavedActivity[] = (savedRows as SavedActivity[]) ?? [];
 
   // Upcoming registration / session dates for what they've saved.
-  const dateLines = await getDateLines(savedActivities.map((s) => s.activity_id));
+  const savedIds = savedActivities.map((s) => s.activity_id);
+  const dateLines = await getDateLines(savedIds);
 
-  return <DashboardClient profile={initialProfile} savedActivities={savedActivities} dateLines={dateLines} />;
+  const calendar = await loadCalendar(user.id, savedIds);
+
+  return <DashboardClient profile={initialProfile} savedActivities={savedActivities} dateLines={dateLines} calendar={calendar} />;
+}
+
+// Calendar data (service-role reads, scoped to this user). If the calendar
+// tables haven't been created yet, the page still works without it.
+async function loadCalendar(userId: string, savedIds: string[]): Promise<CalendarData | null> {
+  const token = await getOrCreateFeedToken(userId);
+  if (!token) return null;
+  const today = seattleToday();
+  const [dates, picks, alertsRow] = await Promise.all([
+    getDatesByActivity(savedIds),
+    getPicks(userId),
+    supabaseAdmin.from('profiles').select('email_alerts').eq('id', userId).maybeSingle(),
+  ]);
+  const sessions: CalendarData['sessions'] = {};
+  for (const id of savedIds) {
+    const list = upcomingSessions(dates.get(id) ?? [], today);
+    if (list.length) sessions[id] = list.map((item) => ({ key: sessionKey(item), text: describeItem(item, today), item }));
+  }
+  return {
+    feedUrl: feedUrl(token),
+    emailAlerts: alertsRow.data?.email_alerts !== false,
+    today,
+    sessions,
+    picks: picks
+      .filter((p) => savedIds.includes(p.activity_id))
+      .map((p) => ({
+        activityId: p.activity_id,
+        key: p.session_key,
+        status: p.status,
+        changeNote: p.change_note,
+        text: describeItem(p.item, today),
+      })),
+  };
 }

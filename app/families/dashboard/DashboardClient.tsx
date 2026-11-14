@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
+import { CalendarPanel, SessionPicker, type CalendarPick, type CalendarSession } from './CalendarParts';
 
 const NEIGHBORHOODS = [
   'Ballard', 'Beacon Hill', 'Capitol Hill', 'Central District', 'Columbia City',
@@ -47,14 +48,25 @@ export interface SavedActivity {
   created_at: string;
 }
 
+export interface CalendarData {
+  feedUrl: string;
+  emailAlerts: boolean;
+  today: string;
+  /** Upcoming sessions per saved activity id. */
+  sessions: Record<string, CalendarSession[]>;
+  picks: CalendarPick[];
+}
+
 export default function DashboardClient({
   profile,
   savedActivities,
   dateLines,
+  calendar,
 }: {
   profile: Profile;
   savedActivities: SavedActivity[];
   dateLines: Record<string, string>;
+  calendar: CalendarData | null;
 }) {
   const router = useRouter();
 
@@ -375,6 +387,8 @@ export default function DashboardClient({
               </a>
             </div>
           ) : (
+            <>
+            {calendar && <CalendarPanel feedUrl={calendar.feedUrl} emailAlerts={calendar.emailAlerts} />}
             <div className="flex flex-col gap-3">
               {saved.map((s) => (
                 <div
@@ -401,6 +415,20 @@ export default function DashboardClient({
                       {dateLines[s.activity_id]}
                     </p>
                   )}
+                  {calendar && (
+                    <SessionPicker
+                      activity={{
+                        activityId: s.activity_id,
+                        title: s.title ?? 'Activity',
+                        provider: s.provider,
+                        website: s.website,
+                        neighborhood: s.neighborhood,
+                      }}
+                      sessions={calendar.sessions[s.activity_id] ?? []}
+                      initialPicks={calendar.picks.filter((p) => p.activityId === s.activity_id)}
+                      today={calendar.today}
+                    />
+                  )}
                   <div className="flex items-center gap-4 mt-3">
                     {s.website && (
                       <a
@@ -424,6 +452,7 @@ export default function DashboardClient({
                 </div>
               ))}
             </div>
+            </>
           )}
         </div>
 

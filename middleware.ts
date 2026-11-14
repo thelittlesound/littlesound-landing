@@ -37,7 +37,10 @@ const SITE_PASSWORD =
 const GATE_COOKIE = 'ls_site_access';
 // /api/cron: Vercel's scheduled jobs can't type the site password. Each cron
 // route checks its own CRON_SECRET instead (see app/api/cron/*).
-const GATE_EXEMPT_PATHS = ['/unlock', '/api/site-gate', '/api/cron'];
+// /api/calendar: calendar apps fetch a family's feed with only the long
+// random token in the link. /api/families/alerts/unsubscribe: the signed
+// one-click link in alert emails must work from any device.
+const GATE_EXEMPT_PATHS = ['/unlock', '/api/site-gate', '/api/cron', '/api/calendar', '/api/families/alerts/unsubscribe'];
 
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;

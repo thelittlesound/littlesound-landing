@@ -11,10 +11,10 @@ export async function sendEmail(opts: {
   subject: string;
   html: string;
   replyTo?: string;
-}) {
+}): Promise<boolean> {
   if (!BREVO_API_KEY) {
     console.log(`[notify] BREVO_API_KEY not set — skipped email "${opts.subject}" to ${opts.to}`);
-    return;
+    return false;
   }
   try {
     const res = await fetch('https://api.brevo.com/v3/smtp/email', {
@@ -28,9 +28,14 @@ export async function sendEmail(opts: {
         htmlContent: opts.html,
       }),
     });
-    if (!res.ok) console.error('[notify] Brevo error', res.status, await res.text());
+    if (!res.ok) {
+      console.error('[notify] Brevo error', res.status, await res.text());
+      return false;
+    }
+    return true;
   } catch (e) {
     console.error('[notify] Brevo request failed', e);
+    return false;
   }
 }
 

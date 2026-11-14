@@ -183,6 +183,28 @@ Provider visits `/providers/signup` → fills out account + business info (now i
 
 **~~Not built yet: editing an already-submitted listing.~~** ✅ Built 2026-08-23 — providers can now self-serve edit their listings. See "Provider listing editing" below.
 
+### Calendar agent Phase 1 Step B: family calendars + alerts (built 2026-11-14, pending `supabase/family-calendar.sql` + deploy + live test)
+
+**What families get** (`/families/dashboard`, inside Saved activities):
+- **"Your Little Sound calendar" panel:** one private subscription link per family, with buttons for **Google Calendar**, **Apple / iPhone** (`webcal://`), **Outlook** (outlook.live.com add-from-web), and **Copy link**, plus **Reset link** (the old link stops working at once). Note shown: calendar apps refresh on their own schedule; Google can take up to a day.
+- **"Add to my calendar"** on each saved activity with upcoming sessions: pick the session the child is in (first 6 shown, "Show all N"), **Add / Added ✓**, and a per-session **.ics** download for a one-off add to any calendar. Families pick sessions; they never type them.
+- **Email alerts switch** (on by default): "Email me a week before registration opens, the morning it opens, and if a session I added changes."
+- A picked session the provider moved shows "Updated by the provider · Was …"; one that disappeared shows "No longer on their schedule" with **Remove**.
+
+**The feed** (`/api/calendar/<token>.ics`, `lib/ics.ts`): picked sessions (weekly classes as weekly repeats with an end date; ongoing classes with no dates repeat weekly from the day picked; camp weeks with daily hours repeat Mon–Fri; untimed ranges are one all-day block) plus "Registration opens/closes" reminders for everything saved. Seattle wall-clock times with a `VTIMEZONE` block (correct across daylight saving). A picked session is matched to the listing's **current** dates each time the feed is read, so a moved session shows its new time even before the daily job runs. Only activities still saved are included. The token is 32 random characters; unknown tokens get a plain 404.
+
+**Daily alerts job** (`/api/cron/family-alerts`, Vercel Cron `5 15 * * *` = 7–8am Seattle in winter, 8–9am in summer; after the date agent): (1) keeps every family's picks in step with their listings' dates: same session → nothing; same label at a new time → updated + "changed" alert; otherwise → marked gone + alert (never guesses between two candidates); (2) sends **one email per family per day** (alerts on) covering registration opening within 7 days / today and those changes. Every alert is logged in `family_alert_log` and never re-sent; a failed send isn't logged, so it retries next day. Stops starting emails after 45 seconds (the rest go next day). Unsubscribe is a signed one-click link (HMAC with `ALERTS_SECRET`, falling back to `CRON_SECRET`), no sign-in needed.
+
+**Picks follow the session, not the database row:** `activity_dates` rows are replaced wholesale on every update, so a pick stores its own copy of the session plus a **session key** (dates, weekdays, times; not the label) and is re-matched by key, then by label.
+
+**Security:** all three new tables are service-role only (RLS on, no client policies); the dashboard goes through `/api/families/*`, which check the signed-in user, only accept a session that's currently listed for an activity the family saved, and cap picks at 200. `middleware.ts` exempts `/api/calendar` (calendar apps can't type the site password; the token is the key) and `/api/families/alerts/unsubscribe` (signed) from the site password.
+
+**New files:** `supabase/family-calendar.sql` (`family_calendar_feeds`, `calendar_picks`, `family_alert_log`, `profiles.email_alerts`), `lib/ics.ts`, `lib/family-calendar.ts` (pure: session keys, matching, registration-alert windows, events), `lib/family-calendar-server.ts`, `lib/family-alerts.ts` (pure planner + email), `app/api/calendar/[file]/route.ts`, `app/api/families/calendar/picks/route.ts`, `…/calendar/reset/route.ts`, `app/api/families/alerts/route.ts`, `…/alerts/unsubscribe/route.ts`, `app/api/cron/family-alerts/route.ts`, `app/families/dashboard/CalendarParts.tsx`. **Changed:** dashboard `page.tsx` + `DashboardClient.tsx`, `lib/notify.ts` (`sendEmail` now returns whether it sent), `middleware.ts`, `vercel.json`.
+
+**Deploy steps:** (1) run `supabase/family-calendar.sql` in Supabase; (2) push; (3) live test: sign in as a family, save an activity that has dates, Add a session, subscribe from a phone calendar, check the event time; turn alerts off and on.
+
+**Status:** typecheck clean; 72 calendar checks pass (time-zone math incl. leap day and year end, each calendar shape, line folding with accented text, no line-injection via URLs, matching moved/gone sessions, alert windows and keys, feed contents, token reset, forged vs signed unsubscribe, and the daily job end-to-end: one email, nothing re-sent, duplicate after a move, alerts off, Brevo down then retried). Not yet tested in a real calendar app. **Known limit:** listings capped at 40 sessions (big swim-school grids) may not include a family's exact slot.
+
 ### Date agent: finds dates automatically (built + deployed 2026-11-14; first run done)
 
 **What it does:** for each listing, it does the following:
@@ -431,7 +453,7 @@ The 2026-08-23 list (family saved activities, provider listing editing, homepage
 
 New priorities (agreed with Evan 2026-11-11), tackle top-down:
 
-1. **Calendar agent, Phase 1 Step B:** each family's private calendar subscription link (works with Google/Apple/Outlook), "Add to my calendar" on a saved activity's sessions, and email alerts through Brevo: registration opening (a week before and the morning of) plus a change notice when updated dates are approved for something they saved. Design in "Calendar agent — roadmap" below.
+1. **Calendar agent, Phase 1 Step B: built 2026-11-14, finish the rollout:** run `supabase/family-calendar.sql`, push, and do the live test in Completed Work (subscribe from a real phone calendar). Then watch the first alert emails.
 2. **Finish the date agent's first pass:** approve/dismiss the 13 drafts in the review inbox (one-time; they were held under the old rule where any AI note blocked publishing), and fix or remove the stale website addresses listed under the date agent in Completed Work. After that it re-checks every site daily on its own.
 3. **Calendar agent, Phase 2:** weekly family digest email; kids' names on profiles so calendar items belong to a specific kid.
 4. **Calendar agent, Phase 3:** text alerts, scheduling help, and direct Google Calendar connect. Start the slow external approvals early (Twilio/10DLC registration, Google app verification).
@@ -471,7 +493,7 @@ New priorities (agreed with Evan 2026-11-11), tackle top-down:
 **Scheduling help needs data we don't store yet:** kids' names (profiles only have ages) and better locations (only neighborhoods). That's why it comes last.
 
 **Phases:**
-- **Phase 1:** Step A, the date foundation (✅ built 2026-11-11) plus the automatic date agent (✅ built 2026-11-14), see Completed Work; Step B, calendar subscription + Add-to-calendar + email alerts.
+- **Phase 1:** Step A, the date foundation (✅ built 2026-11-11) plus the automatic date agent (✅ built 2026-11-14), see Completed Work; Step B, calendar subscription + Add-to-calendar + email alerts (✅ built 2026-11-14).
 - **Phase 2:** weekly digest; kids' names on profiles.
 - **Phase 3:** texts, direct Google Calendar, scheduling help (clashes, pickup overlaps, "fits your week").
 
@@ -527,6 +549,11 @@ Built 2026-10-27 — see "Provider listing claims" under Completed Work. The ori
 | `lib/fetch-page.ts` | Polite, SSRF-safe page fetcher; HTML→text; schedule-link picking; robots.txt |
 | `lib/date-agent-logic.ts` | Pure agent rules: quote verification, publish/review decision, display |
 | `lib/date-agent.ts` | Runs the agent on one listing |
+| `lib/ics.ts` / `lib/family-calendar.ts` | Calendar files; family session picks, matching, alert windows (pure) |
+| `lib/family-calendar-server.ts` / `lib/family-alerts.ts` | Feed tokens + feed; daily alert planner + email |
+| `app/api/calendar/[file]/route.ts` | A family's private calendar feed (`<token>.ics`) |
+| `app/api/cron/family-alerts/route.ts` | Daily: keep picks in step, send registration/change emails |
+| `app/families/dashboard/CalendarParts.tsx` | Calendar panel + per-activity session picker |
 | `app/api/admin/agent/` | Agent status, check-one, inbox approve/dismiss, suggestion add/dismiss |
 | `app/api/cron/date-agent/route.ts` | Daily automatic run (needs `CRON_SECRET`) |
 | `vercel.json` | Cron schedule |
