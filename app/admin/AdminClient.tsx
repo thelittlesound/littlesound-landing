@@ -106,7 +106,9 @@ export default function AdminClient({ adminEmail }: { adminEmail: string }) {
   const selected = submissions.find(s => s.id === selectedId);
 
   return (
-    <div className="min-h-screen bg-[#F5EFE0] font-['DM_Sans']">
+    // pt-16 clears the site's fixed top nav (h-16, rendered by app/layout.tsx),
+    // which otherwise covers the admin header.
+    <div className="min-h-screen bg-[#F5EFE0] font-['DM_Sans'] pt-16">
       {/* Toast */}
       {toast && (
         <div className={`fixed top-4 right-4 z-50 px-5 py-3 rounded-xl shadow-lg text-sm font-semibold transition-all ${

@@ -27,7 +27,7 @@ const TOOL = {
           properties: {
             kind: { type: 'string', enum: ['session', 'registration'] },
             label: { type: ['string', 'null'], description: 'Short name, e.g. "Week 3: Robotics (ages 8–10)" or "Summer 2027 registration"' },
-            start_date: { type: ['string', 'null'], description: 'YYYY-MM-DD. Session start, or the day registration opens.' },
+            start_date: { type: ['string', 'null'], description: 'YYYY-MM-DD. Session start, or the day registration opens. Null for an ongoing weekly class with no stated dates.' },
             end_date: { type: ['string', 'null'], description: 'YYYY-MM-DD. Session end, or the day registration closes.' },
             days_of_week: {
               type: ['array', 'null'],
@@ -82,12 +82,14 @@ Listing: "${opts.listing.title}" by ${opts.listing.business}${opts.listing.websi
 Today in Seattle is ${opts.today}.
 
 Record two kinds of items with the record_schedule tool:
-- session: when the program runs. A recurring class: days_of_week + start_time/end_time between start_date and end_date. A camp week or term: its date range (+ daily times if given). One item per distinct session, week, or term.
+- session: when the program runs. A recurring class: days_of_week + start_time/end_time between start_date and end_date. An ongoing weekly class with no stated dates (e.g. "Sundays 12–1pm"): days_of_week + times, start_date and end_date null. A camp week or term: its date range (+ daily times if given). One item per distinct session, week, term, or time slot (two back-to-back slots = two items).
 - registration: when signups open (start_date/start_time) and close (end_date/end_time).
 
 Rules:
 - Only record what the text actually states. Never guess or fill gaps. Leave fields null when not stated.
-- Only this listing's program. Ignore unrelated programs on the same page.
+- Only this listing's program. Pages often mix several (lessons, camps, open hours, adult programs). Record only what matches the listing, and in warnings name any other dated kids' programs you skipped (e.g. "Also on page: Autumn Skate Camp Nov 23–25"), so the reviewer can decide whether it deserves its own listing.
+- General opening/admission hours are not a program session. Don't record them unless the listing is itself about that drop-in time.
+- Skip dates that are already past, and mention them in warnings.
 - Dates as YYYY-MM-DD. If the text gives no year, use the next occurrence on or after today and add a warning saying you inferred it.
 - Times are Seattle local, 24-hour HH:MM.
 - source_excerpt: quote the words each item came from so a person can verify it.

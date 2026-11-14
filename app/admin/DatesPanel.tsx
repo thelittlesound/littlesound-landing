@@ -269,7 +269,7 @@ export default function DatesPanel({ onToast }: { onToast: (msg: string, ok: boo
       <div className="flex-1 min-w-0">
         {!selected ? (
           <div className="bg-white rounded-2xl border border-[#E8DFC8] p-8 text-center">
-            <p className="text-[#7A9AAA] text-sm">Pick a listing to add or check its dates.</p>
+            <p className="text-[#7A9AAA] text-sm">Pick a listing from the list to add or check its dates.</p>
           </div>
         ) : (
           <div className="bg-white rounded-2xl border border-[#E8DFC8] p-5">
@@ -322,6 +322,9 @@ export default function DatesPanel({ onToast }: { onToast: (msg: string, ok: boo
               >
                 {extracting ? 'Reading the page…' : 'Extract dates with AI'}
               </button>
+              {aiConfigured && !pasted.trim() && !extracting && (
+                <p className="text-xs text-[#7A9AAA] mt-2">Paste the schedule text above to enable the button.</p>
+              )}
             </div>
 
             {warnings.length > 0 && (
@@ -403,7 +406,7 @@ export default function DatesPanel({ onToast }: { onToast: (msg: string, ok: boo
                               {DAY_LABEL[d]}
                             </button>
                           ))}
-                          <span className="text-[11px] text-[#B0C8D0] ml-1">(weekly classes)</span>
+                          <span className="text-[11px] text-[#B0C8D0] ml-1">(weekly classes: leave dates blank if it runs year-round)</span>
                         </div>
                       )}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">

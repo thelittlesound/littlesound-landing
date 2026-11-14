@@ -80,15 +80,27 @@ export function summarize(items: DateItem[], today: string): string | null {
     return `Registration opens ${formatDay(nextOpen.start_date!, today)}${at}`;
   }
 
-  // Otherwise: the next or current session.
+  // Otherwise: the next or current dated session.
   const sessions = items
     .filter((i) => i.kind === 'session' && i.start_date && (i.end_date ?? i.start_date) >= today)
     .sort((a, b) => a.start_date!.localeCompare(b.start_date!));
   const next = sessions[0];
-  if (!next) return null;
-  if (next.start_date! > today) return `Next session starts ${formatDay(next.start_date!, today)}`;
-  if (next.days_of_week?.length) return `Running now · ${formatDays(next.days_of_week)}`;
-  return 'Running now';
+  if (next) {
+    if (next.start_date! > today) return `Next session starts ${formatDay(next.start_date!, today)}`;
+    if (next.days_of_week?.length) return `Running now · ${weekly(next)}`;
+    return 'Running now';
+  }
+
+  // Last: an ongoing weekly class with no dates ("Sundays 12–1pm").
+  const ongoing = items.find(
+    (i) => i.kind === 'session' && !i.start_date && (!i.end_date || i.end_date >= today) && i.days_of_week?.length
+  );
+  return ongoing ? `Weekly · ${weekly(ongoing)}` : null;
+}
+
+/** "Sun 12pm" / "Mon, Wed 4:30pm" — weekdays plus start time if known. */
+function weekly(i: DateItem): string {
+  return `${formatDays(i.days_of_week ?? [])}${i.start_time ? ` ${formatTime(i.start_time)}` : ''}`;
 }
 
 // ── Validation ───────────────────────────────────────────────────────────────
@@ -132,7 +144,6 @@ export function validateItem(raw: unknown): DateItem | string {
   const end_date = r.end_date == null || r.end_date === '' ? null : String(r.end_date);
   if (start_date && !realDate(start_date)) return `bad start date "${start_date}"`;
   if (end_date && !realDate(end_date)) return `bad end date "${end_date}"`;
-  if (!start_date && !end_date) return 'needs at least a start or end date';
   if (start_date && end_date && end_date < start_date) return 'end date is before start date';
 
   const start_time = normTime(r.start_time);
@@ -145,6 +156,14 @@ export function validateItem(raw: unknown): DateItem | string {
     const days = r.days_of_week.map((d) => String(d).toUpperCase().slice(0, 2));
     if (!days.every((d) => (WEEKDAYS as readonly string[]).includes(d))) return 'days must be MO–SU';
     days_of_week = WEEKDAYS.filter((d) => days.includes(d));
+  }
+
+  // Every row needs a date — except an ongoing weekly class ("Sundays
+  // 12–1pm", no start/end), which is common and still useful to families.
+  if (!start_date && !end_date && !days_of_week) {
+    return kind === 'session'
+      ? 'needs a date, or weekday(s) for an ongoing weekly class'
+      : 'needs an open or close date';
   }
 
   return {
