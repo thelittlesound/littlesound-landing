@@ -2,6 +2,7 @@ import { createHash } from 'crypto';
 import { supabaseAdmin } from '@/lib/supabase';
 import { type DatesListing } from '@/lib/activity-dates-server';
 import { fetchPage, pickScheduleLinks, type FetchedPage } from '@/lib/fetch-page';
+import { findWidgets, platformList, type Widget } from '@/lib/booking-widgets';
 import { extractDates, type OtherProgram } from '@/lib/extract-dates';
 import { seattleToday, type DateItem } from '@/lib/activity-dates';
 import {
@@ -26,6 +27,8 @@ export interface AgentResult {
 
 const MIN_TEXT = 300;
 const EXTRA_PAGES = 3;
+const WIDGET_PAGES = 2; // booking-system pages read per listing
+const WIDGET_MIN_TEXT = 200; // less than this = the widget page needs JavaScript too
 const DATE_FIELDS = 'kind, label, start_date, end_date, days_of_week, start_time, end_time, location, notes, source_excerpt, approved_by';
 
 async function record(activityId: string, fields: Record<string, unknown>) {
@@ -55,23 +58,54 @@ export async function checkListing(
   const home = await fetchPage(listing.website);
   if ('error' in home) return done('unreadable', home.error);
 
+  // Schedule pages on their site, and (in parallel) any booking system the
+  // home page embeds or links to. Widgets found only on the schedule pages
+  // are read after, if the home page had none.
   const links = pickScheduleLinks(home.links, home.url, EXTRA_PAGES);
-  const extra = await Promise.all(links.map((u) => fetchPage(u)));
-  const pages = [home, ...extra.filter((p): p is FetchedPage => !('error' in p))].filter((p) => p.text.length >= 50);
+  const homeWidgets = findWidgets([home], WIDGET_PAGES);
+  const [extra, homeWidgetPages] = await Promise.all([
+    Promise.all(links.map((u) => fetchPage(u))),
+    readWidgets(homeWidgets),
+  ]);
+  const sitePages = [home, ...extra.filter((p): p is FetchedPage => !('error' in p))];
+  let widgets = homeWidgets;
+  let widgetPages = homeWidgetPages;
+  if (!homeWidgets.some((w) => w.url)) {
+    widgets = findWidgets(sitePages, WIDGET_PAGES);
+    widgetPages = await readWidgets(widgets);
+  }
+  const pages = [...sitePages, ...widgetPages.read].filter((p) => p.text.length >= 50);
   const checked_urls = pages.map((p) => p.url);
+  // Booking systems we saw but couldn't read (needs JavaScript, blocked, …).
+  const unreadWidgets = widgets
+    .filter((w) => !w.url || widgetPages.failed.includes(w.url))
+    .filter((w) => !widgetPages.read.some((p) => p.platform === w.platform));
+  const widgetHint = unreadWidgets.length
+    ? `Its schedule seems to be in ${platformList(unreadWidgets.map((w) => w.platform))} (a booking system the agent can’t read). Paste it in the Dates tab.`
+    : '';
+
   const totalText = pages.reduce((n, p) => n + p.text.length, 0);
   if (totalText < MIN_TEXT) {
-    return done('unreadable', 'The site shows almost no text to a reader like ours (it may need JavaScript). Paste its schedule in the Dates tab.', { checked_urls });
+    return done(
+      'unreadable',
+      widgetHint || 'The site shows almost no text to a reader like ours (it may need JavaScript). Paste its schedule in the Dates tab.',
+      { checked_urls }
+    );
   }
 
   // ── 2. Unchanged since last time? Skip the AI. ─────────────────────────────
   const page_hash = createHash('sha256').update(pages.map((p) => `${p.url}\n${p.text}`).join('\n\n')).digest('hex');
   const { data: prev } = await supabaseAdmin
     .from('listing_sources')
-    .select('page_hash, last_status')
+    .select('page_hash, last_status, last_message')
     .eq('activity_id', id)
     .maybeSingle();
   const changed = !prev || prev.page_hash !== page_hash;
+  // Unchanged, no dates last time, and a booking system we can't read: the
+  // schedule is in there, so it needs a hand (no point asking the AI again).
+  if (!opts.force && !changed && ['unreadable', 'no_dates'].includes(prev?.last_status ?? '') && widgetHint) {
+    return done('unreadable', widgetHint, { page_hash, checked_urls });
+  }
   if (!opts.force && !changed && ['published', 'unchanged', 'no_dates', 'review'].includes(prev?.last_status ?? '')) {
     const keep = prev!.last_status === 'review' ? 'review' : 'unchanged';
     return done(keep, keep === 'review' ? 'Still waiting for your review (site unchanged)' : 'Site unchanged since last check', { page_hash, checked_urls });
@@ -129,11 +163,18 @@ export async function checkListing(
     await clearPendingDraft(id); // anything still pending is out of date now
     status = decision.action === 'noop' ? 'unchanged' : 'no_dates';
   }
+  // No dates found, but we saw a booking system we couldn't read: that's
+  // where the schedule is, so this listing needs a hand (Dates tab paste).
+  let reason = decision.reason;
+  if (status === 'no_dates' && widgetHint) {
+    status = 'unreadable';
+    reason = widgetHint;
+  }
 
   const suggestions = await saveSuggestions(listing, ext.otherPrograms, pages[0].url, opts.catalog, today);
   const fyi = status === 'published' && ext.notes.length ? ` · Note: ${ext.notes[0]}`.slice(0, 300) : '';
   const note = suggestions ? ` · ${suggestions} new program${suggestions === 1 ? '' : 's'} suggested` : '';
-  return done(status, decision.reason + fyi + note, changeFields, suggestions);
+  return done(status, reason + fyi + note, changeFields, suggestions);
 }
 
 async function saveSuggestions(
@@ -174,4 +215,20 @@ async function saveSuggestions(
     else added += (data ?? []).length;
   }
   return added;
+}
+
+// Reads booking-system pages. A page with almost no text needs JavaScript
+// (or is an error page) and counts as failed.
+async function readWidgets(
+  widgets: Widget[]
+): Promise<{ read: (FetchedPage & { platform: string })[]; failed: string[] }> {
+  const targets = widgets.filter((w): w is Widget & { url: string } => !!w.url);
+  const results = await Promise.all(targets.map((w) => fetchPage(w.url, 6000)));
+  const read: (FetchedPage & { platform: string })[] = [];
+  const failed: string[] = [];
+  results.forEach((r, i) => {
+    if ('error' in r || r.text.length < WIDGET_MIN_TEXT) failed.push(targets[i].url);
+    else read.push({ ...r, platform: targets[i].platform });
+  });
+  return { read, failed };
 }

@@ -17,6 +17,8 @@ export interface FetchedPage {
   url: string; // final URL after redirects
   text: string;
   links: Link[];
+  /** src of <iframe>/<script> tags: where booking widgets usually live. */
+  embeds: string[];
 }
 export type FetchResult = FetchedPage | { error: string };
 
@@ -185,6 +187,23 @@ export function extractLinks(html: string, base: string): Link[] {
   return out;
 }
 
+export function extractEmbeds(html: string, base: string): string[] {
+  const out = new Set<string>();
+  const re = /<(?:iframe|script)\b[^>]*?\s(?:data-)?src\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/gi;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(html))) {
+    const src = decodeEntities((m[1] ?? m[2] ?? m[3] ?? '').trim());
+    if (!src) continue;
+    try {
+      const u = new URL(src, base);
+      if (u.protocol === 'http:' || u.protocol === 'https:') out.add(u.toString());
+    } catch {
+      // unparseable src
+    }
+  }
+  return [...out].slice(0, 200);
+}
+
 // ── Finding the schedule pages ──────────────────────────────────────────────
 
 const GOOD: [RegExp, number][] = [
@@ -283,6 +302,7 @@ export async function fetchPage(raw: string, timeoutMs = 8000): Promise<FetchRes
       url: url.toString(),
       text: isHtml ? htmlToText(html) : html,
       links: isHtml ? extractLinks(html, url.toString()) : [],
+      embeds: isHtml ? extractEmbeds(html, url.toString()) : [],
     };
   }
   return { error: 'Too many redirects' };
