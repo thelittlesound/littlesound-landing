@@ -16,7 +16,8 @@
     "@sendgrid/mail": "^7.7.0",
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.45.0",
-    "axios": "^1.6.0"
+    "axios": "^1.6.0",
+    "unpdf": "^1.4.0"
   },
   "devDependencies": {
     "typescript": "^5.3.0",

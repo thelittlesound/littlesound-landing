@@ -20,7 +20,7 @@ export interface FetchedPage {
   /** src of <iframe>/<script> tags: where booking widgets usually live. */
   embeds: string[];
 }
-export type FetchResult = FetchedPage | { error: string };
+export type FetchResult = FetchedPage | { error: string; pdf?: boolean };
 
 // ── URL safety ───────────────────────────────────────────────────────────────
 
@@ -244,6 +244,47 @@ export function pickScheduleLinks(links: Link[], pageUrl: string, max = 3): stri
   return scored.sort((a, b) => b.score - a.score).slice(0, max).map((s) => s.url);
 }
 
+// Schedule PDFs: brochures, lesson grids, camp guides. A link counts when its
+// URL ends in .pdf or its text says brochure/guide/schedule/grid/catalog (some
+// sites link a short URL that redirects to the PDF). Forms and policies are
+// skipped. Current/next year's files rank first; older years are dropped.
+const PDF_TEXT = /brochure|guide|catalog|schedule|grid|calendar|session|class list|camp/i;
+const PDF_SKIP = /application|waiver|form\b|forms\b|handbook|immuni[sz]|medication|policy|policies|accommodation|grading|criteria|menu|map\b|minutes|agenda|invoice|receipt|resume|flyer-?template/i;
+
+export function pickPdfLinks(links: Link[], pageUrl: string, today: string, max = 2): string[] {
+  const base = new URL(pageUrl);
+  const year = Number(today.slice(0, 4));
+  const seen = new Set<string>();
+  const scored: { url: string; score: number; year: number }[] = [];
+  for (const l of links) {
+    let u: URL;
+    try {
+      u = new URL(l.url);
+    } catch {
+      continue;
+    }
+    if (bareHost(u.hostname) !== bareHost(base.hostname)) continue;
+    u.hash = '';
+    const isPdf = /\.pdf$/i.test(u.pathname);
+    const hay = `${decodeURIComponent(u.pathname)} ${l.text}`.toLowerCase();
+    if (!isPdf && !(PDF_TEXT.test(l.text) && /brochure|guide|catalog|grid/i.test(l.text))) continue;
+    if (!isPdf && FILE.test(u.pathname)) continue; // an image or doc, not a PDF
+    if (PDF_SKIP.test(hay)) continue;
+    const key = u.toString();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const years = (hay.match(/\b20\d\d\b/g) ?? []).map(Number);
+    if (years.length && Math.max(...years) < year) continue; // last year's brochure
+    let score = GOOD.reduce((s, [re, w]) => (re.test(hay) ? s + w : s), 0);
+    if (/brochure|grid|schedule|guide/.test(hay)) score += 4;
+    if (years.includes(year) || years.includes(year + 1)) score += 3;
+    if (isPdf) score += 1;
+    scored.push({ url: key, score, year: years.length ? Math.max(...years) : year });
+  }
+  // Newest season first, then the most schedule-like.
+  return scored.sort((a, b) => b.year - a.year || b.score - a.score).slice(0, max).map((s) => s.url);
+}
+
 // ── Fetch ────────────────────────────────────────────────────────────────────
 
 // Turns Node's network error codes into something an admin can act on.
@@ -264,8 +305,9 @@ function connectError(e: unknown): string {
 async function fetchRaw(
   raw: string,
   timeoutMs: number,
-  accept: string
-): Promise<{ url: URL; type: string; body: string } | { error: string }> {
+  accept: string,
+  maxBytes = MAX_BYTES
+): Promise<{ url: URL; type: string; body: string; bytes: ArrayBuffer } | { error: string }> {
   let url = safeUrl(raw);
   if (!url) return { error: 'Not a public web address' };
 
@@ -298,10 +340,13 @@ async function fetchRaw(
     if (!res.ok) return { error: `The page returned HTTP ${res.status}` };
 
     const type = res.headers.get('content-type') ?? '';
-    if (/pdf/i.test(type)) return { error: 'The schedule is a PDF (not read automatically yet)' };
+    const declared = Number(res.headers.get('content-length') ?? 0);
+    if (declared > maxBytes) return { error: `The file is too large to read (${Math.round(declared / 1e6)} MB)` };
     const buf = await res.arrayBuffer();
-    const body = new TextDecoder('utf-8').decode(buf.byteLength > MAX_BYTES ? buf.slice(0, MAX_BYTES) : buf);
-    return { url, type, body };
+    if (buf.byteLength > maxBytes && /pdf/i.test(type)) return { error: 'The file is too large to read' };
+    const capped = buf.byteLength > maxBytes ? buf.slice(0, maxBytes) : buf;
+    const body = /pdf|octet-stream/i.test(type) ? '' : new TextDecoder('utf-8').decode(capped);
+    return { url, type, body, bytes: capped };
   }
   return { error: 'Too many redirects' };
 }
@@ -309,6 +354,7 @@ async function fetchRaw(
 export async function fetchPage(raw: string, timeoutMs = 8000): Promise<FetchResult> {
   const r = await fetchRaw(raw, timeoutMs, 'text/html,text/plain;q=0.9,*/*;q=0.5');
   if ('error' in r) return r;
+  if (/pdf/i.test(r.type)) return { error: 'This page is a PDF', pdf: true };
   if (!/text\/html|text\/plain|application\/xhtml/i.test(r.type)) {
     return { error: `Not a web page (${r.type || 'unknown type'})` };
   }
@@ -332,4 +378,78 @@ export async function fetchJson(raw: string, timeoutMs = 8000): Promise<{ url: s
   } catch {
     return { error: 'The response wasn’t valid JSON' };
   }
+}
+
+// ── PDFs ────────────────────────────────────────────────────────────────────
+
+const MAX_PDF_BYTES = 25_000_000;
+
+/** Page texts of a PDF. Replaceable in tests; the real one loads unpdf only when needed. */
+type PdfExtractor = (bytes: Uint8Array) => Promise<string[]>;
+let pdfExtractor: PdfExtractor = async (bytes) => {
+  const { getDocumentProxy, extractText } = await import('unpdf');
+  const pdf = await getDocumentProxy(bytes);
+  const { text } = await extractText(pdf, { mergePages: false });
+  return Array.isArray(text) ? text : [text];
+};
+export function setPdfExtractorForTests(fn: PdfExtractor) {
+  pdfExtractor = fn;
+}
+
+/** Downloads a PDF (same safety + robots rules) and returns its text, one string per page. */
+export async function fetchPdfPages(raw: string, timeoutMs = 12000): Promise<{ url: string; pages: string[] } | { error: string }> {
+  const r = await fetchRaw(raw, timeoutMs, 'application/pdf,*/*;q=0.5', MAX_PDF_BYTES);
+  if ('error' in r) return r;
+  const looksPdf = /pdf/i.test(r.type) || (/octet-stream/i.test(r.type) && /\.pdf$/i.test(r.url.pathname));
+  if (!looksPdf) return { error: `Not a PDF (${r.type || 'unknown type'})` };
+  try {
+    const pages = await pdfExtractor(new Uint8Array(r.bytes));
+    const clean = pages.map((p) => p.replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim());
+    if (clean.join('').length < 100) return { error: 'The PDF has no readable text (it may be a scanned image)' };
+    return { url: r.url.toString(), pages: clean };
+  } catch (e) {
+    console.error('pdf extract error:', raw, e);
+    return { error: 'Could not read the PDF' };
+  }
+}
+
+/**
+ * The PDF pages most about this listing, up to maxChars, in page order with
+ * "[PDF page N]" markers. Big brochures cover a whole city; only the pages
+ * that mention the listing's words go to the AI.
+ */
+export function selectPdfPages(pages: string[], terms: string[], maxChars: number): string {
+  const words = Array.from(new Set(terms.map((t) => t.toLowerCase()).filter((t) => t.length >= 4)));
+  const scored = pages.map((text, i) => {
+    const low = text.toLowerCase();
+    const score = words.reduce((n, w) => n + (low.includes(w) ? 1 : 0), 0);
+    return { i, text, score };
+  });
+  const any = scored.some((p) => p.score > 0);
+  const order = any ? [...scored].filter((p) => p.score > 0).sort((a, b) => b.score - a.score || a.i - b.i) : scored;
+  const chosen: typeof scored = [];
+  let used = 0;
+  for (const p of order) {
+    const cost = p.text.length + 20;
+    if (used + cost > maxChars) {
+      if (!chosen.length) chosen.push({ ...p, text: p.text.slice(0, maxChars - 20) }); // one huge page
+      if (any) continue;
+      break;
+    }
+    chosen.push(p);
+    used += cost;
+  }
+  return chosen
+    .sort((a, b) => a.i - b.i)
+    .map((p) => `[PDF page ${p.i + 1}]\n${p.text}`)
+    .join('\n\n');
+}
+
+/** Words that identify a listing in a brochure: its title, business and neighborhood. */
+export function listingTerms(l: { title: string; business: string; neighborhood: string | null }): string[] {
+  const STOP = new Set(['with', 'from', 'more', 'your', 'this', 'that', 'kids', 'youth', 'ages', 'and', 'the', 'for', 'program', 'programs', 'class', 'classes', 'seattle', 'parks', 'recreation', 'center', 'centers', 'school', 'year', 'round']);
+  return `${l.title} ${l.business} ${l.neighborhood ?? ''}`
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter((w) => w.length >= 4 && !STOP.has(w));
 }

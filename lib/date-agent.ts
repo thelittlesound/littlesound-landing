@@ -1,7 +1,9 @@
 import { createHash } from 'crypto';
 import { supabaseAdmin } from '@/lib/supabase';
 import { type DatesListing } from '@/lib/activity-dates-server';
-import { fetchJson, fetchPage, pickScheduleLinks, type FetchedPage } from '@/lib/fetch-page';
+import {
+  fetchJson, fetchPage, fetchPdfPages, listingTerms, pickPdfLinks, pickScheduleLinks, selectPdfPages, type FetchedPage,
+} from '@/lib/fetch-page';
 import { findWidgets, iclassproToText, platformList, type Widget } from '@/lib/booking-widgets';
 import { extractDates, type OtherProgram } from '@/lib/extract-dates';
 import { seattleToday, type DateItem } from '@/lib/activity-dates';
@@ -29,6 +31,10 @@ const MIN_TEXT = 300;
 const EXTRA_PAGES = 3;
 const WIDGET_PAGES = 2; // booking-system pages read per listing
 const WIDGET_MIN_TEXT = 200; // less than this = the widget page needs JavaScript too
+const PDF_FILES = 2; // schedule PDFs (brochures, lesson grids) read per listing
+const PDF_CHARS = 16_000; // of each PDF, the pages most about this listing
+const AI_CHARS = 48_000; // total page text sent to the AI
+const FOCUSED_CHARS = 36_000; // of that, for booking-system pages + PDFs
 const DATE_FIELDS = 'kind, label, start_date, end_date, days_of_week, start_time, end_time, location, notes, source_excerpt, approved_by';
 
 async function record(activityId: string, fields: Record<string, unknown>) {
@@ -55,26 +61,47 @@ export async function checkListing(
   if (!listing.website) return done('skipped', 'This listing has no website');
 
   // ── 1. Read the site: the listing's page plus its likeliest schedule pages ──
-  const home = await fetchPage(listing.website);
+  const today = seattleToday();
+  const readPdfs = async (urls: string[]): Promise<FetchedPage[]> =>
+    (await Promise.all(urls.map((u) => readPdf(u, listing)))).filter((p): p is FetchedPage => !('error' in p));
+
+  let home = await fetchPage(listing.website);
+  if ('error' in home && home.pdf) home = await readPdf(listing.website, listing); // the listing's page is itself a PDF
   if ('error' in home) return done('unreadable', home.error);
+  const homeIsPdf = /\.pdf$/i.test(new URL(home.url).pathname) && home.links.length === 0;
 
   // Schedule pages on their site, and (in parallel) any booking system the
   // home page embeds or links to. Widgets found only on the schedule pages
   // are read after, if the home page had none.
+  // Schedule PDFs (brochures, lesson grids) are read the same way: the home
+  // page's first, otherwise ones linked from the schedule pages.
   const links = pickScheduleLinks(home.links, home.url, EXTRA_PAGES);
   const homeWidgets = findWidgets([home], WIDGET_PAGES);
-  const [extra, homeWidgetPages] = await Promise.all([
+  const homePdfLinks = pickPdfLinks(home.links, home.url, today, PDF_FILES);
+  const [extra, homeWidgetPages, homePdfs] = await Promise.all([
     Promise.all(links.map((u) => fetchPage(u))),
     readWidgets(homeWidgets),
+    readPdfs(homePdfLinks),
   ]);
-  const sitePages = [home, ...extra.filter((p): p is FetchedPage => !('error' in p))];
+  const extraPages = extra.filter((p): p is FetchedPage => !('error' in p));
+  const sitePages = [home, ...extraPages];
   let widgets = homeWidgets;
   let widgetPages = homeWidgetPages;
-  if (!homeWidgets.some((w) => w.url)) {
-    widgets = findWidgets(sitePages, WIDGET_PAGES);
-    widgetPages = await readWidgets(widgets);
+  let pdfPages = homePdfs;
+  const needWidgets = !homeWidgets.some((w) => w.url);
+  const needPdfs = homePdfs.length === 0;
+  if (needWidgets || needPdfs) {
+    if (needWidgets) widgets = findWidgets(sitePages, WIDGET_PAGES);
+    const morePdfLinks = needPdfs
+      ? pickPdfLinks(extraPages.flatMap((p) => p.links), home.url, today, PDF_FILES).filter((u) => !homePdfLinks.includes(u))
+      : [];
+    const [w, p] = await Promise.all([needWidgets ? readWidgets(widgets) : widgetPages, readPdfs(morePdfLinks)]);
+    widgetPages = w;
+    if (needPdfs) pdfPages = p;
   }
-  const pages = [...sitePages, ...widgetPages.read].filter((p) => p.text.length >= 50);
+  // Focused sources (booking-system pages, PDFs) go right after the home page.
+  const focused = [...widgetPages.read, ...pdfPages, ...(homeIsPdf ? [home] : [])];
+  const pages = [home, ...widgetPages.read, ...pdfPages, ...extraPages].filter((p) => p.text.length >= 50);
   const checked_urls = pages.map((p) => p.url);
   // Booking systems we saw but couldn't read (needs JavaScript, blocked, …).
   const unreadWidgets = widgets
@@ -113,9 +140,8 @@ export async function checkListing(
   const changeFields = { page_hash, checked_urls, ...(changed ? { last_changed_at: new Date().toISOString() } : {}) };
 
   // ── 3. Extract ─────────────────────────────────────────────────────────────
-  const today = seattleToday();
   const ext = await extractDates({
-    pages: pages.map((p) => ({ url: p.url, text: p.text })),
+    pages: fitPages(pages, focused),
     listing,
     today,
     knownTitles: sameProviderTitles(listing, opts.catalog),
@@ -252,4 +278,29 @@ async function readIclassPro(classesUrl: string): Promise<FetchedPage | { error:
     .filter(Boolean)
     .join('\n\n');
   return { url: classes.url, text, links: [], embeds: [] };
+}
+
+// A schedule PDF as a page: only the PDF pages most about this listing (a
+// city-wide brochure runs 50+ pages), marked "[PDF page N]".
+async function readPdf(url: string, listing: DatesListing): Promise<FetchedPage | { error: string }> {
+  const pdf = await fetchPdfPages(url);
+  if ('error' in pdf) return pdf;
+  return { url: pdf.url, text: selectPdfPages(pdf.pages, listingTerms(listing), PDF_CHARS), links: [], embeds: [] };
+}
+
+/**
+ * Fits the pages into the AI's budget so nothing important is cut off the end:
+ * focused sources (booking-system pages, PDFs) share FOCUSED_CHARS, and the
+ * site's own pages share what's left. No-op when everything already fits.
+ */
+export function fitPages(pages: FetchedPage[], focused: FetchedPage[]): { url: string; text: string }[] {
+  const total = pages.reduce((n, p) => n + p.text.length, 0);
+  if (total <= AI_CHARS) return pages.map((p) => ({ url: p.url, text: p.text }));
+  const isFocused = (p: FetchedPage) => focused.includes(p);
+  const f = pages.filter(isFocused);
+  const others = pages.filter((p) => !isFocused(p));
+  const perFocused = f.length ? Math.floor(FOCUSED_CHARS / f.length) : 0;
+  const focusedUsed = f.reduce((n, p) => n + Math.min(p.text.length, perFocused), 0);
+  const perOther = others.length ? Math.max(3_000, Math.floor((AI_CHARS - focusedUsed) / others.length)) : 0;
+  return pages.map((p) => ({ url: p.url, text: p.text.slice(0, isFocused(p) ? perFocused : perOther) }));
 }
