@@ -48,6 +48,7 @@ export interface DatesListing {
   title: string;
   business: string;
   website: string | null;
+  neighborhood: string | null;
 }
 
 type Seed = (typeof seedData)[number];
@@ -60,7 +61,7 @@ type Seed = (typeof seedData)[number];
 export async function getListingsForDates(): Promise<DatesListing[]> {
   const { data } = await supabaseAdmin
     .from('submissions')
-    .select('id, seed_id, title, contact_name, website, provider_id')
+    .select('id, seed_id, title, contact_name, website, provider_id, neighborhood')
     .eq('status', 'approved');
   const rows = (data ?? []) as {
     id: string;
@@ -69,6 +70,7 @@ export async function getListingsForDates(): Promise<DatesListing[]> {
     contact_name: string | null;
     website: string | null;
     provider_id: string | null;
+    neighborhood: string | null;
   }[];
 
   const providerIds = Array.from(new Set(rows.map((r) => r.provider_id).filter(Boolean))) as string[];
@@ -85,6 +87,7 @@ export async function getListingsForDates(): Promise<DatesListing[]> {
     title: claimedTitle.get(s.id) || s.title,
     business: s.provider,
     website: s.website ?? null,
+    neighborhood: s.neighborhood ?? null,
   }));
   const submitted: DatesListing[] = rows
     .filter((r) => !r.seed_id)
@@ -93,6 +96,7 @@ export async function getListingsForDates(): Promise<DatesListing[]> {
       title: r.title ?? 'Untitled listing',
       business: (r.provider_id && businessById.get(r.provider_id)) || r.contact_name || 'Unknown provider',
       website: r.website,
+      neighborhood: r.neighborhood,
     }));
   return [...seeds, ...submitted];
 }

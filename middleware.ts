@@ -35,7 +35,9 @@ const SITE_PASSWORD =
   (process.env.NODE_ENV !== 'production' ? 'dev-preview' : undefined);
 
 const GATE_COOKIE = 'ls_site_access';
-const GATE_EXEMPT_PATHS = ['/unlock', '/api/site-gate'];
+// /api/cron: Vercel's scheduled jobs can't type the site password. Each cron
+// route checks its own CRON_SECRET instead (see app/api/cron/*).
+const GATE_EXEMPT_PATHS = ['/unlock', '/api/site-gate', '/api/cron'];
 
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;

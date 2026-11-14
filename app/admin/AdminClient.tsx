@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
 import ClaimsPanel from './ClaimsPanel';
 import DatesPanel from './DatesPanel';
+import AgentPanel from './AgentPanel';
 
 interface Submission {
   id: string;
@@ -47,7 +48,7 @@ export default function AdminClient({ adminEmail }: { adminEmail: string }) {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
   const [signingOut, setSigningOut] = useState(false);
-  const [view, setView] = useState<'listings' | 'claims' | 'dates'>('listings');
+  const [view, setView] = useState<'listings' | 'claims' | 'dates' | 'agent'>('listings');
   const [claimsRefresh, setClaimsRefresh] = useState(0);
 
   const fetchSubmissions = useCallback(async () => {
@@ -129,7 +130,7 @@ export default function AdminClient({ adminEmail }: { adminEmail: string }) {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          {view !== 'dates' && (
+          {(view === 'listings' || view === 'claims') && (
           <button
             onClick={() => (view === 'listings' ? fetchSubmissions() : setClaimsRefresh((n: number) => n + 1))}
             className="text-[#0D5C6E] text-sm border border-[#C5D8E8] rounded-full px-4 py-1.5 hover:bg-[#C5D8E8]/20 transition-colors"
@@ -149,7 +150,7 @@ export default function AdminClient({ adminEmail }: { adminEmail: string }) {
 
       {/* View switch: listing submissions · ownership claims · activity dates */}
       <div className="max-w-6xl mx-auto px-4 pt-6 flex gap-6 border-b border-[#E8DFC8]">
-        {([['listings', 'Listings'], ['claims', 'Claims'], ['dates', 'Dates']] as const).map(([key, label]) => (
+        {([['listings', 'Listings'], ['claims', 'Claims'], ['dates', 'Dates'], ['agent', 'Agent']] as const).map(([key, label]) => (
           <button
             key={key}
             onClick={() => setView(key)}
@@ -162,7 +163,9 @@ export default function AdminClient({ adminEmail }: { adminEmail: string }) {
         ))}
       </div>
 
-      {view === 'dates' ? (
+      {view === 'agent' ? (
+        <AgentPanel onToast={showToast} />
+      ) : view === 'dates' ? (
         <DatesPanel onToast={showToast} />
       ) : view === 'claims' ? (
         <ClaimsPanel refreshKey={claimsRefresh} onToast={showToast} />

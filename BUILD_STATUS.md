@@ -183,6 +183,50 @@ Provider visits `/providers/signup` → fills out account + business info (now i
 
 **~~Not built yet: editing an already-submitted listing.~~** ✅ Built 2026-08-23 — providers can now self-serve edit their listings. See "Provider listing editing" below.
 
+### Date agent: finds dates automatically (built 2026-11-14, pending migration + CRON_SECRET + deploy)
+
+**What it does:** for each listing, it does the following:
+1. Fetches the listing's website and picks up to 3 same-site pages that look like schedule/camp/registration pages (link words like camp, schedule, class, register; skips about/blog/shop, outside sites, and PDFs).
+2. Sends their text to Claude, which returns this listing's sessions and registration windows, each with an exact quote from the page, plus **other kids' programs** it saw.
+3. **Verifies** every date's quote is really on the page (tolerant of dash, quote, and spacing differences). Past dates are dropped.
+4. Decides:
+
+| Situation | What happens |
+|---|---|
+| Same dates as what's live | Nothing (no churn) |
+| All quotes verified, no doubts | **Published automatically** (tagged `approved_by = agent`) |
+| A quote isn't on the page | Inbox |
+| Year not stated, date >90 days out (could be last year's schedule) | Inbox |
+| AI raised a doubt | Inbox |
+| Live dates were typed by hand in the Dates tab | Inbox. **Hand edits are never overwritten.** |
+| Dates disappeared from the site | Inbox (keep or clear) |
+| No dates, none live | Recorded as "no dates on site" |
+
+5. Saves other programs as **suggested listings** (one per business+title, never re-suggested after dismissal, skipped if already a listing). **Add listing** creates an approved, unowned listing on Discover with its dates. Providers can claim it later through the normal claim flow.
+6. Records a fingerprint of the page text, so **unchanged sites skip the AI** on later checks (cheap, fast).
+
+**Where you see it:** `/admin` → **Agent**: counts, **Check unchecked listings** / **Re-check all** (runs 2 at a time from your browser with live progress; keep the tab open), the review inbox (Approve & publish / Dismiss), suggested listings (Add / Dismiss), the "couldn't read" list (the only ones needing the Dates-tab paste box), and every listing's last status with **Check now**.
+
+**Runs itself:** Vercel Cron calls `/api/cron/date-agent` daily at 13:15 UTC (5:15am Seattle in winter, 6:15am in summer). Each run checks the listings checked longest ago until ~15 seconds have passed: unchanged sites take a few seconds, a changed one up to ~45s. So the catalog cycles every few days on the free plan. More frequent checks would need Vercel Pro.
+
+**Safety and politeness:**
+- Identifies itself as `LittleSoundBot/1.0` with a contact address, and honors robots.txt.
+- Fetches only public http(s) addresses on standard ports and re-checks every redirect. Provider-typed websites can't make it fetch internal addresses (localhost, private ranges, cloud metadata).
+- Page text is treated as untrusted data in the AI prompt.
+- `/api/cron` is exempt from the site password (Vercel's scheduler can't type it) and instead requires `Authorization: Bearer <CRON_SECRET>`; without the secret it refuses to run.
+
+**Dates approved from the inbox** are tagged `agent·<your email>` and stay agent-managed, so future site changes can still auto-publish. Dates typed in the Dates tab are tagged with your plain email and are protected.
+
+**New files:** `supabase/date-agent.sql` (`listing_sources`, `date_drafts`, `suggested_listings`), `lib/fetch-page.ts`, `lib/date-agent-logic.ts` (pure rules), `lib/date-agent.ts`, `app/api/admin/agent/route.ts` + `check/` + `drafts/[id]/` + `suggestions/[id]/`, `app/api/cron/date-agent/route.ts`, `vercel.json`, `app/admin/AgentPanel.tsx`.
+**Changed:** `lib/extract-dates.ts` (several pages at once, `other_programs`, per-item `year_inferred`, stricter exact-quote instruction), `lib/activity-dates-server.ts` (listings carry neighborhood), `app/api/admin/dates/extract/route.ts`, `app/admin/AdminClient.tsx` (Agent tab), `middleware.ts` (`/api/cron` exempt from the site password).
+
+**Deploy steps, in order:**
+1. Run `supabase/date-agent.sql` in Supabase (paste the file's contents).
+2. In Vercel, add `CRON_SECRET`: any long random text, e.g. 40+ characters from a password generator. Production environment. Without it, the daily run stays off; the Agent tab still works.
+3. Push. Then `/admin` → Agent → **Check unchecked listings**.
+
+**Status: ⏳ built; typecheck clean; 148 logic checks pass** (67 for the agent, 57 dates, 24 claims). The agent checks cover: URL safety (13 blocked address patterns), robots rules, HTML→text, schedule-link picking, quote verification, every decision rule, and full runs against a simulated skatepark site + AI + database (publish, unchanged-skip, no duplicate suggestions, unverified→inbox, one draft per listing, hand-edit protection, AI-failure retry, robots refusal, metadata-address refusal, JavaScript-only site, no website). The sandbox can't reach the internet, so the first real run in the Agent tab is the live test.
+
 ### Calendar agent Phase 1, Step A: activity dates (built 2026-11-11, pending migration + API key + deploy)
 
 **What it does:** gives listings real dates. In `/admin` → **Dates**, pick a listing (the list shows coverage, e.g. "12 of 79 listings have dates", and filters to ones still needing dates), open the provider's site, paste their schedule text, and click **Extract dates with AI**. Claude drafts **sessions** (date range, weekly days, times) and **registration windows** (opens/closes), each with the exact quote it came from plus any warnings to double-check. You fix anything wrong, add or remove rows by hand, and **Save**. Families then see one line per listing on Discover cards and their saved activities, e.g. "Registration opens Mar 3 at 9am", "Registration open · closes Apr 1", "Next session starts Jun 21", or "Running now · Tue, Thu".
@@ -345,7 +389,7 @@ The 2026-08-23 list (family saved activities, provider listing editing, homepage
 New priorities (agreed with Evan 2026-11-11), tackle top-down:
 
 1. **Calendar agent, Phase 1 Step B:** each family's private calendar subscription link (works with Google/Apple/Outlook), "Add to my calendar" on a saved activity's sessions, and email alerts through Brevo: registration opening (a week before and the morning of) plus a change notice when updated dates are approved for something they saved. Design in "Calendar agent — roadmap" below.
-2. **Fill in dates** via `/admin` → Dates (ongoing, Kelly/Evan). Aim to cover the most-saved and summer-camp listings before camp registration season.
+2. **Run the date agent** once its setup is done (`/admin` → Agent → "Check unchecked listings"). Then work the small inbox: anything it couldn't verify, plus suggested new listings. After that it re-checks every site daily on its own.
 3. **Calendar agent, Phase 2:** weekly family digest email; kids' names on profiles so calendar items belong to a specific kid.
 4. **Calendar agent, Phase 3:** text alerts, scheduling help, and direct Google Calendar connect. Start the slow external approvals early (Twilio/10DLC registration, Google app verification).
 
@@ -365,7 +409,7 @@ New priorities (agreed with Evan 2026-11-11), tackle top-down:
 
 **Jobs (all four wanted):** registration alerts · family calendar · change updates · scheduling help.
 
-**Where dates come from: AI-assisted, human-approved.** Kelly/Evan paste a provider's schedule text into `/admin` → Dates. Claude drafts the sessions and registration windows, and a human corrects and approves them. Only approved dates are stored or shown. No automatic website monitoring (scraping was ruled out earlier as months of work plus permanent upkeep). Claimed providers may later enter their own dates.
+**Where dates come from: an automatic agent (changed 2026-11-14).** The first version had Kelly/Evan paste each provider's schedule. Evan rejected per-camp manual work, so the agent now visits every listing's website itself, finds the schedule/camp pages, and has Claude extract the dates. It publishes the ones it can **verify word-for-word on the page** and sends only uncertain ones to a one-click inbox. Scraping had been ruled out earlier as months of per-site parsers plus upkeep; AI reading any layout removes most of that. Sites it can't read (blocked, JavaScript-only, PDF schedules) fall back to the manual paste box in the Dates tab. Claimed providers may later enter their own dates.
 
 **Families pick sessions, they don't type them:** a saved program can have many sessions, so the family taps "Add to my calendar" on the one they're in (Step B).
 
@@ -378,7 +422,7 @@ New priorities (agreed with Evan 2026-11-11), tackle top-down:
 **Scheduling help needs data we don't store yet:** kids' names (profiles only have ages) and better locations (only neighborhoods). That's why it comes last.
 
 **Phases:**
-- **Phase 1:** Step A, the date foundation (✅ built 2026-11-11, see Completed Work); Step B, calendar subscription + Add-to-calendar + email alerts.
+- **Phase 1:** Step A, the date foundation (✅ built 2026-11-11) plus the automatic date agent (✅ built 2026-11-14), see Completed Work; Step B, calendar subscription + Add-to-calendar + email alerts.
 - **Phase 2:** weekly digest; kids' names on profiles.
 - **Phase 3:** texts, direct Google Calendar, scheduling help (clashes, pickup overlaps, "fits your week").
 
@@ -430,6 +474,14 @@ Built 2026-10-27 — see "Provider listing claims" under Completed Work. The ori
 | `lib/extract-dates.ts` | Anthropic API call that drafts dates from pasted page text |
 | `app/api/admin/dates/` | Admin: listings + coverage, AI extract, per-listing GET/PUT |
 | `app/admin/DatesPanel.tsx` | Admin Dates tab |
+| `supabase/date-agent.sql` | Agent tables: `listing_sources`, `date_drafts`, `suggested_listings` (run manually, before push) |
+| `lib/fetch-page.ts` | Polite, SSRF-safe page fetcher; HTML→text; schedule-link picking; robots.txt |
+| `lib/date-agent-logic.ts` | Pure agent rules: quote verification, publish/review decision, display |
+| `lib/date-agent.ts` | Runs the agent on one listing |
+| `app/api/admin/agent/` | Agent status, check-one, inbox approve/dismiss, suggestion add/dismiss |
+| `app/api/cron/date-agent/route.ts` | Daily automatic run (needs `CRON_SECRET`) |
+| `vercel.json` | Cron schedule |
+| `app/admin/AgentPanel.tsx` | Admin Agent tab |
 | `app/api/providers/signup/route.ts` | Provider signup API (auth + profile) |
 | `lib/provider-auth.ts` | `requireProvider()` helper for provider API routes |
 | `supabase/provider-profiles.sql` | `provider_profiles` table + `submissions.provider_id` (run manually) |

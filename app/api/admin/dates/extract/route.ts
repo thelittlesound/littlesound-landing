@@ -19,6 +19,7 @@ export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => ({}));
   const activityId = typeof body.activityId === 'string' ? body.activityId : '';
   const text = typeof body.text === 'string' ? body.text.trim() : '';
+  const sourceUrl = typeof body.sourceUrl === 'string' && body.sourceUrl.trim() ? body.sourceUrl.trim() : null;
   if (!text) {
     return NextResponse.json({ error: 'Paste the text from the provider’s page first.' }, { status: 400 });
   }
@@ -28,11 +29,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Unknown listing.' }, { status: 404 });
   }
 
-  const result = await extractDates({ text, listing, today: seattleToday() });
+  const result = await extractDates({ pages: [{ url: sourceUrl, text }], listing, today: seattleToday() });
   // `'error' in` (not `!result.ok`): with strict mode off, TypeScript won't
   // narrow this union on the boolean flag.
   if ('error' in result) {
     return NextResponse.json({ error: result.error }, { status: result.status });
   }
-  return NextResponse.json({ items: result.items, warnings: result.warnings });
+  // Here (manual paste) other programs on the page are just worth knowing
+  // about; the Agent tab turns them into suggested listings.
+  const notes = result.otherPrograms.map((p) => `Also on this page (not added here): ${p.title}`);
+  return NextResponse.json({ items: result.items, warnings: [...result.warnings, ...notes] });
 }
