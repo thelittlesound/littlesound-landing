@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import staticActivities from '../data/activities.json';
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
 
@@ -135,6 +135,21 @@ function ActivityCard({
             View details
           </a>
         </div>
+        <button
+          type="button"
+          onClick={() => onToggleSave(a)}
+          aria-pressed={saved}
+          className={`mt-4 w-full inline-flex items-center justify-center gap-2 h-11 rounded-full text-[14px] font-semibold transition-colors ${
+            saved
+              ? 'bg-[#0D5C6E] text-white hover:bg-[#1A7A8A]'
+              : 'border-2 border-[#0D5C6E] text-[#0D5C6E] hover:bg-[#0D5C6E] hover:text-white'
+          }`}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill={saved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z" />
+          </svg>
+          {saved ? 'Saved to your dashboard' : 'Save to my dashboard'}
+        </button>
       </div>
     </article>
   );
@@ -149,6 +164,14 @@ export default function Discover() {
   const [providerActivities, setProviderActivities] = useState<Activity[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+  // Short confirmation after saving (and a visible message if a save fails).
+  const [saveNote, setSaveNote] = useState<{ ok: boolean; text: string } | null>(null);
+  const noteTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  function showSaveNote(ok: boolean, text: string) {
+    if (noteTimer.current) clearTimeout(noteTimer.current);
+    setSaveNote({ ok, text });
+    noteTimer.current = setTimeout(() => setSaveNote(null), ok ? 6000 : 8000);
+  }
   const [claimedSeedIds, setClaimedSeedIds] = useState<Set<string>>(new Set());
   const [dateLines, setDateLines] = useState<Record<string, string>>({});
 
@@ -306,7 +329,10 @@ export default function Discover() {
         .delete()
         .eq('user_id', userId)
         .eq('activity_id', a.id);
-      if (error) revert();
+      if (error) {
+        revert();
+        showSaveNote(false, 'Couldn’t remove it. Please try again.');
+      } else setSaveNote(null);
     } else {
       const { error } = await supabase.from('saved_activities').upsert(
         {
@@ -324,12 +350,43 @@ export default function Discover() {
         },
         { onConflict: 'user_id,activity_id', ignoreDuplicates: true }
       );
-      if (error) revert();
+      if (error) {
+        revert();
+        showSaveNote(false, 'Couldn’t save it. Please try again.');
+      } else {
+        showSaveNote(true, `Saved “${a.title}”. Open your dashboard to add its dates to your calendar.`);
+      }
     }
   }
 
   return (
     <main className="min-h-screen bg-white">
+
+      {/* Save confirmation */}
+      {saveNote && (
+        <div
+          role="status"
+          aria-live="polite"
+          className={`fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-6 sm:max-w-[400px] z-50 rounded-[16px] shadow-[0_12px_32px_rgba(10,74,90,0.25)] px-5 py-4 flex items-start gap-3 ${
+            saveNote.ok ? 'bg-[#0D5C6E] text-white' : 'bg-[#C0544A] text-white'
+          }`}
+        >
+          <p className="text-[14px] leading-snug flex-1">
+            {saveNote.text}
+            {saveNote.ok && (
+              <>
+                {' '}
+                <a href="/families/dashboard" className="font-semibold underline whitespace-nowrap">
+                  Open dashboard →
+                </a>
+              </>
+            )}
+          </p>
+          <button type="button" onClick={() => setSaveNote(null)} aria-label="Dismiss" className="text-white/80 hover:text-white text-[18px] leading-none">
+            ×
+          </button>
+        </div>
+      )}
 
       {/* Header */}
       <section className="bg-[#0D5C6E] px-6 md:px-10 lg:px-16 pt-32 pb-12">
