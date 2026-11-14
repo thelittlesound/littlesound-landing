@@ -6,7 +6,9 @@ import { AGENT, isPast } from '@/lib/date-agent-logic';
 import { seattleToday } from '@/lib/activity-dates';
 import { TEAM_EMAIL } from '@/lib/notify';
 
-// Add a suggested program as a real listing, or dismiss it.
+// Add a suggested program as a real listing, dismiss it (never suggested
+// again), or clear it (removed from the list, but the agent may suggest it
+// again — used by "Clear all" to start the suggestions over).
 //
 // "Add" creates an approved, unowned `submissions` row — live on Discover
 // right away, and claimable by the provider later through the normal claim
@@ -17,7 +19,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   const { action } = await request.json().catch(() => ({}));
-  if (action !== 'add' && action !== 'dismiss') {
+  if (action !== 'add' && action !== 'dismiss' && action !== 'clear') {
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
   }
 
@@ -26,6 +28,11 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
   if (s.status !== 'pending') return NextResponse.json({ error: `Already ${s.status}.` }, { status: 409 });
 
   const reviewed = { reviewed_by: admin.email || 'admin', reviewed_at: new Date().toISOString() };
+
+  if (action === 'clear') {
+    await supabaseAdmin.from('suggested_listings').delete().eq('id', s.id).eq('status', 'pending');
+    return NextResponse.json({ success: true });
+  }
 
   if (action === 'dismiss') {
     await supabaseAdmin.from('suggested_listings').update({ status: 'dismissed', ...reviewed }).eq('id', s.id);

@@ -97,8 +97,8 @@ export default function AgentPanel({ onToast }: { onToast: (msg: string, ok: boo
   const [log, setLog] = useState<LogLine[]>([]);
   const [acting, setActing] = useState<string | null>(null);
   const [showAll, setShowAll] = useState(false);
-  const [confirmBulk, setConfirmBulk] = useState<'add' | 'dismiss' | null>(null);
-  const [bulk, setBulk] = useState<{ action: 'add' | 'dismiss'; done: number; total: number } | null>(null);
+  const [confirmBulk, setConfirmBulk] = useState<'add' | 'clear' | null>(null);
+  const [bulk, setBulk] = useState<{ action: 'add' | 'clear'; done: number; total: number } | null>(null);
   const [forceAI, setForceAI] = useState(false);
   const stopRef = useRef(false);
   const today = seattleToday();
@@ -184,10 +184,10 @@ export default function AgentPanel({ onToast }: { onToast: (msg: string, ok: boo
     }
   }
 
-  // Adds (or dismisses) every pending suggestion, 3 at a time, through the
+  // Adds (or clears) every pending suggestion, 3 at a time, through the
   // same endpoint as a single click (which claims each one first, so nothing
   // is added twice).
-  async function bulkSuggestions(action: 'add' | 'dismiss') {
+  async function bulkSuggestions(action: 'add' | 'clear') {
     if (!data) return;
     const queue = data.suggestions.map((s) => s.id);
     setConfirmBulk(null);
@@ -219,7 +219,7 @@ export default function AgentPanel({ onToast }: { onToast: (msg: string, ok: boo
     toastRef.current(
       signedOut
         ? 'Signed out — sign in again to finish'
-        : `${action === 'add' ? 'Added' : 'Dismissed'} ${added} suggestion${added === 1 ? '' : 's'}${action === 'add' ? ' to Discover' : ''}${failed ? ` · ${failed} failed (still in the list)` : ''}`,
+        : `${action === 'add' ? 'Added' : 'Cleared'} ${added} suggestion${added === 1 ? '' : 's'}${action === 'add' ? ' to Discover' : ''}${failed ? ` · ${failed} failed (still in the list)` : ''}`,
       !signedOut && failed === 0
     );
     load();
@@ -432,20 +432,20 @@ export default function AgentPanel({ onToast }: { onToast: (msg: string, ok: boo
           {data.suggestions.length > 1 &&
             (bulk ? (
               <p className="text-sm text-[#0D5C6E] font-medium">
-                {bulk.action === 'add' ? 'Adding' : 'Dismissing'} {bulk.done} of {bulk.total}…
+                {bulk.action === 'add' ? 'Adding' : 'Clearing'} {bulk.done} of {bulk.total}…
               </p>
             ) : confirmBulk ? (
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-sm text-[#1C3A4A]">
                   {confirmBulk === 'add'
                     ? `Put all ${data.suggestions.length} on Discover?`
-                    : `Dismiss all ${data.suggestions.length}? They won’t be suggested again.`}
+                    : `Clear all ${data.suggestions.length}? The agent can suggest real programs again next time it reads their sites.`}
                 </span>
                 <button
                   onClick={() => bulkSuggestions(confirmBulk)}
                   className="bg-[#0D5C6E] text-white rounded-full px-4 py-1.5 text-sm font-semibold hover:bg-[#1A7A8A]"
                 >
-                  {confirmBulk === 'add' ? 'Yes, add all' : 'Yes, dismiss all'}
+                  {confirmBulk === 'add' ? 'Yes, add all' : 'Yes, clear all'}
                 </button>
                 <button
                   onClick={() => setConfirmBulk(null)}
@@ -464,11 +464,11 @@ export default function AgentPanel({ onToast }: { onToast: (msg: string, ok: boo
                   Add all {data.suggestions.length}
                 </button>
                 <button
-                  onClick={() => setConfirmBulk('dismiss')}
+                  onClick={() => setConfirmBulk('clear')}
                   disabled={!!acting}
                   className="border border-[#E8DFC8] text-[#3A5A6A] rounded-full px-4 py-1.5 text-sm hover:border-[#C5D8E8] disabled:opacity-50"
                 >
-                  Dismiss all
+                  Clear all
                 </button>
               </div>
             ))}
