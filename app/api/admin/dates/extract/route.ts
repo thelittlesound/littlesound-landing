@@ -38,5 +38,5 @@ export async function POST(request: NextRequest) {
   // Here (manual paste) other programs on the page are just worth knowing
   // about; the Agent tab turns them into suggested listings.
   const notes = result.otherPrograms.map((p) => `Also on this page (not added here): ${p.title}`);
-  return NextResponse.json({ items: result.items, warnings: [...result.warnings, ...notes] });
+  return NextResponse.json({ items: result.items, warnings: [...result.warnings, ...result.notes, ...notes] });
 }

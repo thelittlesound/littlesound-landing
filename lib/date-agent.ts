@@ -118,7 +118,8 @@ export async function checkListing(
     const { error } = await supabaseAdmin.from('date_drafts').insert({
       activity_id: id,
       items,
-      warnings: ext.warnings,
+      // Doubts first, then FYI notes; the reason already quotes the first doubt.
+      warnings: [...ext.warnings, ...ext.notes],
       reason: decision.reason,
       source_urls: checked_urls,
     });
@@ -130,8 +131,9 @@ export async function checkListing(
   }
 
   const suggestions = await saveSuggestions(listing, ext.otherPrograms, pages[0].url, opts.catalog, today);
+  const fyi = status === 'published' && ext.notes.length ? ` · Note: ${ext.notes[0]}`.slice(0, 300) : '';
   const note = suggestions ? ` · ${suggestions} new program${suggestions === 1 ? '' : 's'} suggested` : '';
-  return done(status, decision.reason + note, changeFields, suggestions);
+  return done(status, decision.reason + fyi + note, changeFields, suggestions);
 }
 
 async function saveSuggestions(

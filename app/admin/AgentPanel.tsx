@@ -320,11 +320,15 @@ export default function AgentPanel({ onToast }: { onToast: (msg: string, ok: boo
                 <p className="font-semibold text-[#1C3A4A]">{d.title}</p>
                 <p className="text-xs text-[#7A9AAA] mb-2">{d.business}</p>
                 {d.reason && <p className="text-sm text-amber-800 bg-amber-50 rounded-lg px-3 py-2 mb-2">{d.reason}</p>}
-                {d.warnings.length > 0 && (
-                  <ul className="list-disc pl-5 text-xs text-amber-900 mb-2">
-                    {d.warnings.map((w, i) => <li key={i}>{w}</li>)}
-                  </ul>
-                )}
+                {(() => {
+                  // The reason box already quotes the first doubt; don't repeat it.
+                  const extra = d.warnings.filter((w) => !d.reason?.includes(w));
+                  return extra.length > 0 ? (
+                    <ul className="list-disc pl-5 text-xs text-amber-900 mb-2">
+                      {extra.map((w, i) => <li key={i}>{w}</li>)}
+                    </ul>
+                  ) : null;
+                })()}
                 <div className="grid sm:grid-cols-2 gap-3 text-sm mb-3">
                   <div>
                     <p className="text-[11px] text-[#7A9AAA] uppercase tracking-wider mb-1">Agent found</p>

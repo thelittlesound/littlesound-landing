@@ -52,7 +52,14 @@ const TOOL = {
       warnings: {
         type: 'array',
         items: { type: 'string' },
-        description: "Only real doubts about THIS listing's dates: 'TBA', conflicting info, unclear which program a date belongs to. Not past dates, not other programs.",
+        description:
+          "Doubts that could make a recorded item WRONG: dates marked TBA/tentative, conflicting dates, unclear which program a date belongs to, a date that may not apply to this listing. Leave empty when the recorded items are solid. A missing year is handled by year_inferred, not here. Not missing info, not past dates, not other programs.",
+      },
+      notes: {
+        type: 'array',
+        items: { type: 'string' },
+        description:
+          "FYI for the admin that does NOT cast doubt on the recorded items: missing info (no registration dates, signup by email), sessions announced without dates yet, where a year came from when the page states it.",
       },
       other_programs: {
         type: 'array',
@@ -75,7 +82,7 @@ const TOOL = {
         },
       },
     },
-    required: ['items', 'warnings', 'other_programs'],
+    required: ['items', 'warnings', 'notes', 'other_programs'],
   },
 };
 
@@ -98,7 +105,10 @@ export type ExtractResult =
       items: DateItem[];
       /** Parallel to items: did the AI choose the year itself? */
       yearInferred: boolean[];
+      /** Doubts about the items: these hold a listing for review. */
       warnings: string[];
+      /** FYI only: shown to the admin, never block publishing. */
+      notes: string[];
       otherPrograms: OtherProgram[];
     }
   | { ok: false; status: number; error: string };
@@ -183,13 +193,14 @@ Record two kinds of items for THIS listing with the record_schedule tool:
 Rules:
 - Only record what the text actually states. Never guess or fill gaps. Leave fields null when not stated.
 - items: only this listing's program. Pages often mix several (lessons, camps, open hours, adult programs).
-- Other kids' programs on the pages go in other_programs (with their dates, ages, price), not in items or warnings.
+- Other kids' programs on the pages go in other_programs (with their dates, ages, price), not in items, warnings or notes.
 - General opening/admission hours are not a program session. Don't record them unless the listing is itself about that drop-in time.
 - Leave out anything already over. Don't mention past dates anywhere.
-- Dates as YYYY-MM-DD. If the page gives no year, use the next occurrence on or after today and set year_inferred true.
+- Dates as YYYY-MM-DD. A year in a nearby heading (e.g. "Winter 2027 classes") counts as stated. If the page gives no year at all, use the next occurrence on or after today and set year_inferred true.
 - Times are Seattle local, 24-hour HH:MM.
 - source_excerpt: copy the words exactly as they appear on the page, character for character (a person and a program will check it against the page). Do not paraphrase or reformat it.
-- warnings: only real doubts about this listing's dates. If the pages have no dates for this listing, return an empty items list and say so in warnings.
+- warnings: only doubts that could make a recorded item wrong (TBA, conflicting dates, unclear which program a date belongs to, a date that may not apply to this listing). If the recorded items are solid, leave warnings empty. Don't warn about a missing year: set year_inferred instead.
+- notes: FYI that doesn't make any recorded item doubtful (no registration dates given, signup by email, sessions announced without dates yet). If the pages have no dates for this listing, return an empty items list and say so in notes.
 
 Always answer by calling the record_schedule tool exactly once, even when there are no dates.`;
 
@@ -240,7 +251,9 @@ Always answer by calling the record_schedule tool exactly once, even when there 
   const toolUse = (body?.content ?? []).find(
     (c: { type: string; name?: string }) => c.type === 'tool_use' && c.name === TOOL.name
   );
-  const input = toolUse?.input as { items?: unknown[]; warnings?: unknown[]; other_programs?: unknown[] } | undefined;
+  const input = toolUse?.input as
+    | { items?: unknown[]; warnings?: unknown[]; notes?: unknown[]; other_programs?: unknown[] }
+    | undefined;
   if (!input || !Array.isArray(input.items)) {
     return {
       ok: false,
@@ -253,7 +266,9 @@ Always answer by calling the record_schedule tool exactly once, even when there 
 
   const items: DateItem[] = [];
   const yearInferred: boolean[] = [];
-  const warnings = (input.warnings ?? []).filter((w): w is string => typeof w === 'string');
+  const strings = (v: unknown) => (Array.isArray(v) ? v.filter((w): w is string => typeof w === 'string' && !!w.trim()) : []);
+  const warnings = strings(input.warnings);
+  const notes = strings(input.notes);
   input.items.forEach((raw, i) => {
     const v = validateItem(raw);
     if (typeof v === 'string') {
@@ -268,8 +283,8 @@ Always answer by calling the record_schedule tool exactly once, even when there 
     .filter((p): p is OtherProgram => p !== null)
     .slice(0, 10);
 
-  if (truncated) warnings.unshift('Part of the page text was cut off. If dates are missing, check the provider’s site.');
+  if (truncated) notes.unshift('Part of the page text was cut off. If dates are missing, check the provider’s site.');
   if (body?.stop_reason === 'max_tokens') warnings.unshift('The AI ran out of room and the list may be incomplete.');
 
-  return { ok: true, items, yearInferred, warnings, otherPrograms };
+  return { ok: true, items, yearInferred, warnings, notes, otherPrograms };
 }
