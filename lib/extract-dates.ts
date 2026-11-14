@@ -133,6 +133,16 @@ function cleanProgram(raw: unknown): OtherProgram | null {
   };
 }
 
+// Claude 5-family models reject a forced tool_choice ("tool"/"any" → 400) and
+// think by default. For them: let the model choose (the prompt says to always
+// call the tool) and keep thinking modest. Older models: force the tool.
+export function modelOptions(model: string): Record<string, unknown> {
+  if (/^claude-(opus|sonnet|haiku)-5/.test(model)) {
+    return { tool_choice: { type: 'auto' }, output_config: { effort: 'medium' } };
+  }
+  return { tool_choice: { type: 'tool', name: TOOL.name } };
+}
+
 export async function extractDates(opts: {
   /** One entry per page; url is null for text an admin pasted. */
   pages: { url: string | null; text: string }[];
@@ -179,7 +189,9 @@ Rules:
 - Dates as YYYY-MM-DD. If the page gives no year, use the next occurrence on or after today and set year_inferred true.
 - Times are Seattle local, 24-hour HH:MM.
 - source_excerpt: copy the words exactly as they appear on the page, character for character (a person and a program will check it against the page). Do not paraphrase or reformat it.
-- warnings: only real doubts about this listing's dates. If the pages have no dates for this listing, return an empty items list and say so in warnings.`;
+- warnings: only real doubts about this listing's dates. If the pages have no dates for this listing, return an empty items list and say so in warnings.
+
+Always answer by calling the record_schedule tool exactly once, even when there are no dates.`;
 
   let res: Response;
   try {
@@ -192,10 +204,10 @@ Rules:
       },
       body: JSON.stringify({
         model,
-        max_tokens: 8000,
+        max_tokens: 12000,
         system,
         tools: [TOOL],
-        tool_choice: { type: 'tool', name: TOOL.name },
+        ...modelOptions(model),
         messages: [{ role: 'user', content }],
       }),
       signal: AbortSignal.timeout(45_000),
@@ -225,10 +237,18 @@ Rules:
     return { ok: false, status: 502, error };
   }
 
-  const toolUse = (body?.content ?? []).find((c: { type: string }) => c.type === 'tool_use');
+  const toolUse = (body?.content ?? []).find(
+    (c: { type: string; name?: string }) => c.type === 'tool_use' && c.name === TOOL.name
+  );
   const input = toolUse?.input as { items?: unknown[]; warnings?: unknown[]; other_programs?: unknown[] } | undefined;
   if (!input || !Array.isArray(input.items)) {
-    return { ok: false, status: 502, error: 'The AI returned something unexpected. Try again.' };
+    return {
+      ok: false,
+      status: 502,
+      error: toolUse
+        ? 'The AI returned something unexpected. Try again.'
+        : 'The AI answered without filling in the schedule. Try again.',
+    };
   }
 
   const items: DateItem[] = [];
