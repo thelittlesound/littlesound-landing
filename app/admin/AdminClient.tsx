@@ -74,7 +74,7 @@ export default function AdminClient({ adminEmail }: { adminEmail: string }) {
 
   function showToast(msg: string, ok: boolean) {
     setToast({ msg, ok });
-    setTimeout(() => setToast(null), 3500);
+    setTimeout(() => setToast(null), ok ? 3500 : 9000); // errors stay up long enough to read
   }
 
   async function updateStatus(id: string, status: 'approved' | 'rejected') {
@@ -85,12 +85,15 @@ export default function AdminClient({ adminEmail }: { adminEmail: string }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status, admin_notes: notes[id] || null }),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const r = await res.json().catch(() => ({}));
+        throw new Error(res.status === 401 ? 'Signed out. Sign in again.' : r.error || `HTTP ${res.status}`);
+      }
       showToast(`Listing ${status}!`, true);
       fetchSubmissions();
       setSelectedId(null);
-    } catch {
-      showToast('Something went wrong', false);
+    } catch (e) {
+      showToast(e instanceof Error && e.message ? e.message : 'Something went wrong', false);
     } finally {
       setActionLoading(null);
     }

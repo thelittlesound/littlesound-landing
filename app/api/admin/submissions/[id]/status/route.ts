@@ -12,7 +12,7 @@ export async function POST(
   }
 
   const { id } = params;
-  const body = await request.json();
+  const body = await request.json().catch(() => ({}));
   const { status, admin_notes } = body;
 
   if (!status || !['approved', 'rejected', 'pending'].includes(status)) {
@@ -34,7 +34,11 @@ export async function POST(
 
   if (error) {
     console.error('Supabase update error:', error);
-    return NextResponse.json({ error: 'Failed to update submission' }, { status: 500 });
+    // Admin-only endpoint: include the database's reason so it shows in the panel.
+    return NextResponse.json(
+      { error: `Failed to update submission: ${error.message}${error.code ? ` (${error.code})` : ''}` },
+      { status: 500 }
+    );
   }
 
   return NextResponse.json({ success: true, status });
