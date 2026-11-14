@@ -2,7 +2,7 @@ import { createHash } from 'crypto';
 import { supabaseAdmin } from '@/lib/supabase';
 import { type DatesListing } from '@/lib/activity-dates-server';
 import {
-  fetchJson, fetchPage, fetchPdfPages, listingTerms, pickPdfLinks, pickScheduleLinks, selectPdfPages, type FetchedPage,
+  fetchJson, fetchPage, fetchPdfPages, jsReaderConfigured, listingTerms, renderPage, pickPdfLinks, pickScheduleLinks, selectPdfPages, type FetchedPage,
 } from '@/lib/fetch-page';
 import { findWidgets, iclassproRows, iclassproToText, iclassproTotal, platformList, type Widget } from '@/lib/booking-widgets';
 import { extractDates, type OtherProgram } from '@/lib/extract-dates';
@@ -99,6 +99,32 @@ export async function checkListing(
     widgetPages = w;
     if (needPdfs) pdfPages = p;
   }
+  // Pages that only show their content with JavaScript: load ONE in a real
+  // browser (the reader's free daily time is small). Either the site itself
+  // is an empty shell, or its schedule is in a booking-system page that is.
+  // Never used for pages that refused us (403, robots.txt).
+  let jsNote = '';
+  if (jsReaderConfigured()) {
+    const siteText = [home, ...extraPages].reduce((n, p) => n + p.text.length, 0);
+    const haveSchedule = widgetPages.read.length > 0 || pdfPages.length > 0;
+    let target: { url: string; platform: string } | null = null;
+    if (siteText < MIN_TEXT && !homeIsPdf) target = { url: home.url, platform: '' };
+    else if (!haveSchedule && widgetPages.needsJs.length) target = pickJsTarget(sitePages, widgetPages.needsJs, widgets, listing);
+    if (target) {
+      const r = await renderPage(target.url);
+      if ('error' in r) jsNote = r.error;
+      else if (r.text.length < WIDGET_MIN_TEXT) jsNote = 'its page was still empty after running JavaScript';
+      else {
+        widgetPages.read.push({ ...r, platform: target.platform });
+        if (target.platform) {
+          // That booking system is read now: drop its failed attempts.
+          const done = new Set(widgets.filter((w) => w.platform === target!.platform && w.url).map((w) => w.url as string));
+          widgetPages.failed = widgetPages.failed.filter((u) => !done.has(u));
+        }
+      }
+      if (jsNote) for (const u of widgetPages.needsJs) widgetPages.why[u] = jsNote.replace(/^The /, 'the ').slice(0, 140);
+    }
+  }
   // Focused sources (booking-system pages, PDFs) go right after the home page.
   const focused = [...widgetPages.read, ...pdfPages, ...(homeIsPdf ? [home] : [])];
   const pages = [home, ...widgetPages.read, ...pdfPages, ...extraPages].filter((p) => p.text.length >= 50);
@@ -117,7 +143,10 @@ export async function checkListing(
   if (totalText < MIN_TEXT) {
     return done(
       'unreadable',
-      widgetHint || 'The site shows almost no text to a reader like ours (it may need JavaScript). Paste its schedule in the Dates tab.',
+      widgetHint ||
+        (jsNote
+          ? `The site needs JavaScript and the JavaScript reader couldn’t load it (${jsNote.replace(/^The /, 'the ')}). Paste its schedule in the Dates tab.`
+          : 'The site shows almost no text to a reader like ours (it may need JavaScript). Paste its schedule in the Dates tab.'),
       { checked_urls }
     );
   }
@@ -254,23 +283,25 @@ async function saveSuggestions(
 // (or is an error page) and counts as failed.
 async function readWidgets(
   widgets: Widget[]
-): Promise<{ read: (FetchedPage & { platform: string })[]; failed: string[]; why: Record<string, string> }> {
+): Promise<{ read: (FetchedPage & { platform: string })[]; failed: string[]; why: Record<string, string>; needsJs: string[] }> {
   const targets = widgets.filter((w): w is Widget & { url: string } => !!w.url);
   const results = await Promise.all(targets.map((w) => (w.reader === 'iclasspro' ? readIclassPro(w.url) : fetchPage(w.url, 6000))));
   const read: (FetchedPage & { platform: string })[] = [];
   const failed: string[] = [];
   const why: Record<string, string> = {};
+  const needsJs: string[] = []; // loaded fine but empty: a JavaScript page
   results.forEach((r, i) => {
     const t = targets[i];
     // A dedicated reader's text is already just the schedule, so a short one is fine.
     const tooShort = !('error' in r) && r.text.length < (t.reader ? 20 : WIDGET_MIN_TEXT);
     if ('error' in r || tooShort) {
       failed.push(t.url);
+      if (tooShort && !t.reader) needsJs.push(t.url);
       const reason = 'error' in r ? r.error : t.reader ? 'its class list came back empty' : 'its page needs JavaScript';
       why[t.url] = reason.replace(/^The /, 'the ').replace(/\.$/, '').slice(0, 120);
     } else read.push({ ...r, platform: t.platform });
   });
-  return { read, failed, why };
+  return { read, failed, why, needsJs };
 }
 
 // iClassPro's public catalog: classes plus camps (camps is optional; many
@@ -344,4 +375,41 @@ export function fitPages(pages: FetchedPage[], focused: FetchedPage[]): { url: s
   const focusedUsed = f.reduce((n, p) => n + Math.min(p.text.length, perFocused), 0);
   const perOther = others.length ? Math.max(3_000, Math.floor((AI_CHARS - focusedUsed) / others.length)) : 0;
   return pages.map((p) => ({ url: p.url, text: p.text.slice(0, isFocused(p) ? perFocused : perOther) }));
+}
+
+/**
+ * Which JavaScript booking page to load for this listing. A provider's page
+ * can link several pages of the same system (Seattle Parks links a separate
+ * ActiveNet search for each camp), so prefer the link whose words match the
+ * listing; otherwise the one that was tried first.
+ */
+export function pickJsTarget(
+  sitePages: { links: { url: string; text: string }[]; embeds: string[] }[],
+  needsJs: string[],
+  tried: Widget[],
+  listing: DatesListing
+): { url: string; platform: string } | null {
+  const platforms = new Set(tried.filter((w) => w.url && needsJs.includes(w.url)).map((w) => w.platform));
+  if (!platforms.size) return null;
+  const terms = listingTerms(listing);
+  const candidates = findWidgets(sitePages, 40).filter((w) => w.url && !w.reader && platforms.has(w.platform));
+  let best: { url: string; platform: string } | null = null;
+  let bestScore = 0;
+  for (const w of candidates) {
+    let hay = `${w.text ?? ''} ${w.url}`;
+    try {
+      hay = `${w.text ?? ''} ${decodeURIComponent(w.url as string)}`;
+    } catch {
+      // keep the raw URL
+    }
+    hay = hay.toLowerCase();
+    const score = terms.filter((t) => hay.includes(t)).length;
+    if (score > bestScore) {
+      bestScore = score;
+      best = { url: w.url as string, platform: w.platform };
+    }
+  }
+  if (best) return best;
+  const first = tried.find((w) => w.url && needsJs.includes(w.url));
+  return first ? { url: first.url as string, platform: first.platform } : null;
 }

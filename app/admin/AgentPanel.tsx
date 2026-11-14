@@ -47,6 +47,7 @@ interface Overview {
   suggestions: Suggestion[];
   aiConfigured: boolean;
   scheduleConfigured: boolean;
+  jsReader?: boolean;
   tablesMissing: boolean;
 }
 interface LogLine {
@@ -279,6 +280,9 @@ export default function AgentPanel({ onToast }: { onToast: (msg: string, ok: boo
         <p className="text-sm text-[#3A5A6A] mb-4">
           Visits each listing&apos;s website, reads its schedule pages, and publishes dates it can verify word-for-word
           on the page. Anything uncertain lands in your inbox below. Re-checks automatically every day.
+          <span className="block text-xs text-[#7A9AAA] mt-1">
+            JavaScript reader (for sites that only load in a browser): {data.jsReader ? 'on' : 'off — add CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN in Vercel to turn it on'}
+          </span>
         </p>
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-4">
           {[

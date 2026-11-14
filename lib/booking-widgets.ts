@@ -109,6 +109,8 @@ export interface Widget {
   from: 'embed' | 'link';
   /** Set when url is a booking system's public JSON catalog, read by a dedicated reader. */
   reader?: 'iclasspro';
+  /** The link's own words ("Register for Nature Adventure Trek"), when it was a link. */
+  text?: string;
 }
 
 // iClassPro: the parent portal (portal.iclasspro.com/<code>/…) is a JavaScript
@@ -179,7 +181,7 @@ export function findWidgets(pages: { links: Link[]; embeds: string[] }[], max = 
       if (seenUrl.has(url)) return;
       seenUrl.add(url);
       const score = (from === 'embed' ? 10 : 0) + (direct ? 5 : 0) + (SCHEDULEISH.test(`${u.pathname} ${text}`) ? 3 : 0);
-      ranked.push({ w: { platform: p.name, url, from }, score });
+      ranked.push({ w: { platform: p.name, url, from, text: text || undefined }, score });
     } else if (!seenPlatformNoUrl.has(p.name)) {
       seenPlatformNoUrl.add(p.name);
       ranked.push({ w: { platform: p.name, url: null, from }, score: -1 });

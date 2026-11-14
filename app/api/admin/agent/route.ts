@@ -81,6 +81,7 @@ export async function GET() {
     suggestions: suggestionsRes.data ?? [],
     aiConfigured: !!process.env.ANTHROPIC_API_KEY,
     scheduleConfigured: !!process.env.CRON_SECRET,
+    jsReader: !!(process.env.CLOUDFLARE_ACCOUNT_ID && process.env.CLOUDFLARE_API_TOKEN),
     tablesMissing: !!(sourcesRes.error || draftsRes.error || suggestionsRes.error),
   });
 }

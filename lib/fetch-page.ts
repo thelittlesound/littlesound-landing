@@ -453,3 +453,103 @@ export function listingTerms(l: { title: string; business: string; neighborhood:
     .split(/[^a-z0-9]+/)
     .filter((w) => w.length >= 4 && !STOP.has(w));
 }
+
+// ── Pages that need JavaScript ──────────────────────────────────────────────
+//
+// Some sites build their content in the browser (ActiveNet's activity search,
+// single-page apps), so a plain fetch sees an empty shell. For those, a real
+// browser loads the page for us: Cloudflare's Browser Run "content" endpoint
+// returns the finished HTML. It's only used for pages we're allowed to read
+// (same URL-safety and robots.txt checks, announced with our own user agent,
+// and Cloudflare marks its requests as a bot), never to get around a block.
+//
+// Optional: on only when CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN are
+// set. The free plan allows 10 minutes of browser time a day and one request
+// every 10 seconds, so callers use it sparingly (one page per listing).
+
+export function jsReaderConfigured(): boolean {
+  return !!(process.env.CLOUDFLARE_ACCOUNT_ID && process.env.CLOUDFLARE_API_TOKEN);
+}
+
+const CF_PATHS = ['browser-rendering', 'browser-run']; // documented under both names
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+export async function renderPage(raw: string, timeoutMs = 22_000): Promise<FetchResult> {
+  const account = process.env.CLOUDFLARE_ACCOUNT_ID;
+  const token = process.env.CLOUDFLARE_API_TOKEN;
+  if (!account || !token) return { error: 'The JavaScript reader isn’t set up' };
+
+  const url = safeUrl(raw);
+  if (!url) return { error: 'Not a public web address' };
+  if (!robotsAllows(await robotsFor(url.origin), url.pathname + url.search)) {
+    return { error: 'The site asks bots not to read this page (robots.txt)' };
+  }
+
+  const body = JSON.stringify({
+    url: url.toString(),
+    userAgent: BOT_UA,
+    gotoOptions: { waitUntil: 'networkidle2', timeout: 15_000 },
+    rejectResourceTypes: ['image', 'media', 'font'],
+  });
+  const started = Date.now();
+  let pathIndex = 0;
+  let retried = false;
+  for (;;) {
+    let res: Response;
+    try {
+      res = await fetch(
+        `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(account)}/${CF_PATHS[pathIndex]}/content?cacheTTL=1800`,
+        {
+          method: 'POST',
+          headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+          body,
+          signal: AbortSignal.timeout(Math.max(timeoutMs - (Date.now() - started), 1000)),
+        }
+      );
+    } catch (e) {
+      const timedOut = e instanceof Error && (e.name === 'TimeoutError' || e.name === 'AbortError');
+      return { error: timedOut ? 'The JavaScript reader took too long' : 'Could not reach the JavaScript reader' };
+    }
+    const json = (await res.json().catch(() => null)) as {
+      success?: boolean;
+      result?: unknown;
+      meta?: { finalUrl?: string; status?: number };
+      errors?: { message?: string }[];
+    } | null;
+    const message = json?.errors?.[0]?.message ?? '';
+
+    if (res.status === 404 && pathIndex < CF_PATHS.length - 1) {
+      pathIndex += 1; // the other documented name for the same endpoint
+      continue;
+    }
+    if (res.status === 429) {
+      if (/time limit/i.test(message)) return { error: 'The JavaScript reader has used its free time for today (it resets overnight)' };
+      const wait = Number(res.headers.get('retry-after')) || 10;
+      if (!retried && wait <= 12 && Date.now() - started + wait * 1000 < timeoutMs - 8000) {
+        retried = true;
+        await sleep(wait * 1000);
+        continue;
+      }
+      return { error: 'The JavaScript reader is busy (one page every 10 seconds on the free plan). Try again' };
+    }
+    if (res.status === 401 || res.status === 403) {
+      return { error: 'The JavaScript reader isn’t set up correctly (check CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN in Vercel)' };
+    }
+    if (!res.ok || !json?.success || typeof json.result !== 'string') {
+      return { error: `The JavaScript reader failed${message ? `: ${message.slice(0, 120)}` : ` (HTTP ${res.status})`}` };
+    }
+
+    const status = json.meta?.status;
+    if (status === 403 || status === 429) return { error: `The site blocked automated reading (HTTP ${status})` };
+    if (typeof status === 'number' && status >= 400) return { error: `The page returned HTTP ${status}` };
+    // The browser may have been redirected: hold the final address to the same rules.
+    const finalUrl = json.meta?.finalUrl ? safeUrl(json.meta.finalUrl) : url;
+    if (!finalUrl) return { error: 'The site redirected somewhere unsafe or invalid' };
+    if (finalUrl.origin !== url.origin && !robotsAllows(await robotsFor(finalUrl.origin), finalUrl.pathname + finalUrl.search)) {
+      return { error: 'The site asks bots not to read this page (robots.txt)' };
+    }
+    const html = json.result.slice(0, MAX_BYTES);
+    const final = finalUrl.toString();
+    return { url: final, text: htmlToText(html), links: extractLinks(html, final), embeds: extractEmbeds(html, final) };
+  }
+}
