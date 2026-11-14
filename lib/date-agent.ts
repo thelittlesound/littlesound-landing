@@ -1,8 +1,8 @@
 import { createHash } from 'crypto';
 import { supabaseAdmin } from '@/lib/supabase';
 import { type DatesListing } from '@/lib/activity-dates-server';
-import { fetchPage, pickScheduleLinks, type FetchedPage } from '@/lib/fetch-page';
-import { findWidgets, platformList, type Widget } from '@/lib/booking-widgets';
+import { fetchJson, fetchPage, pickScheduleLinks, type FetchedPage } from '@/lib/fetch-page';
+import { findWidgets, iclassproToText, platformList, type Widget } from '@/lib/booking-widgets';
 import { extractDates, type OtherProgram } from '@/lib/extract-dates';
 import { seattleToday, type DateItem } from '@/lib/activity-dates';
 import {
@@ -228,12 +228,28 @@ async function readWidgets(
   widgets: Widget[]
 ): Promise<{ read: (FetchedPage & { platform: string })[]; failed: string[] }> {
   const targets = widgets.filter((w): w is Widget & { url: string } => !!w.url);
-  const results = await Promise.all(targets.map((w) => fetchPage(w.url, 6000)));
+  const results = await Promise.all(targets.map((w) => (w.reader === 'iclasspro' ? readIclassPro(w.url) : fetchPage(w.url, 6000))));
   const read: (FetchedPage & { platform: string })[] = [];
   const failed: string[] = [];
   results.forEach((r, i) => {
-    if ('error' in r || r.text.length < WIDGET_MIN_TEXT) failed.push(targets[i].url);
+    // A dedicated reader's text is already just the schedule, so a short one is fine.
+    if ('error' in r || r.text.length < (targets[i].reader ? 20 : WIDGET_MIN_TEXT)) failed.push(targets[i].url);
     else read.push({ ...r, platform: targets[i].platform });
   });
   return { read, failed };
+}
+
+// iClassPro's public catalog: classes plus camps (camps is optional; many
+// gyms have none). Rendered as plain lines the AI can read and quote.
+async function readIclassPro(classesUrl: string): Promise<FetchedPage | { error: string }> {
+  const campsUrl = classesUrl.replace(/\/classes\?/, '/camps?');
+  const [classes, camps] = await Promise.all([fetchJson(classesUrl, 6000), fetchJson(campsUrl, 6000)]);
+  if ('error' in classes) return classes;
+  const text = [
+    iclassproToText(classes.data, 'Classes (from the iClassPro parent portal):'),
+    'error' in camps ? '' : iclassproToText(camps.data, 'Camps (from the iClassPro parent portal):'),
+  ]
+    .filter(Boolean)
+    .join('\n\n');
+  return { url: classes.url, text, links: [], embeds: [] };
 }

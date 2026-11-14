@@ -259,7 +259,13 @@ function connectError(e: unknown): string {
   return code ? `Could not connect to the site (${code})` : 'Could not connect to the site';
 }
 
-export async function fetchPage(raw: string, timeoutMs = 8000): Promise<FetchResult> {
+// One polite, safe GET (URL safety + robots.txt on every redirect hop),
+// returning the body as text. Shared by fetchPage (HTML) and fetchJson.
+async function fetchRaw(
+  raw: string,
+  timeoutMs: number,
+  accept: string
+): Promise<{ url: URL; type: string; body: string } | { error: string }> {
   let url = safeUrl(raw);
   if (!url) return { error: 'Not a public web address' };
 
@@ -272,7 +278,7 @@ export async function fetchPage(raw: string, timeoutMs = 8000): Promise<FetchRes
     let res: Response;
     try {
       res = await fetch(url.toString(), {
-        headers: { 'user-agent': BOT_UA, accept: 'text/html,text/plain;q=0.9,*/*;q=0.5' },
+        headers: { 'user-agent': BOT_UA, accept },
         redirect: 'manual',
         signal: AbortSignal.timeout(timeoutMs),
       });
@@ -292,18 +298,38 @@ export async function fetchPage(raw: string, timeoutMs = 8000): Promise<FetchRes
     if (!res.ok) return { error: `The page returned HTTP ${res.status}` };
 
     const type = res.headers.get('content-type') ?? '';
-    if (!/text\/html|text\/plain|application\/xhtml/i.test(type)) {
-      return { error: /pdf/i.test(type) ? 'The schedule is a PDF (not read automatically yet)' : `Not a web page (${type || 'unknown type'})` };
-    }
+    if (/pdf/i.test(type)) return { error: 'The schedule is a PDF (not read automatically yet)' };
     const buf = await res.arrayBuffer();
-    const html = new TextDecoder('utf-8').decode(buf.byteLength > MAX_BYTES ? buf.slice(0, MAX_BYTES) : buf);
-    const isHtml = !/text\/plain/i.test(type);
-    return {
-      url: url.toString(),
-      text: isHtml ? htmlToText(html) : html,
-      links: isHtml ? extractLinks(html, url.toString()) : [],
-      embeds: isHtml ? extractEmbeds(html, url.toString()) : [],
-    };
+    const body = new TextDecoder('utf-8').decode(buf.byteLength > MAX_BYTES ? buf.slice(0, MAX_BYTES) : buf);
+    return { url, type, body };
   }
   return { error: 'Too many redirects' };
+}
+
+export async function fetchPage(raw: string, timeoutMs = 8000): Promise<FetchResult> {
+  const r = await fetchRaw(raw, timeoutMs, 'text/html,text/plain;q=0.9,*/*;q=0.5');
+  if ('error' in r) return r;
+  if (!/text\/html|text\/plain|application\/xhtml/i.test(r.type)) {
+    return { error: `Not a web page (${r.type || 'unknown type'})` };
+  }
+  const isHtml = !/text\/plain/i.test(r.type);
+  const url = r.url.toString();
+  return {
+    url,
+    text: isHtml ? htmlToText(r.body) : r.body,
+    links: isHtml ? extractLinks(r.body, url) : [],
+    embeds: isHtml ? extractEmbeds(r.body, url) : [],
+  };
+}
+
+/** GET a public JSON document (booking-system catalogs), same safety rules as fetchPage. */
+export async function fetchJson(raw: string, timeoutMs = 8000): Promise<{ url: string; data: unknown } | { error: string }> {
+  const r = await fetchRaw(raw, timeoutMs, 'application/json');
+  if ('error' in r) return r;
+  if (!/json/i.test(r.type)) return { error: `Not JSON (${r.type || 'unknown type'})` };
+  try {
+    return { url: r.url.toString(), data: JSON.parse(r.body) };
+  } catch {
+    return { error: 'The response wasn’t valid JSON' };
+  }
 }

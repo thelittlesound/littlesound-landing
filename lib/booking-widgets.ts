@@ -97,6 +97,25 @@ export interface Widget {
   /** A page worth reading, or null when we know the system but not a readable page. */
   url: string | null;
   from: 'embed' | 'link';
+  /** Set when url is a booking system's public JSON catalog, read by a dedicated reader. */
+  reader?: 'iclasspro';
+}
+
+// iClassPro: the parent portal (portal.iclasspro.com/<code>/…) is a JavaScript
+// app, but it loads the business's public class catalog from
+// app.iclasspro.com/api/open/v1/<code>/classes, with no login. That's the same
+// public catalog a parent sees; we read it instead of the app shell.
+function iclassproCode(u: URL): string | null {
+  if (!/(^|\.)iclasspro\.com$/i.test(u.hostname)) return null;
+  const seg = u.pathname.split('/').filter(Boolean);
+  let code: string | undefined;
+  if (/^portal\./i.test(u.hostname)) code = seg[0];
+  else if (/^app\./i.test(u.hostname) && seg[0] === 'api' && seg[1] === 'open') code = seg[3];
+  else if (/^app\./i.test(u.hostname) && (seg[0] === 'a' || seg[0] === 'portal')) code = seg[1];
+  return code && /^[a-z0-9_-]{2,60}$/i.test(code) ? code.toLowerCase() : null;
+}
+export function iclassproCatalogUrl(code: string, kind: 'classes' | 'camps' = 'classes'): string {
+  return `https://app.iclasspro.com/api/open/v1/${encodeURIComponent(code)}/${kind}?limit=200`;
 }
 
 const SKIP_PATH = /login|log-in|signin|sign-in|account|password|cart|checkout|privacy|terms|\.(js|css|png|jpe?g|gif|svg|ico|woff2?)$/i;
@@ -120,6 +139,22 @@ export function findWidgets(pages: { links: Link[]; embeds: string[] }[], max = 
     try {
       u = new URL(raw);
     } catch {
+      return;
+    }
+    const icode = iclassproCode(u);
+    if (icode) {
+      const url = iclassproCatalogUrl(icode);
+      if (seenUrl.has(url)) return;
+      seenUrl.add(url);
+      ranked.push({ w: { platform: p.name, url, from, reader: 'iclasspro' }, score: 20 });
+      return;
+    }
+    if (p.name === 'iClassPro') {
+      // e.g. a "Powered by iClassPro" link to their marketing site: no business code to read.
+      if (!seenPlatformNoUrl.has(p.name)) {
+        seenPlatformNoUrl.add(p.name);
+        ranked.push({ w: { platform: p.name, url: null, from }, score: -1 });
+      }
       return;
     }
     const direct = jackrabbitDirect(u);
@@ -153,4 +188,61 @@ export function findWidgets(pages: { links: Link[]; embeds: string[] }[], max = 
 export function platformList(names: string[]): string {
   const u = [...new Set(names)];
   return u.length <= 1 ? (u[0] ?? '') : `${u.slice(0, -1).join(', ')} and ${u[u.length - 1]}`;
+}
+
+// ── Turning a JSON catalog into plain text for the AI ────────────────────────
+
+const DAY_FULL: Record<string, string> = {
+  '0': 'Sun', '1': 'Mon', '2': 'Tue', '3': 'Wed', '4': 'Thu', '5': 'Fri', '6': 'Sat', '7': 'Sun',
+};
+const str = (v: unknown): string => (v == null ? '' : typeof v === 'string' ? v.trim() : typeof v === 'number' || typeof v === 'boolean' ? String(v) : '');
+/** "2026-09-08T00:00:00" → "2026-09-08"; other strings unchanged. */
+const day = (v: unknown) => str(v).replace(/T00:00:00(\.0+)?Z?$/, '');
+
+function ageText(r: Record<string, unknown>): string {
+  const lo = str(r.minAgeYear) || str(r.minAge);
+  const hi = str(r.maxAgeYear) || str(r.maxAge);
+  if (!lo && !hi) return '';
+  return `Ages ${lo || '?'}–${hi || '?'}`;
+}
+
+function scheduleText(v: unknown): string {
+  if (!Array.isArray(v)) return '';
+  return v
+    .map((x) => {
+      const r = (x ?? {}) as Record<string, unknown>;
+      const d = str(r.dayName) || DAY_FULL[str(r.dayNumber)] || '';
+      const t = [str(r.startTime), str(r.endTime)].filter(Boolean).join('–');
+      return [d, t].filter(Boolean).join(' ');
+    })
+    .filter(Boolean)
+    .join(', ');
+}
+
+/**
+ * One line per class/camp: "Name | Mon 4:00 PM–4:45 PM | 2026-09-08 to 2026-12-20 | Ages 3–5 | Registration 2026-08-01 to 2026-09-01".
+ * Openings counts are left out on purpose: they change daily (which would
+ * re-run the AI every day) and some businesses choose not to show them.
+ */
+export function iclassproToText(json: unknown, heading: string): string {
+  const env = (json ?? {}) as Record<string, unknown>;
+  const rows = Array.isArray(env.data) ? env.data : Array.isArray(json) ? (json as unknown[]) : [];
+  const lines: string[] = [];
+  for (const raw of rows.slice(0, 300)) {
+    const r = (raw ?? {}) as Record<string, unknown>;
+    const name = str(r.name) || str(r.title);
+    if (!name) continue;
+    const dates = [day(r.startDate), day(r.endDate)].filter(Boolean).join(' to ');
+    const reg = [day(r.regStartDate), day(r.regEndDate)].filter(Boolean).join(' to ');
+    const parts = [
+      name,
+      scheduleText(r.schedule),
+      dates,
+      ageText(r),
+      str(r.tuition) ? `Tuition ${str(r.tuition).replace(/(\.\d\d)00$/, '$1')}${str(r.tuitionTerm) ? ` ${str(r.tuitionTerm)}` : ''}` : '',
+      reg ? `Registration ${reg}` : '',
+    ].filter(Boolean);
+    lines.push(parts.join(' | '));
+  }
+  return lines.length ? `${heading}\n${lines.join('\n')}` : '';
 }
