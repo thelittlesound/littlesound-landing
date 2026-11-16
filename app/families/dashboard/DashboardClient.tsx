@@ -4,6 +4,9 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
 import { CalendarPanel, SessionPicker, type CalendarPick, type CalendarSession } from './CalendarParts';
+import FamilyCalendar from './FamilyCalendar';
+import { KID_ID_RE, newKidId, type Kid as CalendarKid } from '@/lib/calendar-grid';
+import type { DateItem } from '@/lib/activity-dates';
 
 const NEIGHBORHOODS = [
   'Ballard', 'Beacon Hill', 'Capitol Hill', 'Central District', 'Columbia City',
@@ -23,6 +26,8 @@ const INTERESTS = [
 
 interface Kid {
   age: number;
+  name?: string;
+  id?: string; // stable id so calendar items can be assigned to a child
 }
 
 export interface Profile {
@@ -54,7 +59,11 @@ export interface CalendarData {
   today: string;
   /** Upcoming sessions per saved activity id. */
   sessions: Record<string, CalendarSession[]>;
+  /** Upcoming registration windows per saved activity id. */
+  registrations: Record<string, DateItem[]>;
   picks: CalendarPick[];
+  /** The family's kids with stable ids (for coloring calendar items). */
+  kids: CalendarKid[];
 }
 
 export default function DashboardClient({
@@ -73,7 +82,9 @@ export default function DashboardClient({
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({
     neighborhood: profile.neighborhood,
-    kidsAges: profile.kids.length ? profile.kids.map((k) => String(k.age)) : [''],
+    kids: profile.kids.length
+      ? profile.kids.map((k) => ({ id: k.id && KID_ID_RE.test(k.id) ? k.id : newKidId(), name: k.name ?? '', age: String(k.age ?? '') }))
+      : [{ id: newKidId(), name: '', age: '' }],
     preferences: profile.preferences,
   });
   const [saving, setSaving] = useState(false);
@@ -81,6 +92,41 @@ export default function DashboardClient({
   const [signingOut, setSigningOut] = useState(false);
   const [saved, setSaved] = useState<SavedActivity[]>(savedActivities);
   const [removingId, setRemovingId] = useState<string | null>(null);
+
+  // Calendar picks, shared by the month calendar and the activity cards.
+  const [picks, setPicks] = useState<CalendarPick[]>(calendar?.picks ?? []);
+  const [calBusy, setCalBusy] = useState<string | null>(null);
+  const [calError, setCalError] = useState('');
+  const [showSync, setShowSync] = useState(false);
+
+  async function pickAction(activityId: string, key: string, action: 'add' | 'remove' | 'assign', kidId: string | null = null) {
+    setCalBusy(`${activityId}|${key}`);
+    setCalError('');
+    try {
+      const res = await fetch('/api/families/calendar/picks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ activityId, sessionKey: key, action, kidId }),
+      });
+      const r = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(r.error || 'Something went wrong. Please try again.');
+      setPicks((prev) => {
+        const rest = prev.filter((p) => !(p.activityId === activityId && p.key === key));
+        if (action === 'remove') return rest;
+        const existing = prev.find((p) => p.activityId === activityId && p.key === key);
+        if (action === 'assign') return existing ? [...rest, { ...existing, kidId }] : prev;
+        const session = calendar?.sessions[activityId]?.find((x) => x.key === key);
+        return [
+          ...rest,
+          { activityId, key, status: 'active', changeNote: null, text: session?.text ?? '', kidId, anchor: calendar?.today ?? '' },
+        ];
+      });
+    } catch (e) {
+      setCalError(e instanceof Error ? e.message : 'Something went wrong. Please try again.');
+    } finally {
+      setCalBusy(null);
+    }
+  }
 
   const isProfileEmpty =
     !profile.neighborhood && profile.kids.length === 0 && profile.preferences.length === 0;
@@ -94,19 +140,19 @@ export default function DashboardClient({
     }));
   }
 
-  function updateKidAge(i: number, age: string) {
+  function updateKid(i: number, field: 'name' | 'age', value: string) {
     setForm((prev) => ({
       ...prev,
-      kidsAges: prev.kidsAges.map((a, idx) => (idx === i ? age : a)),
+      kids: prev.kids.map((k, idx) => (idx === i ? { ...k, [field]: value } : k)),
     }));
   }
 
   function addKid() {
-    setForm((prev) => ({ ...prev, kidsAges: [...prev.kidsAges, ''] }));
+    setForm((prev) => ({ ...prev, kids: [...prev.kids, { id: newKidId(), name: '', age: '' }] }));
   }
 
   function removeKid(i: number) {
-    setForm((prev) => ({ ...prev, kidsAges: prev.kidsAges.filter((_, idx) => idx !== i) }));
+    setForm((prev) => ({ ...prev, kids: prev.kids.filter((_, idx) => idx !== i) }));
   }
 
   async function handleSave() {
@@ -124,9 +170,14 @@ export default function DashboardClient({
       return;
     }
 
-    const kids = form.kidsAges
-      .filter((a) => a.trim() !== '')
-      .map((a) => ({ age: Number(a) }));
+    // Keep each child's id: calendar items assigned to a child point at it.
+    const kids = form.kids
+      .filter((k) => k.age.trim() !== '' || k.name.trim() !== '')
+      .map((k) => ({
+        id: k.id,
+        ...(k.name.trim() ? { name: k.name.trim().slice(0, 40) } : {}),
+        ...(k.age.trim() !== '' ? { age: Number(k.age) } : {}),
+      }));
 
     const { error } = await supabase
       .from('profiles')
@@ -187,7 +238,7 @@ export default function DashboardClient({
 
   return (
     <main className="min-h-screen bg-[#F5EFE0] px-4 py-16 pt-28">
-      <div className="max-w-[640px] mx-auto">
+      <div className="max-w-[760px] mx-auto">
 
         {/* Header */}
         <div className="flex items-start justify-between mb-8">
@@ -216,6 +267,46 @@ export default function DashboardClient({
           </div>
         )}
 
+        {/* Family calendar */}
+        {calendar && (
+          <div className="bg-white rounded-[24px] shadow-[0_4px_32px_rgba(10,74,90,0.09)] p-5 sm:p-8 mb-6">
+            <FamilyCalendar
+              activities={saved.map((s) => ({
+                activityId: s.activity_id,
+                title: s.title ?? 'Activity',
+                provider: s.provider,
+                website: s.website,
+                neighborhood: s.neighborhood,
+              }))}
+              sessions={calendar.sessions}
+              registrations={calendar.registrations}
+              picks={picks}
+              kids={calendar.kids}
+              today={calendar.today}
+              busy={calBusy}
+              onAdd={(a, k, kid) => pickAction(a, k, 'add', kid)}
+              onRemove={(a, k) => pickAction(a, k, 'remove')}
+              onAssign={(a, k, kid) => pickAction(a, k, 'assign', kid)}
+            />
+            {calError && <p className="text-[13px] text-[#C0544A] mt-3" role="alert">{calError}</p>}
+            <div className="mt-6 border-t border-[#E8DFC8] pt-4">
+              <button
+                type="button"
+                onClick={() => setShowSync((v) => !v)}
+                aria-expanded={showSync}
+                className="text-[14px] font-semibold text-[#1A7A8A] hover:text-[#0D5C6E]"
+              >
+                {showSync ? '▾' : '▸'} Sync to your phone &amp; email alerts
+              </button>
+              {showSync && (
+                <div className="mt-3">
+                  <CalendarPanel feedUrl={calendar.feedUrl} emailAlerts={calendar.emailAlerts} />
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Profile card */}
         <div className="bg-white rounded-[24px] shadow-[0_4px_32px_rgba(10,74,90,0.09)] p-8 md:p-10 mb-6">
           <div className="flex items-center justify-between mb-6">
@@ -238,7 +329,13 @@ export default function DashboardClient({
               <ReadRow label="Neighborhood" value={profile.neighborhood || '—'} />
               <ReadRow
                 label="Kids"
-                value={profile.kids.length ? profile.kids.map((k) => `${k.age} yrs`).join(', ') : '—'}
+                value={
+                  profile.kids.length
+                    ? profile.kids
+                        .map((k) => (k.name ? `${k.name}${k.age != null ? ` (${k.age})` : ''}` : `${k.age} yrs`))
+                        .join(', ')
+                    : '—'
+                }
               />
               <div>
                 <p className="text-[13px] font-medium text-[#0D5C6E] mb-1.5">Interests</p>
@@ -278,19 +375,30 @@ export default function DashboardClient({
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-[13px] font-medium text-[#0D5C6E]">Kids' ages</label>
-                {form.kidsAges.map((age, i) => (
-                  <div key={i} className="flex items-center gap-2">
+                <label className="text-[13px] font-medium text-[#0D5C6E]">Kids</label>
+                <p className="text-[12px] text-[#7A9AAA] -mt-1">First names are optional; they label and color your calendar.</p>
+                {form.kids.map((kid, i) => (
+                  <div key={kid.id} className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={kid.name}
+                      maxLength={40}
+                      onChange={(e) => updateKid(i, 'name', e.target.value)}
+                      placeholder="First name"
+                      aria-label={`Kid ${i + 1} first name`}
+                      className="h-12 flex-[3] min-w-0 rounded-[12px] border-2 border-[#E8DFC8] px-4 text-[15px] font-['DM_Sans'] text-[#1C3A4A] bg-white transition-colors focus:outline-none focus:border-[#0D5C6E]"
+                    />
                     <input
                       type="number"
                       min={0}
                       max={18}
-                      value={age}
-                      onChange={(e) => updateKidAge(i, e.target.value)}
-                      placeholder={`Kid ${i + 1} age`}
-                      className="h-12 flex-1 rounded-[12px] border-2 border-[#E8DFC8] px-4 text-[15px] font-['DM_Sans'] text-[#1C3A4A] bg-white transition-colors focus:outline-none focus:border-[#0D5C6E]"
+                      value={kid.age}
+                      onChange={(e) => updateKid(i, 'age', e.target.value)}
+                      placeholder="Age"
+                      aria-label={`Kid ${i + 1} age`}
+                      className="h-12 flex-[2] min-w-0 rounded-[12px] border-2 border-[#E8DFC8] px-4 text-[15px] font-['DM_Sans'] text-[#1C3A4A] bg-white transition-colors focus:outline-none focus:border-[#0D5C6E]"
                     />
-                    {form.kidsAges.length > 1 && (
+                    {form.kids.length > 1 && (
                       <button
                         type="button"
                         onClick={() => removeKid(i)}
@@ -388,7 +496,6 @@ export default function DashboardClient({
             </div>
           ) : (
             <>
-            {calendar && <CalendarPanel feedUrl={calendar.feedUrl} emailAlerts={calendar.emailAlerts} />}
             <div className="flex flex-col gap-3">
               {saved.map((s) => (
                 <div
@@ -425,8 +532,10 @@ export default function DashboardClient({
                         neighborhood: s.neighborhood,
                       }}
                       sessions={calendar.sessions[s.activity_id] ?? []}
-                      initialPicks={calendar.picks.filter((p) => p.activityId === s.activity_id)}
+                      picks={picks.filter((p) => p.activityId === s.activity_id)}
                       today={calendar.today}
+                      busy={calBusy}
+                      onToggle={(key, isPicked) => pickAction(s.activity_id, key, isPicked ? 'remove' : 'add')}
                     />
                   )}
                   <div className="flex items-center gap-4 mt-3">

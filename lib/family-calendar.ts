@@ -135,12 +135,13 @@ function details(a: CalendarActivity, extra?: string | null): string {
 }
 
 /** The event for one picked session. `anchor` = day it was picked (for undated weekly classes). */
-export function sessionEvent(a: CalendarActivity, item: DateItem, scope: string, anchor: string): IcsEvent | null {
+export function sessionEvent(a: CalendarActivity, item: DateItem, scope: string, anchor: string, who?: string): IcsEvent | null {
   const timing = sessionTiming(item, anchor);
   if (!timing) return null;
+  const base = item.label && !a.title.toLowerCase().includes(item.label.toLowerCase()) ? `${a.title}: ${item.label}` : a.title;
   return {
     uid: `s-${hash(`${scope}|${a.activityId}|${sessionKey(item)}`)}@thelittlesound.com`,
-    summary: item.label && !a.title.toLowerCase().includes(item.label.toLowerCase()) ? `${a.title}: ${item.label}` : a.title,
+    summary: who ? `${who}: ${base}` : base,
     description: details(a, item.notes),
     location: item.location ?? a.neighborhood ?? undefined,
     url: a.website ?? undefined,

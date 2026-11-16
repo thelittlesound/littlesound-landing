@@ -16,6 +16,9 @@ export interface CalendarPick {
   status: 'active' | 'changed' | 'gone';
   changeNote: string | null;
   text: string;
+  kidId: string | null;
+  /** Day it was added (YYYY-MM-DD): where an undated weekly class starts. */
+  anchor: string;
 }
 
 // ── "Your calendar" panel: subscribe links + email alerts switch ─────────────
@@ -79,11 +82,12 @@ export function CalendarPanel({ feedUrl, emailAlerts }: { feedUrl: string; email
   return (
     <div className="bg-[#F5EFE0] rounded-[18px] p-5 mb-5">
       <h3 className="font-['Cormorant_Garamond'] text-[22px] font-light text-[#1C3A4A] leading-tight mb-1">
-        Your Little Sound calendar
+        Sync to your phone
       </h3>
       <p className="text-[14px] text-[#3A5A6A] mb-4">
-        Sessions you add below, plus registration dates for everything you&apos;ve saved, show up in your own calendar
-        and stay up to date when providers change their schedules.
+        Everything in your Little Sound calendar (sessions you added, with your kids&apos; names, plus registration
+        dates) can also show up in the calendar app you already use, and stays up to date when providers change
+        their schedules.
       </p>
       <div className="flex flex-wrap gap-2 mb-2">
         <a href={google} target="_blank" rel="noopener noreferrer" className={pill}>Google Calendar</a>
@@ -129,66 +133,40 @@ export function CalendarPanel({ feedUrl, emailAlerts }: { feedUrl: string; email
   );
 }
 
-// ── Per-activity session picker ──────────────────────────────────────────────
+// ── Per-activity session picker (on each saved activity) ─────────────────────
+//
+// Controlled by DashboardClient, which also feeds the month calendar, so an
+// add or remove in either place shows in both.
 
 const SHOW_FIRST = 6;
 
 export function SessionPicker({
   activity,
   sessions,
-  initialPicks,
+  picks,
   today,
+  busy,
+  onToggle,
 }: {
   activity: { activityId: string; title: string; provider: string | null; website: string | null; neighborhood: string | null };
   sessions: CalendarSession[];
-  initialPicks: CalendarPick[];
+  /** This activity's picks. */
+  picks: CalendarPick[];
   today: string;
+  /** "activityId|sessionKey" being saved, if any. */
+  busy: string | null;
+  /** Add (when not picked) or remove (when picked). */
+  onToggle: (key: string, isPicked: boolean) => void;
 }) {
-  const [picked, setPicked] = useState(() => new Set(initialPicks.filter((p) => p.status !== 'gone').map((p) => p.key)));
-  const [gone, setGone] = useState(() => initialPicks.filter((p) => p.status === 'gone'));
   const [open, setOpen] = useState(false);
   const [showAll, setShowAll] = useState(false);
-  const [busyKey, setBusyKey] = useState<string | null>(null);
-  const [error, setError] = useState('');
-  const changed = new Map(initialPicks.filter((p) => p.status === 'changed').map((p) => [p.key, p.changeNote]));
+
+  const live = picks.filter((p) => p.status !== 'gone');
+  const picked = new Set(live.map((p) => p.key));
+  const gone = picks.filter((p) => p.status === 'gone');
+  const changed = new Map(live.filter((p) => p.status === 'changed').map((p) => [p.key, p.changeNote]));
 
   if (!sessions.length && !gone.length) return null;
-
-  async function send(key: string, action: 'add' | 'remove') {
-    setBusyKey(key);
-    setError('');
-    try {
-      const res = await fetch('/api/families/calendar/picks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ activityId: activity.activityId, sessionKey: key, action }),
-      });
-      const r = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(r.error || 'Something went wrong. Please try again.');
-      return true;
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Something went wrong. Please try again.');
-      return false;
-    } finally {
-      setBusyKey(null);
-    }
-  }
-
-  async function toggle(key: string) {
-    const isPicked = picked.has(key);
-    if (await send(key, isPicked ? 'remove' : 'add')) {
-      setPicked((prev) => {
-        const next = new Set(prev);
-        if (isPicked) next.delete(key);
-        else next.add(key);
-        return next;
-      });
-    }
-  }
-
-  async function removeGone(key: string) {
-    if (await send(key, 'remove')) setGone((g) => g.filter((p) => p.key !== key));
-  }
 
   function download(s: CalendarSession) {
     const event = sessionEvent(activity, s.item, 'download', today);
@@ -206,6 +184,7 @@ export function SessionPicker({
 
   const shown = showAll ? sessions : sessions.slice(0, SHOW_FIRST);
   const count = picked.size;
+  const isBusy = (key: string) => busy === `${activity.activityId}|${key}`;
 
   return (
     <div className="mt-3">
@@ -225,7 +204,7 @@ export function SessionPicker({
 
       {open && sessions.length > 0 && (
         <div className="mt-3 border border-[#E8DFC8] rounded-[14px] divide-y divide-[#E8DFC8]">
-          <p className="px-4 py-2.5 text-[12px] text-[#7A9AAA]">Pick the session your child is in.</p>
+          <p className="px-4 py-2.5 text-[12px] text-[#7A9AAA]">Pick the session your child is in. You can choose which child in the calendar above.</p>
           {shown.map((s) => {
             const isPicked = picked.has(s.key);
             return (
@@ -247,13 +226,14 @@ export function SessionPicker({
                 </button>
                 <button
                   type="button"
-                  onClick={() => toggle(s.key)}
-                  disabled={busyKey === s.key}
+                  onClick={() => onToggle(s.key, isPicked)}
+                  disabled={isBusy(s.key)}
+                  title={isPicked ? 'Remove from your calendar' : 'Add to your calendar'}
                   className={`shrink-0 h-8 rounded-full px-3.5 text-[12px] font-semibold transition-colors disabled:opacity-50 ${
                     isPicked ? 'bg-[#0D5C6E] text-white hover:bg-[#C0544A]' : 'border border-[#C5D8E8] text-[#0D5C6E] hover:bg-[#C5D8E8]/20'
                   }`}
                 >
-                  {busyKey === s.key ? '…' : isPicked ? 'Added ✓' : 'Add'}
+                  {isBusy(s.key) ? '…' : isPicked ? 'Added ✓' : 'Add'}
                 </button>
               </div>
             );
@@ -269,13 +249,11 @@ export function SessionPicker({
       {gone.map((p) => (
         <div key={p.key} className="mt-2 flex items-center gap-3 text-[13px] bg-[#C0544A]/5 border border-[#C0544A]/20 rounded-[12px] px-3 py-2">
           <span className="flex-1 text-[#7A3A30]">No longer on their schedule: {p.text}</span>
-          <button type="button" onClick={() => removeGone(p.key)} disabled={busyKey === p.key} className="font-semibold text-[#7A3A30] underline disabled:opacity-50">
+          <button type="button" onClick={() => onToggle(p.key, true)} disabled={isBusy(p.key)} className="font-semibold text-[#7A3A30] underline disabled:opacity-50">
             Remove
           </button>
         </div>
       ))}
-
-      {error && <p className="text-[13px] text-[#C0544A] mt-2">{error}</p>}
     </div>
   );
 }

@@ -53,5 +53,10 @@ alter table public.family_calendar_feeds enable row level security;
 alter table public.calendar_picks enable row level security;
 alter table public.family_alert_log enable row level security;
 
--- Make the new column visible to the API right away.
+-- Which child a picked session is for (an id from profiles.kids, e.g.
+-- "k_ab12cd34"; null = not assigned). Added with the dashboard calendar.
+alter table public.calendar_picks
+  add column if not exists kid_id text;
+
+-- Make the new columns visible to the API right away.
 notify pgrst, 'reload schema';

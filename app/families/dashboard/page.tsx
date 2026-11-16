@@ -4,7 +4,7 @@ import { getDatesByActivity, getDateLines } from '@/lib/activity-dates-server';
 import { seattleToday } from '@/lib/activity-dates';
 import { describeItem } from '@/lib/date-agent-logic';
 import { sessionKey, upcomingSessions } from '@/lib/family-calendar';
-import { feedUrl, getOrCreateFeedToken, getPicks } from '@/lib/family-calendar-server';
+import { feedUrl, getKids, getOrCreateFeedToken, getPicks } from '@/lib/family-calendar-server';
 import { supabaseAdmin } from '@/lib/supabase';
 import DashboardClient, { type CalendarData, type Profile, type SavedActivity } from './DashboardClient';
 
@@ -65,21 +65,28 @@ async function loadCalendar(userId: string, savedIds: string[]): Promise<Calenda
   const token = await getOrCreateFeedToken(userId);
   if (!token) return null;
   const today = seattleToday();
-  const [dates, picks, alertsRow] = await Promise.all([
+  const [dates, picks, alertsRow, kids] = await Promise.all([
     getDatesByActivity(savedIds),
     getPicks(userId),
     supabaseAdmin.from('profiles').select('email_alerts').eq('id', userId).maybeSingle(),
+    getKids(userId, true), // gives older profiles' kids stable ids, so items can be assigned to them
   ]);
   const sessions: CalendarData['sessions'] = {};
+  const registrations: CalendarData['registrations'] = {};
   for (const id of savedIds) {
-    const list = upcomingSessions(dates.get(id) ?? [], today);
+    const all = dates.get(id) ?? [];
+    const list = upcomingSessions(all, today);
     if (list.length) sessions[id] = list.map((item) => ({ key: sessionKey(item), text: describeItem(item, today), item }));
+    const regs = all.filter((i) => i.kind === 'registration' && ((i.start_date ?? '') >= today || (i.end_date ?? '') >= today));
+    if (regs.length) registrations[id] = regs;
   }
   return {
     feedUrl: feedUrl(token),
     emailAlerts: alertsRow.data?.email_alerts !== false,
     today,
     sessions,
+    registrations,
+    kids,
     picks: picks
       .filter((p) => savedIds.includes(p.activity_id))
       .map((p) => ({
@@ -88,6 +95,8 @@ async function loadCalendar(userId: string, savedIds: string[]): Promise<Calenda
         status: p.status,
         changeNote: p.change_note,
         text: describeItem(p.item, today),
+        kidId: p.kid_id ?? null,
+        anchor: p.created_at.slice(0, 10),
       })),
   };
 }

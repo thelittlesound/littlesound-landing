@@ -6,6 +6,7 @@ import { getDatesByActivity } from '@/lib/activity-dates-server';
 import { seattleToday, type DateItem } from '@/lib/activity-dates';
 import { SITE_URL } from '@/lib/site';
 import { buildCalendar, type IcsEvent } from '@/lib/ics';
+import { kidLabel, normalizeKids, type Kid } from '@/lib/calendar-grid';
 import {
   reconcile,
   registrationEvents,
@@ -24,9 +25,12 @@ export interface PickRow {
   status: 'active' | 'changed' | 'gone';
   change_note: string | null;
   created_at: string;
+  kid_id?: string | null;
 }
 
-export const PICK_FIELDS = 'id, user_id, activity_id, session_key, item, title, provider, status, change_note, created_at';
+export const PICK_FIELDS = 'id, user_id, activity_id, session_key, item, title, provider, status, change_note, created_at, kid_id';
+// Before the kid_id column exists (supabase/family-calendar.sql not re-run yet).
+const PICK_FIELDS_OLD = 'id, user_id, activity_id, session_key, item, title, provider, status, change_note, created_at';
 
 // ── Feed link ───────────────────────────────────────────────────────────────
 
@@ -96,7 +100,10 @@ export async function getSaved(userId: string): Promise<CalendarActivity[]> {
 }
 
 export async function getPicks(userId: string): Promise<PickRow[]> {
-  const { data, error } = await supabaseAdmin.from('calendar_picks').select(PICK_FIELDS).eq('user_id', userId);
+  let { data, error } = await supabaseAdmin.from('calendar_picks').select(PICK_FIELDS).eq('user_id', userId);
+  if (error && /kid_id/.test(error.message ?? '')) {
+    ({ data, error } = await supabaseAdmin.from('calendar_picks').select(PICK_FIELDS_OLD).eq('user_id', userId));
+  }
   if (error) {
     console.error('calendar_picks read error:', error);
     return [];
@@ -117,6 +124,7 @@ export async function buildFamilyFeed(userId: string, now = new Date()): Promise
   const byId = new Map(saved.map((s) => [s.activityId, s]));
   const picks = (await getPicks(userId)).filter((p) => p.status !== 'gone' && byId.has(p.activity_id));
   const dates = await getDatesByActivity(saved.map((s) => s.activityId));
+  const kids = await getKids(userId);
 
   const events: IcsEvent[] = [];
   const seen = new Set<string>();
@@ -124,7 +132,8 @@ export async function buildFamilyFeed(userId: string, now = new Date()): Promise
     const a = byId.get(p.activity_id)!;
     const r = reconcile(p.item, dates.get(p.activity_id) ?? [], today);
     if (r.kind === 'past' || r.kind === 'gone') continue;
-    const e = sessionEvent(a, r.item, userId, p.created_at.slice(0, 10));
+    const ki = p.kid_id ? kids.findIndex((k) => k.id === p.kid_id) : -1;
+    const e = sessionEvent(a, r.item, userId, p.created_at.slice(0, 10), ki >= 0 ? kidLabel(kids[ki], ki) : undefined);
     if (e && !seen.has(e.uid)) {
       seen.add(e.uid);
       events.push(e);
@@ -133,6 +142,23 @@ export async function buildFamilyFeed(userId: string, now = new Date()): Promise
   for (const a of saved) events.push(...registrationEvents(a, dates.get(a.activityId) ?? [], userId, today));
 
   return buildCalendar({ name: 'Little Sound', events, now, refreshHours: 6 });
+}
+
+// ── Kids ────────────────────────────────────────────────────────────────────
+
+/**
+ * The family's kids with stable ids (profiles.kids). Kids saved before ids
+ * existed get one here, and it's written back when `persist` is set, so a
+ * calendar item assigned to a child keeps pointing at that child.
+ */
+export async function getKids(userId: string, persist = false): Promise<Kid[]> {
+  const { data } = await supabaseAdmin.from('profiles').select('kids').eq('id', userId).maybeSingle();
+  const { kids, stored, changed } = normalizeKids(data?.kids);
+  if (persist && changed) {
+    const { error } = await supabaseAdmin.from('profiles').update({ kids: stored }).eq('id', userId);
+    if (error) console.error('kids id backfill error:', error);
+  }
+  return kids;
 }
 
 // ── Unsubscribe links ───────────────────────────────────────────────────────
