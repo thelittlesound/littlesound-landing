@@ -22,6 +22,14 @@ Family activity planning platform ("The Family OS") for Seattle. Helps parents d
 
 ## Completed Work
 
+### Family profile: interests per child + saving fixed (Nov 2026)
+
+- **Interests are per child.** In the dashboard profile editor, each child has a card with their first name, age and their own interest chips. The family-wide Interests block is gone. The editor also has a "Your first name" field, which the Family Rhythm greeting uses. Each child is stored in `profiles.kids` as `{ id, name, age, interests }`. `profiles.preferences` is still saved as all the kids' interests together, because older code reads it. Older profiles that only have family interests: with one child, that child gets them; with several, the read view shows the signup interests and asks the parent to pick per child.
+- **Why saving silently did nothing:** the editor used a browser-side `.update()` on `profiles`. Accounts without a profile row (for example the admin account, which never went through family signup) matched 0 rows, which isn't an error, so nothing saved and nothing complained. Saving now goes through `POST /api/families/profile`, which upserts the row with the service role, so the row is created if it's missing. Any failure shows a message.
+- The validation lives in `lib/family-profile.ts` (`cleanProfile`, plus the shared `NEIGHBORHOODS` and `INTERESTS` lists). Each kid keeps their stable `k_…` id, so calendar items assigned to a child stay assigned to them. The dashboard page now reads the profile after `getKids` backfills ids, so the editor uses those same ids.
+- Tests: `tests/family-profile.test.ts` (19 checks).
+- Follow-ups: family signup still asks for family-level interests; Family Rhythm ideas could use each child's interests.
+
 ### Provider registration + admin flow (fully complete)
 
 **End-to-end flow:**

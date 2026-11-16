@@ -8,26 +8,13 @@ import FamilyRhythm from './FamilyRhythm';
 import { KID_ID_RE, newKidId, type Kid as CalendarKid } from '@/lib/calendar-grid';
 import type { DateItem } from '@/lib/activity-dates';
 
-const NEIGHBORHOODS = [
-  'Ballard', 'Beacon Hill', 'Capitol Hill', 'Central District', 'Columbia City',
-  'Eastlake', 'First Hill', 'Fremont', 'Green Lake', 'Greenwood',
-  'Interbay', 'Kirkland', 'Lake City', 'Laurelhurst', 'Leschi',
-  'Magnolia', 'Madrona', 'Mercer Island', 'Mount Baker', 'North Seattle',
-  'Phinney Ridge', 'Queen Anne', 'Rainier Beach', 'Redmond', 'Shoreline',
-  'South Lake Union', 'South Seattle', 'University District', 'Wallingford',
-  'West Seattle', 'White Center', 'Citywide',
-];
-
-const INTERESTS = [
-  'Camps', 'Sports & Athletics', 'Arts & Crafts', 'Music & Dance',
-  'Academic & Tutoring', 'Outdoor Adventure', 'STEM & Tech',
-  'Swim & Aquatics', 'Dance & Movement', 'Theater & Performance',
-];
+import { INTERESTS, NEIGHBORHOODS } from '@/lib/family-profile';
 
 interface Kid {
-  age: number;
+  age?: number;
   name?: string;
   id?: string; // stable id so calendar items can be assigned to a child
+  interests?: string[];
 }
 
 export interface Profile {
@@ -84,12 +71,20 @@ export default function DashboardClient({
   const router = useRouter();
 
   const [editing, setEditing] = useState(false);
+  // Interests are per child. Older profiles only have family-wide interests
+  // (`preferences`): with one child those become that child's; with several
+  // we don't guess.
   const [form, setForm] = useState({
+    first_name: profile.first_name,
     neighborhood: profile.neighborhood,
     kids: profile.kids.length
-      ? profile.kids.map((k) => ({ id: k.id && KID_ID_RE.test(k.id) ? k.id : newKidId(), name: k.name ?? '', age: String(k.age ?? '') }))
-      : [{ id: newKidId(), name: '', age: '' }],
-    preferences: profile.preferences,
+      ? profile.kids.map((k) => ({
+          id: k.id && KID_ID_RE.test(k.id) ? k.id : newKidId(),
+          name: k.name ?? '',
+          age: String(k.age ?? ''),
+          interests: k.interests ?? (profile.kids.length === 1 ? profile.preferences : []),
+        }))
+      : [{ id: newKidId(), name: '', age: '', interests: [] as string[] }],
   });
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
@@ -162,14 +157,14 @@ export default function DashboardClient({
   }
 
   const isProfileEmpty =
-    !profile.neighborhood && profile.kids.length === 0 && profile.preferences.length === 0;
+    !profile.first_name && !profile.neighborhood && profile.kids.length === 0 && profile.preferences.length === 0;
 
-  function toggleInterest(interest: string) {
+  function toggleKidInterest(i: number, interest: string) {
     setForm((prev) => ({
       ...prev,
-      preferences: prev.preferences.includes(interest)
-        ? prev.preferences.filter((p) => p !== interest)
-        : [...prev.preferences, interest],
+      kids: prev.kids.map((k, idx) =>
+        idx !== i ? k : { ...k, interests: k.interests.includes(interest) ? k.interests.filter((x) => x !== interest) : [...k.interests, interest] }
+      ),
     }));
   }
 
@@ -181,55 +176,38 @@ export default function DashboardClient({
   }
 
   function addKid() {
-    setForm((prev) => ({ ...prev, kids: [...prev.kids, { id: newKidId(), name: '', age: '' }] }));
+    setForm((prev) => ({ ...prev, kids: [...prev.kids, { id: newKidId(), name: '', age: '', interests: [] as string[] }] }));
   }
 
   function removeKid(i: number) {
     setForm((prev) => ({ ...prev, kids: prev.kids.filter((_, idx) => idx !== i) }));
   }
 
+  // Saved by the server (it creates the profile row if this account doesn't
+  // have one yet), so a failed save always shows a message.
   async function handleSave() {
     setSaving(true);
     setSaveError('');
-
-    const supabase = createSupabaseBrowserClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      setSaveError('Your session expired — please sign in again.');
+    try {
+      const res = await fetch('/api/families/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          first_name: form.first_name,
+          neighborhood: form.neighborhood,
+          // Keep each child's id: calendar items assigned to a child point at it.
+          kids: form.kids.map((k) => ({ id: k.id, name: k.name, age: k.age.trim(), interests: k.interests })),
+        }),
+      });
+      const r = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(r.error || 'Could not save changes. Please try again.');
+      setEditing(false);
+      router.refresh();
+    } catch (e) {
+      setSaveError(e instanceof Error ? e.message : 'Could not save changes. Please try again.');
+    } finally {
       setSaving(false);
-      return;
     }
-
-    // Keep each child's id: calendar items assigned to a child point at it.
-    const kids = form.kids
-      .filter((k) => k.age.trim() !== '' || k.name.trim() !== '')
-      .map((k) => ({
-        id: k.id,
-        ...(k.name.trim() ? { name: k.name.trim().slice(0, 40) } : {}),
-        ...(k.age.trim() !== '' ? { age: Number(k.age) } : {}),
-      }));
-
-    const { error } = await supabase
-      .from('profiles')
-      .update({
-        neighborhood: form.neighborhood || null,
-        kids,
-        preferences: form.preferences,
-      })
-      .eq('id', user.id);
-
-    setSaving(false);
-
-    if (error) {
-      setSaveError('Could not save changes. Please try again.');
-      return;
-    }
-
-    setEditing(false);
-    router.refresh();
   }
 
   async function handleSignOut() {
@@ -373,38 +351,55 @@ export default function DashboardClient({
 
           {!editing ? (
             <div className="flex flex-col gap-4">
+              <ReadRow label="Your name" value={[profile.first_name, profile.last_name].filter(Boolean).join(' ') || '—'} />
               <ReadRow label="Email" value={profile.email} />
               <ReadRow label="Neighborhood" value={profile.neighborhood || '—'} />
-              <ReadRow
-                label="Kids"
-                value={
-                  profile.kids.length
-                    ? profile.kids
-                        .map((k) => (k.name ? `${k.name}${k.age != null ? ` (${k.age})` : ''}` : `${k.age} yrs`))
-                        .join(', ')
-                    : '—'
-                }
-              />
               <div>
-                <p className="text-[13px] font-medium text-[#0D5C6E] mb-1.5">Interests</p>
-                {profile.preferences.length ? (
-                  <div className="flex flex-wrap gap-2">
-                    {profile.preferences.map((p) => (
-                      <span
-                        key={p}
-                        className="px-3 py-1 rounded-full text-[12px] font-medium bg-[#C5D8E8]/40 text-[#0D5C6E]"
-                      >
-                        {p}
-                      </span>
-                    ))}
+                <p className="text-[13px] font-medium text-[#0D5C6E] mb-1.5">Kids</p>
+                {profile.kids.length ? (
+                  <div className="flex flex-col gap-3">
+                    {profile.kids.map((k, i) => {
+                      const interests = k.interests ?? (profile.kids.length === 1 ? profile.preferences : []);
+                      return (
+                        <div key={k.id ?? i}>
+                          <p className="text-[15px] text-[#1C3A4A]">
+                            {k.name || `Kid ${i + 1}`}
+                            {k.age != null && <span className="text-[#7A9AAA]"> · {k.age}</span>}
+                          </p>
+                          {interests.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 mt-1">
+                              {interests.map((p) => (
+                                <span key={p} className="px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-[#C5D8E8]/40 text-[#0D5C6E]">{p}</span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 ) : (
                   <p className="text-[15px] text-[#1C3A4A]">—</p>
+                )}
+                {profile.kids.length > 1 && profile.preferences.length > 0 && !profile.kids.some((k) => k.interests?.length) && (
+                  <p className="text-[12px] text-[#7A9AAA] mt-2">Family interests from signup: {profile.preferences.join(', ')}. Click Edit to choose them for each child.</p>
                 )}
               </div>
             </div>
           ) : (
             <div className="flex flex-col gap-5">
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="profile-first-name" className="text-[13px] font-medium text-[#0D5C6E]">Your first name</label>
+                <input
+                  id="profile-first-name"
+                  type="text"
+                  value={form.first_name}
+                  maxLength={40}
+                  onChange={(e) => setForm((p) => ({ ...p, first_name: e.target.value }))}
+                  placeholder="So we can say hello"
+                  className="h-12 rounded-[12px] border-2 border-[#E8DFC8] px-4 text-[15px] font-['DM_Sans'] text-[#1C3A4A] bg-white transition-colors focus:outline-none focus:border-[#0D5C6E]"
+                />
+              </div>
+
               <div className="flex flex-col gap-1.5">
                 <label className="text-[13px] font-medium text-[#0D5C6E]">Neighborhood</label>
                 <div className="relative">
@@ -422,72 +417,74 @@ export default function DashboardClient({
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2">
-                <label className="text-[13px] font-medium text-[#0D5C6E]">Kids</label>
-                <p className="text-[12px] text-[#7A9AAA] -mt-1">First names are optional; they label and color your calendar.</p>
+              <div className="flex flex-col gap-3">
+                <div>
+                  <p className="text-[13px] font-medium text-[#0D5C6E]">Kids</p>
+                  <p className="text-[12px] text-[#7A9AAA]">First names label and color your Family Rhythm; interests help us suggest the right things for each child.</p>
+                </div>
                 {form.kids.map((kid, i) => (
-                  <div key={kid.id} className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      value={kid.name}
-                      maxLength={40}
-                      onChange={(e) => updateKid(i, 'name', e.target.value)}
-                      placeholder="First name"
-                      aria-label={`Kid ${i + 1} first name`}
-                      className="h-12 flex-[3] min-w-0 rounded-[12px] border-2 border-[#E8DFC8] px-4 text-[15px] font-['DM_Sans'] text-[#1C3A4A] bg-white transition-colors focus:outline-none focus:border-[#0D5C6E]"
-                    />
-                    <input
-                      type="number"
-                      min={0}
-                      max={18}
-                      value={kid.age}
-                      onChange={(e) => updateKid(i, 'age', e.target.value)}
-                      placeholder="Age"
-                      aria-label={`Kid ${i + 1} age`}
-                      className="h-12 flex-[2] min-w-0 rounded-[12px] border-2 border-[#E8DFC8] px-4 text-[15px] font-['DM_Sans'] text-[#1C3A4A] bg-white transition-colors focus:outline-none focus:border-[#0D5C6E]"
-                    />
-                    {form.kids.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => removeKid(i)}
-                        className="text-[#7A9AAA] hover:text-[#C0544A] text-sm px-2"
-                        aria-label="Remove"
-                      >
-                        ✕
-                      </button>
-                    )}
+                  <div key={kid.id} className="rounded-[16px] border-2 border-[#E8DFC8] p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <input
+                        type="text"
+                        value={kid.name}
+                        maxLength={40}
+                        onChange={(e) => updateKid(i, 'name', e.target.value)}
+                        placeholder="First name"
+                        aria-label={`Kid ${i + 1} first name`}
+                        className="h-11 flex-[3] min-w-0 rounded-[12px] border-2 border-[#E8DFC8] px-4 text-[15px] font-['DM_Sans'] text-[#1C3A4A] bg-white transition-colors focus:outline-none focus:border-[#0D5C6E]"
+                      />
+                      <input
+                        type="number"
+                        min={0}
+                        max={18}
+                        value={kid.age}
+                        onChange={(e) => updateKid(i, 'age', e.target.value)}
+                        placeholder="Age"
+                        aria-label={`Kid ${i + 1} age`}
+                        className="h-11 flex-[2] min-w-0 rounded-[12px] border-2 border-[#E8DFC8] px-4 text-[15px] font-['DM_Sans'] text-[#1C3A4A] bg-white transition-colors focus:outline-none focus:border-[#0D5C6E]"
+                      />
+                      {form.kids.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeKid(i)}
+                          className="text-[#7A9AAA] hover:text-[#C0544A] text-sm px-2"
+                          aria-label={`Remove ${kid.name || `kid ${i + 1}`}`}
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-[12px] font-medium text-[#5A7A8A] mb-1.5">{kid.name ? `${kid.name}’s interests` : 'Interests'}</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {INTERESTS.map((interest) => {
+                        const active = kid.interests.includes(interest);
+                        return (
+                          <button
+                            key={interest}
+                            type="button"
+                            aria-pressed={active}
+                            onClick={() => toggleKidInterest(i, interest)}
+                            className={`px-3 py-1.5 rounded-full text-[12.5px] font-medium border-2 transition-colors ${
+                              active ? 'bg-[#0D5C6E] border-[#0D5C6E] text-white' : 'bg-white border-[#E8DFC8] text-[#3A5A6A] hover:border-[#C5D8E8]'
+                            }`}
+                          >
+                            {interest}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 ))}
-                <button
-                  type="button"
-                  onClick={addKid}
-                  className="self-start text-[13px] font-medium text-[#1A7A8A] hover:text-[#0D5C6E] mt-1"
-                >
-                  + Add another kid
-                </button>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <label className="text-[13px] font-medium text-[#0D5C6E]">Interests</label>
-                <div className="flex flex-wrap gap-2">
-                  {INTERESTS.map((interest) => {
-                    const active = form.preferences.includes(interest);
-                    return (
-                      <button
-                        key={interest}
-                        type="button"
-                        onClick={() => toggleInterest(interest)}
-                        className={`px-3.5 py-1.5 rounded-full text-[13px] font-medium border-2 transition-colors ${
-                          active
-                            ? 'bg-[#0D5C6E] border-[#0D5C6E] text-white'
-                            : 'bg-white border-[#E8DFC8] text-[#3A5A6A] hover:border-[#C5D8E8]'
-                        }`}
-                      >
-                        {interest}
-                      </button>
-                    );
-                  })}
-                </div>
+                {form.kids.length < 8 && (
+                  <button
+                    type="button"
+                    onClick={addKid}
+                    className="self-start text-[13px] font-semibold text-[#1A7A8A] hover:text-[#0D5C6E]"
+                  >
+                    + Add a child
+                  </button>
+                )}
               </div>
 
               {saveError && (

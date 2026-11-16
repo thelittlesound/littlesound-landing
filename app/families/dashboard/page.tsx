@@ -25,12 +25,6 @@ export default async function FamilyDashboardPage() {
     redirect('/families/login');
   }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('first_name, last_name, email, neighborhood, kids, preferences')
-    .eq('id', user.id)
-    .maybeSingle();
-
   // Activities this family has saved from Discover. RLS scopes this to the
   // signed-in user's own rows. Newest first.
   const { data: savedRows } = await supabase
@@ -38,6 +32,21 @@ export default async function FamilyDashboardPage() {
     .select('activity_id, title, provider, category, neighborhood, age_min, age_max, price, price_unit, website, created_at')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
+  const savedActivities: SavedActivity[] = (savedRows as SavedActivity[]) ?? [];
+
+  // Upcoming registration / session dates for what they've saved.
+  const savedIds = savedActivities.map((s) => s.activity_id);
+  const dateLines = await getDateLines(savedIds);
+
+  // The calendar first: it gives older profiles' kids stable ids and saves
+  // them, so the profile read below (and the editor) uses those same ids.
+  const calendar = await loadCalendar(user.id, savedIds);
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('first_name, last_name, email, neighborhood, kids, preferences')
+    .eq('id', user.id)
+    .maybeSingle();
 
   const initialProfile: Profile = {
     first_name: profile?.first_name ?? '',
@@ -48,13 +57,6 @@ export default async function FamilyDashboardPage() {
     preferences: profile?.preferences ?? [],
   };
 
-  const savedActivities: SavedActivity[] = (savedRows as SavedActivity[]) ?? [];
-
-  // Upcoming registration / session dates for what they've saved.
-  const savedIds = savedActivities.map((s) => s.activity_id);
-  const dateLines = await getDateLines(savedIds);
-
-  const calendar = await loadCalendar(user.id, savedIds);
 
   return <DashboardClient profile={initialProfile} savedActivities={savedActivities} dateLines={dateLines} calendar={calendar} />;
 }
