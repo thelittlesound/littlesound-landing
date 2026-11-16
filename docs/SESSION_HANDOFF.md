@@ -1,4 +1,4 @@
-# Little Sound: handoff for a new chat (updated 2026-11-15, after the Summer planner)
+# Little Sound: handoff for a new chat (updated 2026-11-16, Summer planner live)
 
 Read this first, then `BUILD_STATUS.md` (the repo's source of truth; a copy is in this Project). Both live in the repo on Evan's PC.
 
@@ -7,7 +7,8 @@ Read this first, then `BUILD_STATUS.md` (the repo's source of truth; a copy is i
 - **Evan's local repo:** `C:\Users\esher\OneDrive\Desktop\Little Sound\littlesound-landing-page`. In a linked session's device shell it is `$HOME/mnt/Little Sound/littlesound-landing-page`.
 - **Stack:** Next.js 14 App Router, TypeScript, Tailwind, Supabase. Email goes through Resend, AI through Anthropic, and pages that need JavaScript to show their schedules are read with the Cloudflare Browser Run `/content` endpoint.
 - **Secrets live only in Vercel env vars:** `ANTHROPIC_API_KEY`, `CLOUDFLARE_API_TOKEN` (Sensitive), `CLOUDFLARE_ACCOUNT_ID`, `CRON_SECRET`, Supabase keys. Never ask for them in chat or put them in the repo.
-- **Pushed:** everything through `8f2231a` (BUILD_STATUS Next Up). If `git status -sb` shows `ahead`, ask Evan to push.
+- **Pushed and live:** everything through `73016c7` (Summer planner), plus the handoff docs commit after it. If `git status -sb` shows `ahead`, ask Evan to push.
+- **Database:** every SQL file is applied, including `saved_activities.kid_id`, `calendar_picks.kid_id`, `signup_reminders` and `summer_plans`.
 
 ## How we work (Evan's rules)
 - Claude commits locally on Evan's PC; **Evan runs `git push`** himself. The cloud sandbox can't reach GitHub.
@@ -25,7 +26,7 @@ Read this first, then `BUILD_STATUS.md` (the repo's source of truth; a copy is i
 - **Moving files to Evan's PC:** tar the changed files, then `device_commit_files` to `...\Little Sound\<unique-name>.tgz` (use a **new file name each time**; reusing a name delivered a stale bundle once). Then in the device shell: extract, `rm` the tgz, compare sha256 with the sandbox, check `git status`, commit.
 
 ## Testing
-- **Pure-logic tests** are in `tests/*.test.ts`: calendar-grid, family-rhythm, alerts, family-profile, kid-match (about 120 checks). Run them with `bash tests/run.sh`; it needs Node and esbuild.
+- **Pure-logic tests** are in `tests/*.test.ts`: calendar-grid, family-rhythm, alerts, family-profile, kid-match, summer (148 checks). Run them with `bash tests/run.sh`; it needs Node and esbuild.
 - **Typechecking in the cloud sandbox:** npm is blocked there. Use tsc with a sandbox tsconfig and shims for react, next, supabase and node globals. These aren't in the repo, so rebuild them if needed.
 - **Previews:** render components with esbuild + react-dom, compile Tailwind v4 via `tailwindcss/dist/lib.js` `compile` (don't split tokens on commas), and screenshot with Playwright.
 
@@ -48,8 +49,24 @@ Read this first, then `BUILD_STATUS.md` (the repo's source of truth; a copy is i
   Kids have stable ids `k_xxxxxxxx` in `profiles.kids` and colors by order.
 - **Date agent:** a daily cron reads providers' sites (HTML, PDF, iClassPro, JS via Cloudflare) and proposes dates. Admins review them in `/admin`. Eight sites block bots, and we respect that.
 
+## Where we stopped (2026-11-16)
+Family Rhythm Rounds 1 and 2 are live, and Evan tested them on the live site. The Summer planner is in use: Ella's Jul 5 week has Hands-On Science Camps pencilled in.
+
+**Still to confirm** (ask Evan to check):
+
+- the pencilled camp is in the saved list as "For Ella"
+- Erase from plan reopens the week
+- the Pottery class can be assigned to a child
+- Remind me works on a dated signup
+
+**Open decisions for Evan:**
+
+1. Before-and-after care listings (Gage "Creative Care") appear in summer ideas because they run that week. Keep them, or leave add-on care out?
+2. Open weeks all say "5 ideas →". Show the top idea's name instead?
+
 ## Next up (see BUILD_STATUS "Next Up" for the full list)
-1. Run `supabase/family-calendar.sql` (its `kid_id` and `signup_reminders` lines) and `supabase/summer-plans.sql`; both are safe to re-run. Then do the live test: save for a child, assign a session, Remind me, and pencil in a summer camp.
-2. Family Rhythm: smarter weekly ideas beyond the saved list.
-3. Move family signup to per-child interests, and use each child's interests in ideas.
-4. Finish the date agent's first pass (review inbox, stale URLs). Then the launch-readiness items: the honesty pass on placeholder stats, the provider outreach kit, and the small fixes.
+1. Settle the two open decisions above and finish the remaining checks.
+2. Family signup: ask for interests per child (the dashboard already does).
+3. Family Rhythm: smarter weekly ideas beyond the saved list, using each child's interests.
+4. Step B check: subscribe from a real phone calendar and watch the first alert emails.
+5. Finish the date agent's first pass (the 13 drafts in the review inbox, stale URLs). Then the launch-readiness items: the honesty pass on placeholder stats, the provider outreach kit, and the small fixes.

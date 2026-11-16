@@ -526,15 +526,25 @@ The 2026-08-23 list (family saved activities, provider listing editing, homepage
 
 New priorities (agreed with Evan 2026-11-11), tackle top-down:
 
-1. **Family Rhythm: confirm Round 1, then build Round 2.** Live since 2026-11-15, including interests per child in the profile and "Find activities for {child}" (Discover's "Browsing for").
-   - **SQL:** `saved_activities.kid_id` was run 2026-11-15. Still unconfirmed: the `kid_id` and `signup_reminders` lines in `supabase/family-calendar.sql`, which assigning a session to a child and "Remind me" need. They are safe to re-run.
-   - **Live test, desktop and phone:**
-     - Find activities for Ella, then Save for Ella. The dashboard card should say "For Ella", and a session added from it should land in Ella's row.
-     - Assign the Pottery class (now in Not assigned) to a child.
-     - Try "Remind me" on the radar.
-   - **Round 2, the Summer planner:** built 2026-11-15 (see Completed Work). Run `supabase/summer-plans.sql`, then pencil in a camp for each child and check the Signup radar picks it up.
-   - **Follow-ups:** family signup still asks for family-level interests (move it to per child), and ideas beyond the saved list could use each child's interests.
-   - **Step B (calendar sync and alerts):** subscribe from a real phone calendar and watch the first alert emails.
+1. **Family Rhythm: Rounds 1 and 2 are live (2026-11-15).** All the SQL has been run: `saved_activities.kid_id`, `calendar_picks.kid_id`, `signup_reminders` and `summer_plans`.
+   - **Tested live by Evan:**
+     - Find activities for Ella / Save for Ella; the saved cards show "For Ella" / "For Jack".
+     - Summer planner ideas show "Runs this week" from real dates.
+     - Pencil in filled Ella's Jul 5 week (Hands-On Science Camps), and her count went to 1/10.
+     - The filled week's sheet shows Their site and Erase from plan.
+     - The radar watches 5 of 6 saved activities.
+   - **Not yet confirmed:**
+     - the pencilled camp shows in the saved list as "For Ella"
+     - Erase from plan reopens the week
+     - assigning the Pottery class to a child
+     - Remind me on a dated signup
+   - **Open decisions:**
+     - Before-and-after care listings (e.g. Gage "Creative Care") show up as summer ideas because they run that week. Keep them, or leave add-on care out?
+     - Open weeks all say "5 ideas →". Show the top idea's name instead?
+   - **Next builds:**
+     - family signup asks for interests per child
+     - smarter weekly ideas beyond the saved list, using each child's interests
+     - Step B check: subscribe from a real phone calendar and watch the first alert emails
 2. **Finish the date agent's first pass:** approve/dismiss the 13 drafts in the review inbox (one-time; they were held under the old rule where any AI note blocked publishing), and fix or remove the stale website addresses listed under the date agent in Completed Work. After that it re-checks every site daily on its own.
 3. **Calendar agent, Phase 2:** weekly family digest email. (Kids' names on profiles and calendar items per child: done in Family Rhythm.)
 4. **Calendar agent, Phase 3:** text alerts, scheduling help, and direct Google Calendar connect. Start the slow external approvals early (Twilio/10DLC registration, Google app verification).
