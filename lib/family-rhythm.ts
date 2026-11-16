@@ -120,7 +120,7 @@ export function lanes(kids: Kid[], events: RhythmEvent[]): string[] {
 
 export interface Breathing {
   hours: number;
-  freeAfternoons: number; // Mon–Fri with nothing after 2pm
+  freeAfternoons: number; // weekdays in the window with nothing after 2pm
   word: 'Light' | 'Balanced' | 'Full';
   pct: number; // bar fill, 0–100
 }
@@ -134,8 +134,9 @@ export function breathing(events: RhythmEvent[], lane: string, week: string[]): 
     return n + Math.max(0, eh * 60 + em - (sh * 60 + sm));
   }, 0);
   const hours = Math.round((minutes / 60) * 10) / 10;
+  // Weekdays in the window (it can start on any day: the dashboard shows the next 7 days).
   const freeAfternoons = week
-    .slice(0, 5)
+    .filter((d) => !['SA', 'SU'].includes(weekdayOf(d)))
     .filter((d) => !mine.some((e) => e.date === d && (!e.start || e.start >= '14:00' || (e.end ?? '') > '14:30'))).length;
   const word = hours > FULL_WEEK_HOURS ? 'Full' : hours >= 2 ? 'Balanced' : 'Light';
   return { hours, freeAfternoons, word, pct: Math.min(100, Math.max(hours ? 8 : 0, Math.round((hours / FULL_WEEK_HOURS) * 100))) };

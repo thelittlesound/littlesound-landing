@@ -17,7 +17,6 @@ import {
   UNASSIGNED,
   watching as findWatching,
   weekDays,
-  weekStart,
   type Clash,
   type Idea,
   type RhythmActivity,
@@ -26,7 +25,7 @@ import {
   type RhythmPick,
   type RhythmSession,
 } from '@/lib/family-rhythm';
-import { plusDays } from '@/lib/ics';
+import { plusDays, weekdayOf } from '@/lib/ics';
 
 // Family Rhythm: the top of the family dashboard. Where things stand, at a
 // glance: a one-line read of the week, how full each child's week is,
@@ -88,7 +87,9 @@ function Icon({ name, size = 16 }: { name: string; size?: number }) {
   );
 }
 const timeRange = (s: string | null, e: string | null) => (s ? (e ? `${formatTime(s)}–${formatTime(e)}` : formatTime(s)) : 'All day');
-const DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const DOW: Record<string, string> = { MO: 'Mon', TU: 'Tue', WE: 'Wed', TH: 'Thu', FR: 'Fri', SA: 'Sat', SU: 'Sun' };
+const DAY_FULL: Record<string, string> = { MO: 'Monday', TU: 'Tuesday', WE: 'Wednesday', TH: 'Thursday', FR: 'Friday', SA: 'Saturday', SU: 'Sunday' };
+const dow = (iso: string) => DOW[weekdayOf(iso)];
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const md = (iso: string) => `${MONTHS[Number(iso.slice(5, 7)) - 1]} ${Number(iso.slice(8))}`;
 
@@ -151,9 +152,11 @@ export default function FamilyRhythm({
   const [dismissed, setDismissed] = useState<string[]>([]);
   useEffect(() => setDismissed(loadDismissed()), []);
 
-  const thisWeek = weekDays(weekStart(today));
-  const monday = plusDays(weekStart(today), weekOffset * 7);
-  const week = weekDays(monday);
+  // The week view is the next 7 days starting today (so "now" is always the
+  // first column and the summary, breathing room and grid agree); the arrows
+  // move it a week at a time.
+  const thisWeek = weekDays(today);
+  const week = weekDays(plusDays(today, weekOffset * 7));
   const weekEvents = useMemo(() => rhythmEvents(data, week[0], week[6]), [data, week[0]]);
   const nowEvents = useMemo(() => rhythmEvents(data, thisWeek[0], thisWeek[6]), [data, thisWeek[0]]);
   const allClashes = useMemo(() => findClashes(data, today, plusDays(today, 13), today), [data, today]);
@@ -192,7 +195,7 @@ export default function FamilyRhythm({
     <section aria-label="Family Rhythm">
       {/* Greeting + the week in one line */}
       <p className="text-[12px] font-bold uppercase tracking-[0.18em] text-[#1A7A8A] mb-2">
-        Family Rhythm · week of {md(thisWeek[0])}
+        Family Rhythm · {DAY_FULL[weekdayOf(today)]}, {md(today)}
       </p>
       <h1 className="font-['Cormorant_Garamond'] font-light text-[34px] sm:text-[44px] leading-[1.05] tracking-tight text-[#1C3A4A] mb-2">
         {greeting(hour)}{firstName ? `, ${firstName}` : ''}<span className="text-[#C4A882]">.</span>
@@ -347,12 +350,12 @@ export default function FamilyRhythm({
       {/* The week, by child */}
       <div className="flex items-center justify-between mb-3">
         <h2 className="font-['Cormorant_Garamond'] text-[26px] font-light text-[#1C3A4A]">
-          {weekOffset === 0 ? 'This week' : weekOffset === 1 ? 'Next week' : `Week of ${md(week[0])}`}
+          {weekOffset === 0 ? 'The week ahead' : weekOffset === 1 ? 'The week after' : `${md(week[0])} – ${md(week[6])}`}
         </h2>
         <div className="flex items-center gap-1">
           <button type="button" onClick={() => setWeekOffset((w) => w - 1)} aria-label="Previous week" className="w-9 h-9 rounded-full hover:bg-white text-[#0D5C6E] text-lg">‹</button>
           {weekOffset !== 0 && (
-            <button type="button" onClick={() => setWeekOffset(0)} className="h-9 px-3 rounded-full border border-[#C5D8E8] text-[13px] font-semibold text-[#0D5C6E] hover:bg-white">This week</button>
+            <button type="button" onClick={() => setWeekOffset(0)} className="h-9 px-3 rounded-full border border-[#C5D8E8] text-[13px] font-semibold text-[#0D5C6E] hover:bg-white">Today</button>
           )}
           <button type="button" onClick={() => setWeekOffset((w) => w + 1)} aria-label="Next week" className="w-9 h-9 rounded-full hover:bg-white text-[#0D5C6E] text-lg">›</button>
         </div>
@@ -364,12 +367,13 @@ export default function FamilyRhythm({
           <div />
           {week.map((d, i) => (
             <div key={d} className={`py-3 text-center ${d === today ? 'bg-[#F5EFE0]' : ''}`}>
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-[#7A9AAA]">{DOW[i]}</p>
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-[#7A9AAA]">{d === today ? 'Today' : dow(d)}</p>
               <p className={`font-['Cormorant_Garamond'] text-[22px] leading-none mt-0.5 ${d === today ? 'text-[#0D5C6E] font-semibold' : d < today ? 'text-[#B5C4CC]' : 'text-[#1C3A4A]'}`}>{Number(d.slice(8))}</p>
             </div>
           ))}
         </div>
-        {/* Signups lane */}
+        {/* Signups lane (only when a signup date is in view) */}
+        {radarItems.some((r) => week.includes(r.date)) && (
         <div className="grid grid-cols-[112px_repeat(7,1fr)] border-b border-[#EFE7D4] min-h-[52px]">
           <div className="flex items-center gap-2 px-4"><span className="text-[#C4A882]">◆</span><span className="text-[13px] font-semibold text-[#7A5A2E]">Signups</span></div>
           {week.map((d) => (
@@ -382,6 +386,7 @@ export default function FamilyRhythm({
             </div>
           ))}
         </div>
+        )}
         {rows.map((lane) => {
           const t = theme(kids, lane);
           return (
@@ -445,10 +450,10 @@ export default function FamilyRhythm({
                 type="button"
                 onClick={() => setMobileDay(d)}
                 aria-pressed={sel}
-                aria-label={`${DOW[i]} ${md(d)}`}
+                aria-label={`${dow(d)} ${md(d)}`}
                 className={`rounded-[16px] py-2 flex flex-col items-center ${sel ? 'bg-[#0D5C6E] text-white' : 'bg-white text-[#1C3A4A]'} ${d < today && !sel ? 'opacity-50' : ''}`}
               >
-                <span className={`text-[10px] font-semibold uppercase ${sel ? 'text-white/70' : 'text-[#7A9AAA]'}`}>{DOW[i]}</span>
+                <span className={`text-[10px] font-semibold uppercase ${sel ? 'text-white/70' : 'text-[#7A9AAA]'}`}>{dow(d)}</span>
                 <span className="font-['Cormorant_Garamond'] text-[20px] leading-tight">{Number(d.slice(8))}</span>
                 <span className="flex gap-0.5 h-1.5 mt-0.5">
                   {lanesOn.map((l) => <span key={l} className="w-1.5 h-1.5 rounded-full" style={{ background: sel ? '#fff' : theme(kids, l).color }} />)}

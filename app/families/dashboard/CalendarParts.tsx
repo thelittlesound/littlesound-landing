@@ -81,9 +81,6 @@ export function CalendarPanel({ feedUrl, emailAlerts }: { feedUrl: string; email
 
   return (
     <div className="bg-[#F5EFE0] rounded-[18px] p-5 mb-5">
-      <h3 className="font-['Cormorant_Garamond'] text-[22px] font-light text-[#1C3A4A] leading-tight mb-1">
-        Sync to your phone
-      </h3>
       <p className="text-[14px] text-[#3A5A6A] mb-4">
         Everything in your Little Sound calendar (sessions you added, with your kids&apos; names, plus registration
         dates) can also show up in the calendar app you already use, and stays up to date when providers change
@@ -125,7 +122,8 @@ export function CalendarPanel({ feedUrl, emailAlerts }: { feedUrl: string; email
           className="mt-1 h-4 w-4 accent-[#0D5C6E]"
         />
         <span className="text-[14px] text-[#1C3A4A]">
-          Email me a week before registration opens, the morning it opens, and if a session I added changes.
+          Email me when registration is about to open for anything I&apos;ve saved, and if a session I added changes.
+          <span className="block text-[12px] text-[#7A9AAA] mt-0.5">&ldquo;Remind me&rdquo; on the Signup radar adds an email the day before and the morning it opens.</span>
         </span>
       </label>
       {msg && <p className="text-[13px] text-[#7A5A2E] mt-3">{msg}</p>}

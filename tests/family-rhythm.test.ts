@@ -62,6 +62,10 @@ const busy = base(); busy.sessions['19'] = [S({ days_of_week: ['MO', 'TU', 'WE',
 const bb = breathing(rhythmEvents(busy, wk[0], wk[6]), MAYA, wk);
 ok(bb.word === 'Full' && bb.pct === 100 && bb.freeAfternoons === 1, 'busy week → Full: ' + JSON.stringify(bb));
 
+const sunWin = weekDays('2026-11-15'); // a Sunday: the dashboard's window starts today
+const bs = breathing(rhythmEvents(d, sunWin[0], sunWin[6]), MAYA, sunWin);
+ok(bs.hours === 1.5 && bs.freeAfternoons === 4, 'rolling window from Sunday: weekdays counted by weekday, not position: ' + JSON.stringify(bs));
+
 // clashes + fixes
 const cl = clashes(d, T, '2026-11-29', T);
 ok(cl.length === 1 && cl[0].lane === MAYA && cl[0].date === '2026-11-18', 'Maya’s Wed clash found once');
