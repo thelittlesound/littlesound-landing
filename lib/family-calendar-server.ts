@@ -100,9 +100,15 @@ export async function getSaved(userId: string): Promise<CalendarActivity[]> {
 }
 
 export async function getPicks(userId: string): Promise<PickRow[]> {
-  let { data, error } = await supabaseAdmin.from('calendar_picks').select(PICK_FIELDS).eq('user_id', userId);
+  // Two separate results: Supabase types each query by its column list, so
+  // the fallback (one column fewer) can't be assigned to the first one's type.
+  const first = await supabaseAdmin.from('calendar_picks').select(PICK_FIELDS).eq('user_id', userId);
+  let data: unknown[] | null = first.data;
+  let error = first.error;
   if (error && /kid_id/.test(error.message ?? '')) {
-    ({ data, error } = await supabaseAdmin.from('calendar_picks').select(PICK_FIELDS_OLD).eq('user_id', userId));
+    const fallback = await supabaseAdmin.from('calendar_picks').select(PICK_FIELDS_OLD).eq('user_id', userId);
+    data = fallback.data;
+    error = fallback.error;
   }
   if (error) {
     console.error('calendar_picks read error:', error);
