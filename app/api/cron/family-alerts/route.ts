@@ -60,6 +60,15 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Calendar tables missing' }, { status: 500 });
   }
 
+  // "Remind me" openings (table may not exist yet before the SQL is re-run).
+  const { data: reminderRows } = await supabaseAdmin.from('signup_reminders').select('user_id, activity_id, open_date');
+  const remindersByUser = new Map<string, Set<string>>();
+  for (const r of (reminderRows ?? []) as { user_id: string; activity_id: string; open_date: string }[]) {
+    const set = remindersByUser.get(r.user_id) ?? new Set<string>();
+    set.add(`${r.activity_id}|${String(r.open_date).slice(0, 10)}`);
+    remindersByUser.set(r.user_id, set);
+  }
+
   const savedByUser = new Map<string, CalendarActivity[]>();
   for (const r of (savedRows ?? []) as SavedRow[]) {
     const list = savedByUser.get(r.user_id) ?? [];
@@ -88,7 +97,13 @@ export async function GET(request: NextRequest) {
   let emails = 0;
   let deferred = 0;
   for (const userId of userIds) {
-    const plan = planFamily({ today, saved: savedByUser.get(userId) ?? [], picks: picksByUser.get(userId) ?? [], dates });
+    const plan = planFamily({
+      today,
+      saved: savedByUser.get(userId) ?? [],
+      picks: picksByUser.get(userId) ?? [],
+      dates,
+      reminders: remindersByUser.get(userId),
+    });
 
     // 1. Keep picks in step with the listing's dates.
     for (const u of plan.updates) {
@@ -97,14 +112,16 @@ export async function GET(request: NextRequest) {
 
     // 2. Email, if they want it and anything new is due.
     const profile = profiles.get(userId);
-    if (!profile?.email || profile.email_alerts === false || !plan.alerts.length) continue;
+    // Alerts off → only the reminders they asked for with "Remind me".
+    const wanted = profile?.email_alerts === false ? plan.alerts.filter((a) => a.explicit) : plan.alerts;
+    if (!profile?.email || !wanted.length) continue;
     const { data: logRows } = await supabaseAdmin
       .from('family_alert_log')
       .select('alert_key')
       .eq('user_id', userId)
-      .in('alert_key', plan.alerts.map((a) => a.key));
+      .in('alert_key', wanted.map((a) => a.key));
     const sent = new Set(((logRows ?? []) as { alert_key: string }[]).map((r) => r.alert_key));
-    const due = plan.alerts.filter((a) => !sent.has(a.key));
+    const due = wanted.filter((a) => !sent.has(a.key));
     if (!due.length) continue;
     if (Date.now() - started > STOP_SENDING_AFTER_MS) {
       deferred += 1; // "opens soon" alerts go out tomorrow instead

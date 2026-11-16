@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
 import { CalendarPanel, SessionPicker, type CalendarPick, type CalendarSession } from './CalendarParts';
-import FamilyCalendar from './FamilyCalendar';
+import FamilyRhythm from './FamilyRhythm';
 import { KID_ID_RE, newKidId, type Kid as CalendarKid } from '@/lib/calendar-grid';
 import type { DateItem } from '@/lib/activity-dates';
 
@@ -54,6 +54,8 @@ export interface SavedActivity {
 }
 
 export interface CalendarData {
+  /** Hour of day in Seattle when the page was made (for the greeting). */
+  hour: number;
   feedUrl: string;
   emailAlerts: boolean;
   today: string;
@@ -64,6 +66,8 @@ export interface CalendarData {
   picks: CalendarPick[];
   /** The family's kids with stable ids (for coloring calendar items). */
   kids: CalendarKid[];
+  /** "activityId|YYYY-MM-DD" registration openings with "Remind me" on. */
+  reminders: string[];
 }
 
 export default function DashboardClient({
@@ -98,8 +102,35 @@ export default function DashboardClient({
   const [calBusy, setCalBusy] = useState<string | null>(null);
   const [calError, setCalError] = useState('');
   const [showSync, setShowSync] = useState(false);
+  const [reminders, setReminders] = useState<string[]>(calendar?.reminders ?? []);
 
-  async function pickAction(activityId: string, key: string, action: 'add' | 'remove' | 'assign', kidId: string | null = null) {
+  // "Switch to the Saturday class": add the new session for the same child, then drop the old one.
+  async function switchSession(activityId: string, fromKey: string, toKey: string, kidId: string | null) {
+    const added = await pickAction(activityId, toKey, 'add', kidId);
+    if (added) await pickAction(activityId, fromKey, 'remove');
+  }
+
+  async function setReminder(activityId: string, date: string, on: boolean) {
+    const id = `${activityId}|${date}`;
+    setCalBusy(`reminder|${id}`);
+    setCalError('');
+    try {
+      const res = await fetch('/api/families/reminders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ activityId, date, on }),
+      });
+      const r = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(r.error || 'Could not change the reminder. Please try again.');
+      setReminders((prev) => (on ? [...prev.filter((x) => x !== id), id] : prev.filter((x) => x !== id)));
+    } catch (e) {
+      setCalError(e instanceof Error ? e.message : 'Could not change the reminder. Please try again.');
+    } finally {
+      setCalBusy(null);
+    }
+  }
+
+  async function pickAction(activityId: string, key: string, action: 'add' | 'remove' | 'assign', kidId: string | null = null): Promise<boolean> {
     setCalBusy(`${activityId}|${key}`);
     setCalError('');
     try {
@@ -121,8 +152,10 @@ export default function DashboardClient({
           { activityId, key, status: 'active', changeNote: null, text: session?.text ?? '', kidId, anchor: calendar?.today ?? '' },
         ];
       });
+      return true;
     } catch (e) {
       setCalError(e instanceof Error ? e.message : 'Something went wrong. Please try again.');
+      return false;
     } finally {
       setCalBusy(null);
     }
@@ -238,7 +271,7 @@ export default function DashboardClient({
 
   return (
     <main className="min-h-screen bg-[#F5EFE0] px-4 py-16 pt-28">
-      <div className="max-w-[760px] mx-auto">
+      <div className="max-w-[1080px] mx-auto">
 
         {/* Header */}
         <div className="flex items-start justify-between mb-8">
@@ -246,9 +279,11 @@ export default function DashboardClient({
             <div className="inline-flex items-center gap-2 bg-[#0D5C6E]/8 border border-[#0D5C6E]/15 rounded-full px-4 py-1.5 mb-4">
               <span className="text-xs font-bold uppercase tracking-widest text-[#0D5C6E]">Family Dashboard</span>
             </div>
-            <h1 className="font-['Cormorant_Garamond'] text-[clamp(28px,4vw,40px)] font-light leading-[1.1] tracking-tight text-[#1C3A4A]">
-              Hi {profile.first_name || 'there'}<em className="italic text-[#0D5C6E]">.</em>
-            </h1>
+            {!calendar && (
+              <h1 className="font-['Cormorant_Garamond'] text-[clamp(28px,4vw,40px)] font-light leading-[1.1] tracking-tight text-[#1C3A4A]">
+                Hi {profile.first_name || 'there'}<em className="italic text-[#0D5C6E]">.</em>
+              </h1>
+            )}
           </div>
           <button
             onClick={handleSignOut}
@@ -260,36 +295,48 @@ export default function DashboardClient({
         </div>
 
         {isProfileEmpty && !editing && (
-          <div className="bg-[#0D5C6E]/8 border border-[#0D5C6E]/15 rounded-[16px] px-5 py-4 mb-6">
+          <div className="max-w-[760px] mx-auto bg-[#0D5C6E]/8 border border-[#0D5C6E]/15 rounded-[16px] px-5 py-4 mb-6">
             <p className="text-[14px] text-[#0D5C6E] font-medium">
               Complete your family profile to get activity picks matched to your kids.
             </p>
           </div>
         )}
 
-        {/* Family calendar */}
+        {/* Family Rhythm */}
         {calendar && (
-          <div className="bg-white rounded-[24px] shadow-[0_4px_32px_rgba(10,74,90,0.09)] p-5 sm:p-8 mb-6">
-            <FamilyCalendar
+          <>
+            <FamilyRhythm
+              firstName={profile.first_name}
+              hour={calendar.hour}
+              today={calendar.today}
               activities={saved.map((s) => ({
                 activityId: s.activity_id,
                 title: s.title ?? 'Activity',
                 provider: s.provider,
                 website: s.website,
                 neighborhood: s.neighborhood,
+                ageMin: s.age_min,
+                ageMax: s.age_max,
+                category: s.category,
               }))}
               sessions={calendar.sessions}
               registrations={calendar.registrations}
               picks={picks}
               kids={calendar.kids}
-              today={calendar.today}
+              reminders={reminders}
               busy={calBusy}
               onAdd={(a, k, kid) => pickAction(a, k, 'add', kid)}
               onRemove={(a, k) => pickAction(a, k, 'remove')}
               onAssign={(a, k, kid) => pickAction(a, k, 'assign', kid)}
+              onSwitch={switchSession}
+              onReminder={setReminder}
             />
-            {calError && <p className="text-[13px] text-[#C0544A] mt-3" role="alert">{calError}</p>}
-            <div className="mt-6 border-t border-[#E8DFC8] pt-4">
+            {calError && (
+              <p className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:max-w-[420px] z-50 rounded-[14px] bg-[#C0544A] text-white text-[14px] px-4 py-3 shadow-lg" role="alert">
+                {calError}
+              </p>
+            )}
+            <div className="bg-white rounded-[20px] shadow-[0_4px_24px_rgba(10,74,90,0.06)] px-5 py-4 mt-6">
               <button
                 type="button"
                 onClick={() => setShowSync((v) => !v)}
@@ -304,11 +351,12 @@ export default function DashboardClient({
                 </div>
               )}
             </div>
-          </div>
+          </>
         )}
 
+        <div className="max-w-[760px] mx-auto mt-10">
         {/* Profile card */}
-        <div className="bg-white rounded-[24px] shadow-[0_4px_32px_rgba(10,74,90,0.09)] p-8 md:p-10 mb-6">
+        <div id="family-profile" className="scroll-mt-24 bg-white rounded-[24px] shadow-[0_4px_32px_rgba(10,74,90,0.09)] p-8 md:p-10 mb-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="font-['Cormorant_Garamond'] text-2xl font-light text-[#1C3A4A]">
               Your family profile
@@ -574,6 +622,7 @@ export default function DashboardClient({
           <p className="text-[14px] text-[#5A7A8A]">
             Once you can book activities through Little Sound, your bookings will show up here.
           </p>
+        </div>
         </div>
       </div>
     </main>

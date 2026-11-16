@@ -69,29 +69,41 @@ export const REG_ALERT_DAYS = 7;
 export interface RegAlert {
   /** Unique per family in family_alert_log: never sent twice. */
   key: string;
-  stage: 'soon' | 'today';
+  stage: 'soon' | 'eve' | 'today';
   date: string;
   time: string | null;
   label: string | null;
+  /** The family tapped "Remind me" for this one. */
+  explicit: boolean;
 }
 
 /**
  * Registration openings worth an email today: one "opens soon" alert when an
  * opening is 1–7 days away, and one "opens today" alert the morning of.
  */
-export function registrationAlerts(activityId: string, items: DateItem[], today: string): RegAlert[] {
+export function registrationAlerts(
+  activityId: string,
+  items: DateItem[],
+  today: string,
+  /** "activityId|YYYY-MM-DD" openings the family asked to be reminded about. */
+  reminded: Set<string> = new Set()
+): RegAlert[] {
   const horizon = addDays(today, REG_ALERT_DAYS);
+  const tomorrow = addDays(today, 1);
   const out: RegAlert[] = [];
   for (const i of items) {
     if (i.kind !== 'registration' || !i.start_date) continue;
     if (i.start_date < today || i.start_date > horizon) continue;
-    const stage = i.start_date === today ? 'today' : 'soon';
+    const explicit = reminded.has(`${activityId}|${i.start_date}`);
+    // "Remind me" adds a day-before email; on that day it replaces "opens soon".
+    const stage = i.start_date === today ? 'today' : explicit && i.start_date === tomorrow ? 'eve' : 'soon';
     out.push({
       key: `reg|${activityId}|${i.start_date}|${i.start_time ?? ''}|${stage}`,
       stage,
       date: i.start_date,
       time: i.start_time,
       label: i.label,
+      explicit,
     });
   }
   return out;

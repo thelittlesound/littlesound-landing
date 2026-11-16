@@ -22,7 +22,9 @@ export type PickUpdate =
 export interface Alert {
   /** Unique per family in family_alert_log. */
   key: string;
-  kind: 'reg-soon' | 'reg-today' | 'changed' | 'gone';
+  kind: 'reg-soon' | 'reg-eve' | 'reg-today' | 'changed' | 'gone';
+  /** From "Remind me": sent even when general email alerts are off. */
+  explicit?: boolean;
   activity: CalendarActivity;
   text: string; // plain text, escaped when put in the email
 }
@@ -32,6 +34,8 @@ export function planFamily(opts: {
   saved: CalendarActivity[];
   picks: PickLike[];
   dates: Map<string, DateItem[]>;
+  /** "activityId|YYYY-MM-DD" openings with "Remind me" on. */
+  reminders?: Set<string>;
 }): { updates: PickUpdate[]; alerts: Alert[] } {
   const { today, saved, picks, dates } = opts;
   const byId = new Map(saved.map((a) => [a.activityId, a]));
@@ -65,10 +69,11 @@ export function planFamily(opts: {
   }
 
   for (const a of saved) {
-    for (const r of registrationAlerts(a.activityId, dates.get(a.activityId) ?? [], today)) {
+    for (const r of registrationAlerts(a.activityId, dates.get(a.activityId) ?? [], today, opts.reminders)) {
       alerts.push({
         key: r.key,
-        kind: r.stage === 'today' ? 'reg-today' : 'reg-soon',
+        kind: r.stage === 'today' ? 'reg-today' : r.stage === 'eve' ? 'reg-eve' : 'reg-soon',
+        explicit: r.explicit,
         activity: a,
         text: `Registration opens ${whenText(r.date, r.time, today)}${r.label ? ` (${r.label})` : ''}.`,
       });
@@ -77,7 +82,7 @@ export function planFamily(opts: {
   return { updates, alerts };
 }
 
-const ORDER: Alert['kind'][] = ['reg-today', 'reg-soon', 'changed', 'gone'];
+const ORDER: Alert['kind'][] = ['reg-today', 'reg-eve', 'reg-soon', 'changed', 'gone'];
 
 /** One email per family per day, covering every alert that's due. */
 export function buildAlertEmail(opts: {
@@ -92,6 +97,8 @@ export function buildAlertEmail(opts: {
   const subject = one
     ? one.kind === 'reg-today'
       ? `Registration opens today: ${title(one)}`
+      : one.kind === 'reg-eve'
+      ? `Registration opens tomorrow: ${title(one)}`
       : one.kind === 'reg-soon'
       ? `Registration opens soon: ${title(one)}`
       : one.kind === 'changed'

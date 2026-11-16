@@ -58,5 +58,18 @@ alter table public.family_alert_log enable row level security;
 alter table public.calendar_picks
   add column if not exists kid_id text;
 
+-- "Remind me" on the dashboard's Signup radar: one row per registration
+-- opening the family wants a day-before + morning-of email for. Sent even if
+-- general email alerts are off (they asked for this one); the one-click
+-- unsubscribe clears these too.
+create table if not exists public.signup_reminders (
+  user_id uuid not null references auth.users (id) on delete cascade,
+  activity_id text not null,
+  open_date date not null,
+  created_at timestamptz not null default now(),
+  primary key (user_id, activity_id, open_date)
+);
+alter table public.signup_reminders enable row level security;
+
 -- Make the new columns visible to the API right away.
 notify pgrst, 'reload schema';

@@ -183,28 +183,28 @@ Provider visits `/providers/signup` → fills out account + business info (now i
 
 **~~Not built yet: editing an already-submitted listing.~~** ✅ Built 2026-08-23 — providers can now self-serve edit their listings. See "Provider listing editing" below.
 
-### Family calendar widget on the dashboard (built 2026-11-16, pending the `kid_id` SQL line + deploy + live test)
+### Family Rhythm: the family dashboard (Round 1 built 2026-11-16; pending SQL + deploy + live test)
 
-Evan (2026-11-16): the phone-calendar sync was needed, but what he meant by "calendar" was **an interactive calendar inside the family portal**. His choices: **month grid**; show **sessions they added + registration dates + all dates of saved activities**; actions **tap for details, add sessions from it, spot clashes, color by kid**; placed **at the top of the dashboard**.
+**How we got here (2026-11-16):** Evan wanted an interactive calendar in the family portal, not just phone sync. A plain month grid was built and mocked up; Evan: "good start but this is basic… we need unique, stand out, a differentiator… lead with creativity and the user experience." Claude prototyped **Family Rhythm** (clickable prototype kept in `docs/design/`); Evan: "Yes!!!!! I love the dashboard concept and easy to see at a glance where things stand." His calls: **drop the month grid**, reminders = **day before + morning of** (email), name it **Family Rhythm**.
 
-**What families see** (`app/families/dashboard/FamilyCalendar.tsx`, first card on `/families/dashboard`):
-- **Month grid** (Mon–Sun, ‹ Today ›). Desktop: up to 2 chips per day ("3:45pm Pottery…", "+N more"); phones: colored dots. Today is circled; past days are faded.
-- **● Sessions they added**, colored by child · **○ Other dates of saved activities** (dashed; toggle "Show other dates of saved activities") · **◆ Registration opens / closes** (gold).
-- **⚠️ Clashes:** a day where two added sessions overlap gets a warning; in the day's details each says "Overlaps with X (time)". Unadded sessions say "Would overlap with X". Back-to-back and all-day items never count as clashes.
-- **Tap a day** → its items underneath: time, title + session label, provider · location, "Updated by the provider · Was …" when a session moved, **For [child ▾]** to assign, **Remove from calendar** / **Add to my calendar** (choose the child first), **Their site →** / **Register on their site →**.
-- Empty states: nothing saved → link to Discover; saved but no dates yet → "We check providers' sites every day…".
-- The **Sync to your phone & email alerts** panel now sits collapsed under the calendar (same subscribe links, reset, alerts switch). The phone feed now prefixes each event with the child's name ("Maya: Pottery…").
-- The activity cards' "Add to my calendar" picker and the month calendar share one set of picks (`DashboardClient` holds them), so a change in either shows in both.
+**Round 1 (built), top of `/families/dashboard`** (`app/families/dashboard/FamilyRhythm.tsx`, logic in `lib/family-rhythm.ts`):
+- **Greeting + the week in one line:** "Good morning, Kelly." (Seattle time) and a sentence written from the family's data, e.g. "A full Wednesday, a wide-open tomorrow, one clash to sort out, and one signup to catch on Friday."
+- **Breathing room** per child: hours of activities this week, free after-school afternoons (Mon–Fri, nothing after 2pm), and Light / Balanced / Full (Full = over 6 hrs). No kids on the profile → a prompt to add first names.
+- **Clashes with a fix:** "Maya can't be in two places at 4pm." with **Move Swim to Sat 9:30am (same class)**, found among the other sessions of either class that don't clash with that child's next four weeks. Same child only (two kids at once isn't a clash). A weekly clash shows once. **Keep both** hides it (remembered in that browser).
+- **Signup radar:** countdown rings for registration openings of saved activities (soonest first), then registrations open now that close soonest; "For Maya" when the activity's ages fit one child; **Remind me** (day-before + morning-of email); **Sign-up page →**; a card counting saved activities we're still watching for dates.
+- **The week by child:** lanes for each child (+ "Not assigned" when needed) and a Signups lane; ‹ › week navigation; tap a session for details (which child, **Same class, other times → Switch to…**, remove, provider link). **Ideas** in empty future days: a session of a saved activity that fits the child's age and meets that day ("Open · idea" → **Add for Leo**). Phones get a day strip with each child's day stacked.
+- The **Sync to your phone & email alerts** panel is a collapsed card under it. The activity cards' "Add to my calendar" picker still works and shares the same picks.
+- Kids' first names (optional) + stable ids in the profile; items assigned to a child are colored by child and named in the phone feed ("Maya: Pottery…").
 
-**Kids:** the profile editor now has **first name (optional) + age** per child. Each child gets a stable id (`k_xxxxxxxx`) stored in `profiles.kids`; older profiles get ids on their next dashboard visit (`getKids(userId, true)`), so assigned items keep pointing at the right child even if names change. Colors by position: teal, purple, green, coral, blue, plum (not tan: that's registration); unassigned = slate. A removed child's items show as unassigned.
+**Reminders:** `signup_reminders` table + `/api/families/reminders`. The daily alerts job sends a **day-before** email for reminded openings (replacing "opens soon" that day) and the **morning-of** one; reminded alerts go out even if general email alerts are off (the family asked), and the one-click unsubscribe clears reminders too.
 
-**Data:** `calendar_picks.kid_id` (new line in `supabase/family-calendar.sql`). `/api/families/calendar/picks` gains `assign` and accepts `kidId` on `add`; a child id must be one of the family's own kids. `getPicks` falls back gracefully if the column doesn't exist yet.
+**Round 2 (not built):** the **Summer planner** (weeks × kids board, open weeks with ideas, signup dates per week, "pencil in" camps), smarter ideas beyond the saved list, and anything needing travel times or weather.
 
-**Day rules** (`lib/calendar-grid.ts` `occurrences`) match the phone feed's (`lib/ics.ts` `sessionTiming`): weekly classes on their weekdays between their dates; undated weekly classes from the day added (or today, for ones not added); a camp range with daily hours runs Mon–Fri when it starts and ends on weekdays, otherwise every day; an untimed range covers every day.
+**Data / deploy:** run the new lines of `supabase/family-calendar.sql` (`calendar_picks.kid_id`, `signup_reminders`). Everything degrades gracefully if they're missing (no reminders, picks still load).
 
-**Status:** typecheck clean; 38 calendar-logic checks (grid weeks incl. leap February, every session shape, first day + weekdays identical to the phone feed, clashes, kid ids/labels/colors) + 12 server checks (kid id backfill, add/assign/unassign, refusing an unknown child, child names in the feed, fallback before the column exists). **Rendered and clicked through in a headless browser** at desktop and phone widths: add from the calendar for a child, reassign (chip recolors), remove clears the clash, card and calendar stay in sync, toggle other dates, month navigation, camp week on the right days, Today. Not yet tried on the live site.
+**Status:** typecheck clean; **83 logic checks** in `tests/` (now in the repo: `bash tests/run.sh`, see `tests/README.md`): week/lanes, breathing, clashes + fixes, radar, ideas, summary sentences, reminder timing, day placement matching the phone feed. The real dashboard component was rendered with a sample family and clicked through in a headless browser at desktop and phone widths (fix a clash, Remind me, add an idea, reassign a child, next week). Not yet tried on the live site.
 
-**Note:** the cloud workspace was reset on 2026-11-16, which deleted the earlier sandbox test harnesses (they were never in the repo). The calendar tests were rewritten; the older date-agent/claims suites would need rewriting to run again.
+**Note:** the cloud workspace was reset on 2026-11-16, deleting the earlier sandbox-only test harnesses; tests now live in `tests/` so that can't happen again.
 
 ### Calendar agent Phase 1 Step B: family calendars + alerts (built 2026-11-14, pending `supabase/family-calendar.sql` + deploy + live test)
 
@@ -477,7 +477,7 @@ The 2026-08-23 list (family saved activities, provider listing editing, homepage
 
 New priorities (agreed with Evan 2026-11-11), tackle top-down:
 
-1. **Family calendar widget (built 2026-11-16) + Step B rollout:** run the `kid_id` line from `supabase/family-calendar.sql`, push, add kids' first names in the profile, and click through the calendar on desktop and phone. Step B (built 2026-11-14): run `supabase/family-calendar.sql`, push, and do the live test in Completed Work (subscribe from a real phone calendar). Then watch the first alert emails.
+1. **Family Rhythm Round 1 (built 2026-11-16) + Step B rollout:** run the new `supabase/family-calendar.sql` lines (`kid_id`, `signup_reminders`), push, add kids' first names in the profile, and click through on desktop and phone. Then Round 2 (Summer planner). Step B (built 2026-11-14): run `supabase/family-calendar.sql`, push, and do the live test in Completed Work (subscribe from a real phone calendar). Then watch the first alert emails.
 2. **Finish the date agent's first pass:** approve/dismiss the 13 drafts in the review inbox (one-time; they were held under the old rule where any AI note blocked publishing), and fix or remove the stale website addresses listed under the date agent in Completed Work. After that it re-checks every site daily on its own.
 3. **Calendar agent, Phase 2:** weekly family digest email; kids' names on profiles so calendar items belong to a specific kid.
 4. **Calendar agent, Phase 3:** text alerts, scheduling help, and direct Google Calendar connect. Start the slow external approvals early (Twilio/10DLC registration, Google app verification).

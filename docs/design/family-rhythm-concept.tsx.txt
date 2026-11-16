@@ -1,0 +1,472 @@
+import { useMemo, useState } from 'react';
+import { createRoot } from 'react-dom/client';
+
+/* ───────────── Sample family (prototype only) ───────────── */
+type KidId = 'maya' | 'leo';
+const KIDS: Record<KidId, { name: string; age: number; color: string; soft: string; ink: string }> = {
+  maya: { name: 'Maya', age: 9, color: '#0D5C6E', soft: '#DCEFF2', ink: '#0A4A5A' },
+  leo: { name: 'Leo', age: 4, color: '#7B5EA7', soft: '#EEE8F7', ink: '#4E3A70' },
+};
+const DAYS = [
+  { iso: '2026-11-16', d: 'Mon', n: 16 }, { iso: '2026-11-17', d: 'Tue', n: 17 }, { iso: '2026-11-18', d: 'Wed', n: 18 },
+  { iso: '2026-11-19', d: 'Thu', n: 19 }, { iso: '2026-11-20', d: 'Fri', n: 20 }, { iso: '2026-11-21', d: 'Sat', n: 21 }, { iso: '2026-11-22', d: 'Sun', n: 22 },
+];
+const TODAY = '2026-11-16';
+interface Ev { id: string; kid: KidId; day: string; start: string; end: string; title: string; short: string; where: string; hood: string; icon: string; alt?: { day: string; start: string; end: string; label: string } }
+const START_EVENTS: Ev[] = [
+  { id: 'music', kid: 'leo', day: '2026-11-17', start: '10:00', end: '10:45', title: 'Music FunTime', short: 'Music', where: 'Seattle Music & Dance', hood: 'Wallingford', icon: 'music' },
+  { id: 'pottery', kid: 'maya', day: '2026-11-18', start: '15:45', end: '16:45', title: 'Pottery Wheel & Clay', short: 'Pottery', where: 'FayezArt Pottery', hood: 'Ballard', icon: 'vase' },
+  { id: 'swim', kid: 'maya', day: '2026-11-18', start: '16:00', end: '16:30', title: 'Swim · Starfish Level 2', short: 'Swim', where: 'Goldfish Swim School', hood: 'Shoreline', icon: 'waves',
+    alt: { day: '2026-11-21', start: '09:30', end: '10:00', label: 'Sat 9:30am' } },
+  { id: 'soccer', kid: 'maya', day: '2026-11-21', start: '10:30', end: '11:30', title: 'Youth Soccer', short: 'Soccer', where: 'YMCA Youth Sports', hood: 'Green Lake', icon: 'ball' },
+  { id: 'skate', kid: 'leo', day: '2026-11-22', start: '12:00', end: '13:00', title: 'Skatepark Lesson', short: 'Skate', where: 'All Together Skatepark', hood: 'Fremont', icon: 'wheel' },
+];
+const IDEAS: Record<string, { kid: KidId; day: string; start: string; end: string; title: string; short: string; where: string; hood: string; icon: string; why: string }> = {
+  'leo|2026-11-21': { kid: 'leo', day: '2026-11-21', start: '09:00', end: '09:30', title: 'Parent & Tot Swim', short: 'Tot swim', where: 'Goldfish Swim School', hood: 'Shoreline', icon: 'waves', why: 'Same pool as Maya’s Saturday swim, 30 minutes earlier' },
+  'maya|2026-11-19': { kid: 'maya', day: '2026-11-19', start: '15:30', end: '17:00', title: 'Drop-in Clay Studio', short: 'Clay', where: 'FayezArt Pottery', hood: 'Ballard', icon: 'vase', why: 'From a studio you saved · ages 7–11' },
+};
+const SIGNUPS = [
+  { id: 'ski', title: 'Winter Ski & Snowboard Camps', for: 'maya' as KidId, opens: 'Fri, Nov 20 · 9:00am', days: 4, total: 14, note: 'Popular weeks can fill fast. We’ll ping you at 8:45am.', link: '#' },
+  { id: 'midwinter', title: 'Mid-Winter Break Camp', for: 'leo' as KidId, opens: 'Closes Fri, Dec 4', days: 18, total: 30, note: 'Registration is open now.', link: '#', closing: true },
+  { id: 'parks', title: 'Seattle Parks Summer Camps', for: null, opens: 'Opens late winter · date TBA', days: null, total: null, note: 'We’ll tell you the day the date is announced.', link: '#' },
+];
+type Week = { id: string; label: string; sub: string };
+const SUMMER: Week[] = ['Jun 21', 'Jun 28', 'Jul 5', 'Jul 12', 'Jul 19', 'Jul 26', 'Aug 2', 'Aug 9', 'Aug 16', 'Aug 23'].map((l, i) => ({ id: `w${i}`, label: l, sub: i === 2 ? 'Jul 4 holiday' : '' }));
+const START_PLAN: Record<string, { title: string; where: string; icon: string; signup: string }> = {
+  'maya|w0': { title: 'Nature Adventure Trek', where: 'Discovery Park', icon: 'tree', signup: 'Signups late Feb' },
+  'maya|w3': { title: 'Tech Camp at UW', where: 'iD Tech', icon: 'laptop', signup: 'Booked ✓' },
+  'leo|w1': { title: 'Kinder Camp at the Zoo', where: 'Woodland Park Zoo', icon: 'paw', signup: 'Signups Jan 13' },
+};
+const CAMP_IDEAS: Record<KidId, { title: string; where: string; icon: string; signup: string; hood: string }[]> = {
+  maya: [
+    { title: 'Outdoor Art Camp', where: 'West Seattle Art Nest', icon: 'brush', signup: 'Signups open now', hood: 'West Seattle' },
+    { title: 'Youth Rowing & Sailing', where: 'Mt. Baker Rowing', icon: 'sail', signup: 'Signups late Feb', hood: 'Mt. Baker' },
+    { title: 'Junior Chef Week', where: 'Frog Legs Culinary', icon: 'chef', signup: 'Signups Mar 1', hood: 'Wallingford' },
+  ],
+  leo: [
+    { title: 'Itty Bitty Nature Camp', where: 'Discovery Park', icon: 'tree', signup: 'Signups Feb 2', hood: 'Magnolia' },
+    { title: 'Little Movers Dance', where: 'Seattle Music & Dance', icon: 'music', signup: 'Signups open now', hood: 'Wallingford' },
+    { title: 'Splash & Play Week', where: 'Colman Pool', icon: 'waves', signup: 'Signups late Feb', hood: 'West Seattle' },
+  ],
+};
+
+/* ───────────── line icons (brand: thin line, warm) ───────────── */
+const ICONS: Record<string, string> = {
+  vase: 'M9 3h6M10 3c0 3-4 4.5-4 9a6 6 0 0 0 12 0c0-4.5-4-6-4-9M7.5 14h9',
+  waves: 'M2 9c2 0 2-2 4-2s2 2 4 2 2-2 4-2 2 2 4 2 2-2 4-2M2 15c2 0 2-2 4-2s2 2 4 2 2-2 4-2 2 2 4 2 2-2 4-2',
+  music: 'M9 17V5l10-2v12M9 17a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0zM19 15a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z',
+  ball: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 8l3.5 2.5-1.3 4h-4.4l-1.3-4zM12 8V3.5M15.5 10.5l4-1.5M14.2 14.5l2.3 3.8M9.8 14.5l-2.3 3.8M8.5 10.5l-4-1.5',
+  wheel: 'M3 13h18M5 13l1.5-3h11L19 13M7 17a2 2 0 1 0 0-.01M17 17a2 2 0 1 0 0-.01',
+  tree: 'M12 21v-5M12 3l6 8h-3l4 5H5l4-5H6z',
+  laptop: 'M4 6h16v9H4zM2 18h20',
+  paw: 'M12 20c-3 0-5-2-5-4s2-3.5 5-3.5 5 1.5 5 3.5-2 4-5 4zM6 11a1.6 2 0 1 0 0-.01M18 11a1.6 2 0 1 0 0-.01M9.5 7a1.6 2 0 1 0 0-.01M14.5 7a1.6 2 0 1 0 0-.01',
+  brush: 'M14 4l6 6-8 8H6v-6zM12 6l6 6',
+  sail: 'M12 3v14M12 4l7 11h-7M12 7l-5 8h5M3 19c2 1.5 4 1.5 6 0 2 1.5 4 1.5 6 0 2 1.5 4 1.5 6 0',
+  chef: 'M7 14v5h10v-5M7 14a4 4 0 1 1 2.5-7.2A4 4 0 0 1 17 8a3 3 0 0 1 0 6z',
+};
+function Icon({ name, size = 16 }: { name: string; size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="inline-block align-[-3px] shrink-0">
+      <path d={ICONS[name] ?? ICONS.tree} />
+    </svg>
+  );
+}
+
+/* ───────────── helpers ───────────── */
+const mins = (t: string) => Number(t.slice(0, 2)) * 60 + Number(t.slice(3));
+const fmt = (t: string) => { const h = Number(t.slice(0, 2)), m = t.slice(3); const hh = ((h + 11) % 12) + 1; return `${hh}${m === '00' ? '' : ':' + m}${h < 12 ? 'am' : 'pm'}`; };
+const range = (a: string, b: string) => `${fmt(a).replace(/(am|pm)$/, fmt(a).slice(-2) === fmt(b).slice(-2) ? '' : '$1')}–${fmt(b)}`;
+const overlap = (a: Ev, b: Ev) => a.day === b.day && a.kid === b.kid && mins(a.start) < mins(b.end) && mins(b.start) < mins(a.end);
+const dayName = (iso: string) => DAYS.find((d) => d.iso === iso)!;
+
+/* ───────────── the concept ───────────── */
+function FamilyRhythm() {
+  const [events, setEvents] = useState<Ev[]>(START_EVENTS);
+  const [view, setView] = useState<'week' | 'season'>('week');
+  const [open, setOpen] = useState<Ev | null>(null);
+  const [mobileDay, setMobileDay] = useState('2026-11-18');
+  const [reminders, setReminders] = useState<Record<string, boolean>>({ ski: true });
+  const [toast, setToast] = useState('');
+  const [keptBoth, setKeptBoth] = useState(false);
+  const [plan, setPlan] = useState(START_PLAN);
+  const [ideasFor, setIdeasFor] = useState<{ kid: KidId; week: Week } | null>(null);
+
+  const say = (m: string) => { setToast(m); setTimeout(() => setToast(''), 2600); };
+  const clashes = useMemo(() => {
+    const out: [Ev, Ev][] = [];
+    events.forEach((a, i) => events.slice(i + 1).forEach((b) => overlap(a, b) && out.push([a, b])));
+    return keptBoth ? [] : out;
+  }, [events, keptBoth]);
+  const clashIds = new Set(clashes.flat().map((e) => e.id));
+
+  const hours = (kid: KidId) => events.filter((e) => e.kid === kid).reduce((n, e) => n + (mins(e.end) - mins(e.start)) / 60, 0);
+  const freeAfternoons = (kid: KidId) => DAYS.slice(0, 5).filter((d) => !events.some((e) => e.kid === kid && e.day === d.iso && mins(e.start) >= 14 * 60)).length;
+  const mood = (h: number) => (h > 5 ? { word: 'Full', tone: '#C0544A', pct: 100 } : h >= 2 ? { word: 'Balanced', tone: '#2E7D5B', pct: Math.round((h / 5) * 100) } : { word: 'Light', tone: '#A8865A', pct: Math.max(12, Math.round((h / 5) * 100)) });
+
+  function switchToAlt(e: Ev) {
+    if (!e.alt) return;
+    setEvents((list) => list.map((x) => (x.id === e.id ? { ...x, day: e.alt!.day, start: e.alt!.start, end: e.alt!.end, alt: undefined } : x)));
+    setOpen(null);
+    say(`${KIDS[e.kid].name}’s ${e.short.toLowerCase()} moved to ${e.alt.label}. Your phone calendar updates too.`);
+  }
+  function addIdea(key: string) {
+    const i = IDEAS[key];
+    setEvents((list) => [...list, { id: key, kid: i.kid, day: i.day, start: i.start, end: i.end, title: i.title, short: i.short, where: i.where, hood: i.hood, icon: i.icon }]);
+    say(`Added ${i.title} for ${KIDS[i.kid].name}.`);
+  }
+
+  const summary = (() => {
+    const busiest = DAYS.map((d) => ({ d, n: events.filter((e) => e.day === d.iso).length })).sort((a, b) => b.n - a.n)[0];
+    const quiet = DAYS.slice(0, 5).find((d) => !events.some((e) => e.day === d.iso));
+    const FULL: Record<string, string> = { Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday', Thu: 'Thursday', Fri: 'Friday', Sat: 'Saturday', Sun: 'Sunday' };
+    return `A full ${FULL[busiest.d.d]}, ${quiet ? `a wide-open ${FULL[quiet.d]}` : 'no quiet weekday'}, and one signup to catch on Friday.`;
+  })();
+
+  return (
+    <div className="min-h-screen bg-[#F5EFE0] text-[#1C3A4A]">
+      <div className="max-w-[1080px] mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        {/* Greeting */}
+        <p className="text-[12px] font-bold uppercase tracking-[0.18em] text-[#1A7A8A] mb-2">The Sherman family · week of Nov 16</p>
+        <h1 className="font-['Cormorant_Garamond'] font-light text-[34px] sm:text-[46px] leading-[1.05] tracking-tight mb-3">
+          Good morning, Kelly<span className="text-[#C4A882]">.</span>
+        </h1>
+        <p className="font-['Cormorant_Garamond'] italic text-[20px] sm:text-[24px] text-[#3A5A6A] leading-snug max-w-[640px] mb-8">{summary}</p>
+
+        {/* Breathing room */}
+        <div className="grid sm:grid-cols-2 gap-3 mb-6">
+          {(Object.keys(KIDS) as KidId[]).map((k) => {
+            const h = hours(k), m = mood(h), kid = KIDS[k];
+            return (
+              <div key={k} className="bg-white rounded-[20px] p-4 sm:p-5 shadow-[0_4px_24px_rgba(10,74,90,0.06)] flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full flex items-center justify-center text-white font-['Cormorant_Garamond'] text-[22px] shrink-0" style={{ background: kid.color }}>{kid.name[0]}</div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <p className="font-semibold text-[15px]">{kid.name} <span className="text-[#7A9AAA] font-normal text-[13px]">· {kid.age}</span></p>
+                    <p className="text-[13px] font-semibold" style={{ color: m.tone }}>{m.word} week</p>
+                  </div>
+                  <div className="h-2 rounded-full bg-[#F0E9D8] mt-2 overflow-hidden"><div className="h-full rounded-full transition-all duration-500" style={{ width: `${m.pct}%`, background: kid.color }} /></div>
+                  <p className="text-[12px] text-[#7A9AAA] mt-1.5">{h.toFixed(h % 1 ? 1 : 0)} hrs of activities · {freeAfternoons(k)} free after-school afternoons</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Clash, with a fix */}
+        {clashes.map(([a, b]) => {
+          const movable = [a, b].find((x) => x.alt) ?? null;
+          return (
+            <div key={a.id + b.id} className="relative overflow-hidden rounded-[22px] bg-[#FFF6E8] border border-[#E8C99A] p-5 sm:p-6 mb-6">
+              <div className="absolute -right-8 -top-10 w-28 h-28 rounded-full bg-[#F3D9AE]/40 pointer-events-none" aria-hidden />
+              <p className="relative text-[12px] font-bold uppercase tracking-[0.16em] text-[#9A5B1E] mb-1">Heads up · Wednesday</p>
+              <p className="relative font-['Cormorant_Garamond'] text-[24px] sm:text-[28px] leading-tight mb-1">{KIDS[a.kid].name} can’t be in two places at {fmt(b.start)}.</p>
+              <p className="text-[14px] text-[#5A4A3A] mb-4">{a.short} in {a.hood} runs {range(a.start, a.end)}; {b.short} in {b.hood} starts at {fmt(b.start)}.</p>
+              <div className="flex flex-wrap gap-2">
+                {movable && (
+                  <button onClick={() => switchToAlt(movable)} className="h-11 px-5 rounded-full bg-[#0D5C6E] text-white text-[14px] font-semibold hover:bg-[#1A7A8A] transition-colors">
+                    Move {movable.short.toLowerCase()} to {movable.alt!.label} (same class)
+                  </button>
+                )}
+                <button onClick={() => { setKeptBoth(true); say('Okay, keeping both. Tag-team time!'); }} className="h-11 px-5 rounded-full border border-[#D9B98A] text-[#7A5A2E] text-[14px] font-semibold hover:bg-white/60">Keep both</button>
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Signup radar */}
+        <div className="mb-8">
+          <div className="flex items-baseline justify-between mb-3">
+            <h2 className="font-['Cormorant_Garamond'] text-[26px] font-light">Signup radar</h2>
+            <p className="text-[12px] text-[#7A9AAA]">From what you’ve saved</p>
+          </div>
+          <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 snap-x">
+            {SIGNUPS.map((s, i) => {
+              const hero = i === 0;
+              const kid = s.for ? KIDS[s.for] : null;
+              return (
+                <div key={s.id} className={`snap-start shrink-0 w-[260px] sm:w-[300px] rounded-[22px] p-5 flex flex-col ${hero ? 'bg-[#0D5C6E] text-white' : 'bg-white shadow-[0_4px_24px_rgba(10,74,90,0.06)]'}`}>
+                  <div className="flex items-center gap-3 mb-3">
+                    {s.days != null ? (
+                      <div className="relative w-14 h-14 shrink-0">
+                        <svg viewBox="0 0 36 36" className="w-14 h-14 -rotate-90"><circle cx="18" cy="18" r="15.5" fill="none" stroke={hero ? 'rgba(255,255,255,0.18)' : '#F0E9D8'} strokeWidth="3" />
+                          <circle cx="18" cy="18" r="15.5" fill="none" stroke={hero ? '#C4A882' : '#1A7A8A'} strokeWidth="3" strokeLinecap="round" strokeDasharray={`${(1 - s.days / s.total!) * 97.4} 97.4`} /></svg>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center leading-none"><span className="font-['Cormorant_Garamond'] text-[22px]">{s.days}</span><span className="text-[9px] uppercase tracking-wider opacity-70">days</span></div>
+                      </div>
+                    ) : (
+                      <div className="w-14 h-14 rounded-full border-2 border-dashed border-[#C5D8E8] flex items-center justify-center text-[#7A9AAA] text-[18px] shrink-0">?</div>
+                    )}
+                    <div className="min-w-0">
+                      <p className={`text-[12px] font-semibold ${hero ? 'text-[#C4A882]' : s.closing ? 'text-[#C0544A]' : 'text-[#1A7A8A]'}`}>{s.opens}</p>
+                      <p className="font-semibold text-[15px] leading-snug">{s.title}</p>
+                    </div>
+                  </div>
+                  <p className={`text-[13px] mb-4 flex-1 ${hero ? 'text-white/80' : 'text-[#5A7A8A]'}`}>{kid ? `For ${kid.name}. ` : ''}{s.note}</p>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => { setReminders((r) => ({ ...r, [s.id]: !r[s.id] })); say(reminders[s.id] ? 'Reminder off.' : 'We’ll remind you by email the day before and 15 minutes before.'); }}
+                      className={`h-9 px-4 rounded-full text-[13px] font-semibold whitespace-nowrap transition-colors ${reminders[s.id] ? (hero ? 'bg-[#C4A882] text-[#1C3A4A]' : 'bg-[#0D5C6E] text-white') : hero ? 'border border-white/40 text-white' : 'border border-[#C5D8E8] text-[#0D5C6E]'}`}>
+                      {reminders[s.id] ? '✓ Reminder set' : 'Remind me'}
+                    </button>
+                    <a href={s.link} onClick={(e) => e.preventDefault()} className={`text-[13px] font-semibold whitespace-nowrap ${hero ? 'text-white' : 'text-[#1A7A8A]'}`}>Sign-up page →</a>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* View switch */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="inline-flex bg-white rounded-full p-1 shadow-[0_2px_12px_rgba(10,74,90,0.06)]">
+            {(['week', 'season'] as const).map((v) => (
+              <button key={v} onClick={() => setView(v)} className={`h-9 px-5 rounded-full text-[14px] font-semibold transition-colors ${view === v ? 'bg-[#0D5C6E] text-white' : 'text-[#3A5A6A]'}`}>
+                {v === 'week' ? 'This week' : 'Summer planner'}
+              </button>
+            ))}
+          </div>
+          {view === 'week' && <p className="hidden sm:block text-[13px] text-[#7A9AAA]">Nov 16 – 22</p>}
+        </div>
+
+        {view === 'week' ? (
+          <>
+            {/* Week lanes (tablet/desktop) */}
+            <div className="hidden md:block bg-white rounded-[24px] shadow-[0_4px_32px_rgba(10,74,90,0.08)] overflow-hidden">
+              <div className="grid grid-cols-[120px_repeat(7,1fr)] border-b border-[#EFE7D4]">
+                <div />
+                {DAYS.map((d) => (
+                  <div key={d.iso} className={`py-3 text-center ${d.iso === TODAY ? 'bg-[#F5EFE0]' : ''}`}>
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-[#7A9AAA]">{d.d}</p>
+                    <p className={`font-['Cormorant_Garamond'] text-[22px] leading-none mt-0.5 ${d.iso === TODAY ? 'text-[#0D5C6E] font-semibold' : ''}`}>{d.n}</p>
+                  </div>
+                ))}
+              </div>
+              {/* Family lane: signups */}
+              <div className="grid grid-cols-[120px_repeat(7,1fr)] border-b border-[#EFE7D4] min-h-[56px]">
+                <div className="flex items-center gap-2 px-4"><span className="text-[#C4A882]">◆</span><span className="text-[13px] font-semibold text-[#7A5A2E]">Signups</span></div>
+                {DAYS.map((d) => (
+                  <div key={d.iso} className={`p-1.5 ${d.iso === TODAY ? 'bg-[#F5EFE0]/60' : ''}`}>
+                    {d.iso === '2026-11-20' && <div className="rounded-xl bg-[#C4A882]/20 text-[#7A5A2E] text-[11.5px] font-semibold px-2 py-1.5 leading-tight">9am · Ski camp opens</div>}
+                  </div>
+                ))}
+              </div>
+              {(Object.keys(KIDS) as KidId[]).map((k) => {
+                const kid = KIDS[k];
+                return (
+                  <div key={k} className="grid grid-cols-[120px_repeat(7,1fr)] border-b last:border-b-0 border-[#EFE7D4] min-h-[132px]">
+                    <div className="flex items-center gap-2.5 px-4">
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center text-white font-['Cormorant_Garamond'] text-[16px]" style={{ background: kid.color }}>{kid.name[0]}</div>
+                      <span className="text-[14px] font-semibold">{kid.name}</span>
+                    </div>
+                    {DAYS.map((d) => {
+                      const list = events.filter((e) => e.kid === k && e.day === d.iso).sort((a, b) => mins(a.start) - mins(b.start));
+                      const ideaKey = `${k}|${d.iso}`;
+                      const idea = !list.length && IDEAS[ideaKey] && !events.some((e) => e.id === ideaKey) ? IDEAS[ideaKey] : null;
+                      return (
+                        <div key={d.iso} className={`p-1.5 flex flex-col gap-1.5 ${d.iso === TODAY ? 'bg-[#F5EFE0]/60' : ''}`}>
+                          {list.map((e) => {
+                            const clash = clashIds.has(e.id);
+                            return (
+                              <button key={e.id} onClick={() => setOpen(e)}
+                                className={`text-left rounded-[14px] px-2.5 py-2 transition-transform hover:-translate-y-0.5 ${clash ? 'ring-2 ring-[#E0A458] ring-offset-1' : ''}`}
+                                style={{ background: kid.soft, color: kid.ink }}>
+                                <p className="text-[11px] font-semibold opacity-80">{fmt(e.start)}</p>
+                                <p className="text-[13px] font-semibold leading-tight flex items-center gap-1"><Icon name={e.icon} size={14} />{e.short}</p>
+                                <p className="text-[11px] opacity-70 truncate">{e.hood}</p>
+                              </button>
+                            );
+                          })}
+                          {idea && (
+                            <button onClick={() => addIdea(ideaKey)} title={idea.why}
+                              className="group text-left rounded-[14px] px-2.5 py-2 border border-dashed border-[#C5D8E8] hover:border-[#1A7A8A] hover:bg-[#F7FBFC] transition-colors">
+                              <p className="text-[11px] font-semibold text-[#7A9AAA]">Open · idea</p>
+                              <p className="text-[12.5px] font-semibold text-[#3A5A6A] leading-tight">{idea.short} {fmt(idea.start)}</p>
+                              <p className="text-[11px] text-[#1A7A8A] font-semibold opacity-0 group-hover:opacity-100">+ Add</p>
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Phone: day strip + stacked kids */}
+            <div className="md:hidden">
+              <div className="grid grid-cols-7 gap-1 mb-4">
+                {DAYS.map((d) => {
+                  const kidsOn = (Object.keys(KIDS) as KidId[]).filter((k) => events.some((e) => e.kid === k && e.day === d.iso));
+                  const sel = d.iso === mobileDay;
+                  return (
+                    <button key={d.iso} onClick={() => setMobileDay(d.iso)} className={`rounded-[16px] py-2 flex flex-col items-center ${sel ? 'bg-[#0D5C6E] text-white' : 'bg-white'}`}>
+                      <span className={`text-[10px] font-semibold uppercase ${sel ? 'text-white/70' : 'text-[#7A9AAA]'}`}>{d.d}</span>
+                      <span className="font-['Cormorant_Garamond'] text-[20px] leading-tight">{d.n}</span>
+                      <span className="flex gap-0.5 h-1.5 mt-0.5">{kidsOn.map((k) => <span key={k} className="w-1.5 h-1.5 rounded-full" style={{ background: sel ? '#fff' : KIDS[k].color }} />)}{d.iso === '2026-11-20' && <span className="w-1.5 h-1.5 rotate-45" style={{ background: '#C4A882' }} />}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              {mobileDay === '2026-11-20' && <div className="rounded-[16px] bg-[#C4A882]/20 text-[#7A5A2E] text-[14px] font-semibold px-4 py-3 mb-3">◆ 9am · Ski camp signups open</div>}
+              {(Object.keys(KIDS) as KidId[]).map((k) => {
+                const kid = KIDS[k];
+                const list = events.filter((e) => e.kid === k && e.day === mobileDay).sort((a, b) => mins(a.start) - mins(b.start));
+                const ideaKey = `${k}|${mobileDay}`;
+                const idea = !list.length && IDEAS[ideaKey] && !events.some((e) => e.id === ideaKey) ? IDEAS[ideaKey] : null;
+                return (
+                  <div key={k} className="bg-white rounded-[20px] p-4 mb-3">
+                    <div className="flex items-center gap-2.5 mb-2">
+                      <div className="w-7 h-7 rounded-full flex items-center justify-center text-white font-['Cormorant_Garamond'] text-[15px]" style={{ background: kid.color }}>{kid.name[0]}</div>
+                      <span className="text-[14px] font-semibold">{kid.name}</span>
+                    </div>
+                    {list.length ? list.map((e) => (
+                      <button key={e.id} onClick={() => setOpen(e)} className={`w-full text-left rounded-[14px] px-3 py-2.5 mb-1.5 ${clashIds.has(e.id) ? 'ring-2 ring-[#E0A458]' : ''}`} style={{ background: kid.soft, color: kid.ink }}>
+                        <span className="text-[12px] font-semibold opacity-80">{range(e.start, e.end)}</span>
+                        <span className="flex items-center gap-1.5 text-[15px] font-semibold"><Icon name={e.icon} />{e.title}</span>
+                        <span className="block text-[12px] opacity-70">{e.where} · {e.hood}</span>
+                      </button>
+                    )) : idea ? (
+                      <button onClick={() => addIdea(ideaKey)} className="w-full text-left rounded-[14px] px-3 py-2.5 border border-dashed border-[#C5D8E8]">
+                        <span className="text-[12px] font-semibold text-[#7A9AAA]">Free · an idea</span>
+                        <span className="block text-[15px] font-semibold text-[#3A5A6A]">{idea.title} · {fmt(idea.start)}</span>
+                        <span className="block text-[12px] text-[#7A9AAA]">{idea.why}</span>
+                        <span className="block text-[13px] font-semibold text-[#1A7A8A] mt-1">+ Add for {kid.name}</span>
+                      </button>
+                    ) : <p className="text-[14px] text-[#7A9AAA] italic font-['Cormorant_Garamond'] text-[17px]">Free day. Enjoy it.</p>}
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        ) : (
+          /* Summer planner */
+          <div className="bg-white rounded-[24px] shadow-[0_4px_32px_rgba(10,74,90,0.08)] p-4 sm:p-6">
+            <div className="flex flex-wrap items-end justify-between gap-3 mb-5">
+              <div>
+                <h2 className="font-['Cormorant_Garamond'] text-[30px] font-light leading-none">Summer 2027</h2>
+                <p className="text-[13px] text-[#7A9AAA] mt-1">Ten weeks, two kids. Fill the gaps before signups open.</p>
+              </div>
+              <div className="flex gap-4">
+                {(Object.keys(KIDS) as KidId[]).map((k) => {
+                  const n = SUMMER.filter((w) => plan[`${k}|${w.id}`]).length;
+                  return (
+                    <div key={k} className="text-right">
+                      <p className="text-[12px] text-[#7A9AAA]">{KIDS[k].name}</p>
+                      <p className="font-['Cormorant_Garamond'] text-[24px] leading-none" style={{ color: KIDS[k].color }}>{n}<span className="text-[15px] text-[#B5C4CC]">/10 weeks</span></p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+              <div className="grid grid-cols-[64px_repeat(10,minmax(86px,1fr))] gap-1.5 min-w-[940px]">
+                <div />
+                {SUMMER.map((w) => (
+                  <div key={w.id} className="text-center pb-1">
+                    <p className="text-[11px] uppercase tracking-wider text-[#7A9AAA] font-semibold">Week of</p>
+                    <p className="font-['Cormorant_Garamond'] text-[18px] leading-tight">{w.label}</p>
+                    <p className="text-[10.5px] text-[#C0544A] h-3">{w.sub}</p>
+                  </div>
+                ))}
+                {(Object.keys(KIDS) as KidId[]).map((k) => (
+                  <Lane key={k} k={k} plan={plan} onOpen={(week) => setIdeasFor({ kid: k, week })} />
+                ))}
+              </div>
+            </div>
+            <p className="text-[12px] text-[#7A9AAA] mt-4">Tip: we’ll fill in signup dates as providers post them and remind you the day before.</p>
+          </div>
+        )}
+
+        <p className="text-center text-[12px] text-[#B5A889] mt-10">Prototype · sample family and sample listings · nothing is saved</p>
+      </div>
+
+      {/* Event sheet */}
+      {open && (
+        <Sheet onClose={() => setOpen(null)}>
+          {(() => { const e = events.find((x) => x.id === open.id) ?? open; const kid = KIDS[e.kid]; const clash = clashIds.has(e.id);
+            return (
+              <>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-11 h-11 rounded-2xl flex items-center justify-center" style={{ background: kid.soft, color: kid.ink }}><Icon name={e.icon} size={22} /></div>
+                  <div>
+                    <p className="text-[12px] font-semibold" style={{ color: kid.color }}>{kid.name} · {dayName(e.day).d} {dayName(e.day).n} · {range(e.start, e.end)}</p>
+                    <p className="font-['Cormorant_Garamond'] text-[26px] leading-tight">{e.title}</p>
+                  </div>
+                </div>
+                <p className="text-[14px] text-[#3A5A6A] mb-4">{e.where} · {e.hood}</p>
+                {clash && e.alt && (
+                  <div className="rounded-[16px] bg-[#FFF6E8] border border-[#E8C99A] p-4 mb-4">
+                    <p className="text-[14px] text-[#5A4A3A] mb-2">This overlaps with another of {kid.name}’s activities. The same class also runs <b>{e.alt.label}</b>.</p>
+                    <button onClick={() => switchToAlt(e)} className="h-10 px-4 rounded-full bg-[#0D5C6E] text-white text-[13px] font-semibold">Switch to {e.alt.label}</button>
+                  </div>
+                )}
+                <div className="flex flex-wrap gap-2">
+                  <button className="h-10 px-4 rounded-full border border-[#C5D8E8] text-[#0D5C6E] text-[13px] font-semibold" onClick={() => say('Opening their site…')}>Their site →</button>
+                  <button className="h-10 px-4 rounded-full border border-[#C5D8E8] text-[#0D5C6E] text-[13px] font-semibold" onClick={() => { setEvents((l) => l.map((x) => x.id === e.id ? { ...x, kid: e.kid === 'maya' ? 'leo' : 'maya' } : x)); setOpen(null); say(`Moved to ${e.kid === 'maya' ? 'Leo' : 'Maya'}’s row.`); }}>This is for {e.kid === 'maya' ? 'Leo' : 'Maya'}</button>
+                  <button className="h-10 px-4 rounded-full text-[#C0544A] text-[13px] font-semibold" onClick={() => { setEvents((l) => l.filter((x) => x.id !== e.id)); setOpen(null); say('Removed from your calendar.'); }}>Remove</button>
+                </div>
+              </>
+            ); })()}
+        </Sheet>
+      )}
+
+      {/* Summer ideas sheet */}
+      {ideasFor && (
+        <Sheet onClose={() => setIdeasFor(null)}>
+          <p className="text-[12px] font-semibold" style={{ color: KIDS[ideasFor.kid].color }}>{KIDS[ideasFor.kid].name} · age {KIDS[ideasFor.kid].age} · week of {ideasFor.week.label}</p>
+          <p className="font-['Cormorant_Garamond'] text-[26px] leading-tight mb-4">Ideas for this week</p>
+          {CAMP_IDEAS[ideasFor.kid].map((c) => (
+            <button key={c.title} onClick={() => { setPlan((p) => ({ ...p, [`${ideasFor.kid}|${ideasFor.week.id}`]: c })); setIdeasFor(null); say(`${c.title} penciled in for ${KIDS[ideasFor.kid].name}.`); }}
+              className="w-full flex items-center gap-3 text-left rounded-[16px] border border-[#EFE7D4] hover:border-[#1A7A8A] p-3 mb-2 transition-colors">
+              <span className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: KIDS[ideasFor.kid].soft, color: KIDS[ideasFor.kid].ink }}><Icon name={c.icon} size={20} /></span>
+              <span className="flex-1 min-w-0"><span className="block font-semibold text-[15px]">{c.title}</span><span className="block text-[12px] text-[#7A9AAA]">{c.where} · {c.hood} · {c.signup}</span></span>
+              <span className="text-[13px] font-semibold text-[#1A7A8A]">Pencil in</span>
+            </button>
+          ))}
+        </Sheet>
+      )}
+
+      {toast && <div className="fixed left-1/2 -translate-x-1/2 bottom-6 z-50 bg-[#1C3A4A] text-white text-[14px] rounded-full px-5 py-3 shadow-lg max-w-[92vw] text-center">{toast}</div>}
+    </div>
+  );
+}
+
+function Lane({ k, plan, onOpen }: { k: KidId; plan: Record<string, any>; onOpen: (w: Week) => void }) {
+  const kid = KIDS[k];
+  return (
+    <>
+      <div className="flex flex-col items-center justify-center gap-1">
+        <div className="w-9 h-9 rounded-full flex items-center justify-center text-white font-['Cormorant_Garamond'] text-[17px]" style={{ background: kid.color }}>{kid.name[0]}</div>
+        <span className="text-[12px] font-semibold">{kid.name}</span>
+      </div>
+      {SUMMER.map((w) => {
+        const p = plan[`${k}|${w.id}`];
+        return p ? (
+          <div key={w.id} className="rounded-[16px] p-2.5 min-h-[104px] flex flex-col" style={{ background: kid.soft, color: kid.ink }}>
+            <span className="mb-1.5"><Icon name={p.icon} size={20} /></span>
+            <span className="text-[12.5px] font-semibold leading-tight">{p.title}</span>
+            <span className="text-[11px] opacity-70 mt-auto">{p.signup}</span>
+          </div>
+        ) : (
+          <button key={w.id} onClick={() => onOpen(w)} className="rounded-[16px] min-h-[104px] border-2 border-dashed border-[#E3DAC5] hover:border-[#1A7A8A] hover:bg-[#F7FBFC] flex flex-col items-center justify-center gap-1 transition-colors">
+            <span className="text-[12px] text-[#B5A889] font-semibold">Open week</span>
+            <span className="text-[12px] text-[#1A7A8A] font-semibold">3 ideas →</span>
+          </button>
+        );
+      })}
+    </>
+  );
+}
+
+function Sheet({ children, onClose }: { children: any; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-40 flex items-end sm:items-center justify-center" role="dialog" aria-modal="true">
+      <div className="absolute inset-0 bg-[#1C3A4A]/35 backdrop-blur-[2px]" onClick={onClose} />
+      <div className="relative bg-white w-full sm:max-w-[480px] rounded-t-[28px] sm:rounded-[28px] p-6 pb-8 shadow-2xl">
+        <div className="sm:hidden w-10 h-1 rounded-full bg-[#E3DAC5] mx-auto -mt-2 mb-4" />
+        <button onClick={onClose} aria-label="Close" className="absolute right-4 top-4 w-9 h-9 rounded-full hover:bg-[#F5EFE0] text-[#7A9AAA] text-[20px]">×</button>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+createRoot(document.getElementById('root')!).render(<FamilyRhythm />);

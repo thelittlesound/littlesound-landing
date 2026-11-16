@@ -65,11 +65,12 @@ async function loadCalendar(userId: string, savedIds: string[]): Promise<Calenda
   const token = await getOrCreateFeedToken(userId);
   if (!token) return null;
   const today = seattleToday();
-  const [dates, picks, alertsRow, kids] = await Promise.all([
+  const [dates, picks, alertsRow, kids, reminderRows] = await Promise.all([
     getDatesByActivity(savedIds),
     getPicks(userId),
     supabaseAdmin.from('profiles').select('email_alerts').eq('id', userId).maybeSingle(),
     getKids(userId, true), // gives older profiles' kids stable ids, so items can be assigned to them
+    supabaseAdmin.from('signup_reminders').select('activity_id, open_date').eq('user_id', userId), // empty if the table isn't there yet
   ]);
   const sessions: CalendarData['sessions'] = {};
   const registrations: CalendarData['registrations'] = {};
@@ -80,13 +81,19 @@ async function loadCalendar(userId: string, savedIds: string[]): Promise<Calenda
     const regs = all.filter((i) => i.kind === 'registration' && ((i.start_date ?? '') >= today || (i.end_date ?? '') >= today));
     if (regs.length) registrations[id] = regs;
   }
+  // Seattle hour, for "Good morning/afternoon/evening" (the server runs in UTC).
+  const hour = Number(new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', hour: 'numeric', hourCycle: 'h23' }).format(new Date()));
   return {
+    hour,
     feedUrl: feedUrl(token),
     emailAlerts: alertsRow.data?.email_alerts !== false,
     today,
     sessions,
     registrations,
     kids,
+    reminders: ((reminderRows.data ?? []) as { activity_id: string; open_date: string }[]).map(
+      (r) => `${r.activity_id}|${String(r.open_date).slice(0, 10)}`
+    ),
     picks: picks
       .filter((p) => savedIds.includes(p.activity_id))
       .map((p) => ({

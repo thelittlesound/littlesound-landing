@@ -27,9 +27,11 @@ export async function GET(request: NextRequest) {
     return page('That link didn’t work', 'You can turn email alerts off from your dashboard instead.');
   }
   const { error } = await supabaseAdmin.from('profiles').update({ email_alerts: false }).eq('id', userId);
+  // "Remind me" reminders are emails too: unsubscribing stops them as well.
+  if (!error) await supabaseAdmin.from('signup_reminders').delete().eq('user_id', userId);
   if (error) {
     console.error('unsubscribe error:', error);
     return page('Something went wrong', 'We couldn’t update your settings. You can turn email alerts off from your dashboard.');
   }
-  return page('You’re unsubscribed', 'We won’t email you about registration dates or schedule changes. You can turn alerts back on from your dashboard anytime.');
+  return page('You’re unsubscribed', 'We won’t email you about registration dates, reminders or schedule changes. You can turn alerts back on from your dashboard anytime.');
 }
