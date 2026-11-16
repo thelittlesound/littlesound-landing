@@ -24,6 +24,8 @@ export interface RhythmActivity {
   ageMin: number | null;
   ageMax: number | null;
   category?: string | null;
+  /** Saved for this child (Discover's "Browsing for"); ideas go to them only. */
+  forKid?: string | null;
 }
 export interface RhythmSession {
   key: string;
@@ -219,6 +221,8 @@ export interface RadarItem {
 }
 
 export function kidsFor(a: RhythmActivity, kids: Kid[]): Kid[] {
+  const chosen = a.forKid ? kids.filter((k) => k.id === a.forKid) : [];
+  if (chosen.length) return chosen; // saved for this child
   if (a.ageMin == null && a.ageMax == null) return [];
   return kids.filter((k) => k.age != null && k.age >= (a.ageMin ?? 0) && k.age <= (a.ageMax ?? 99));
 }
@@ -272,6 +276,7 @@ export function ideaFor(data: RhythmData, lane: string, date: string, events: Rh
   for (const a of data.activities) {
     if (kid && kid.age != null && (a.ageMin != null || a.ageMax != null) && (kid.age < (a.ageMin ?? 0) || kid.age > (a.ageMax ?? 99))) continue;
     if (pickedActivities.has(a.activityId)) continue; // already doing this one
+    if (a.forKid && a.forKid !== lane && data.kids.some((k) => k.id === a.forKid)) continue; // saved for a sibling
     for (const s of data.sessions[a.activityId] ?? []) {
       if (picked.has(`${a.activityId}|${s.key}`)) continue;
       const o = occurrences(s.item, date, date, date)[0];

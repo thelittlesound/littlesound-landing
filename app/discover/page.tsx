@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import staticActivities from '../data/activities.json';
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
+import { browsableKids, fitsKid, type MatchKid } from '@/lib/kid-match';
 
 type Activity = typeof staticActivities[0] & { subcategory?: string; source?: string };
 
@@ -56,11 +57,15 @@ function ActivityCard({
   saved,
   onToggleSave,
   dateLine,
+  saveLabel = 'Save to my dashboard',
+  savedLabel = 'Saved to your dashboard',
 }: {
   a: Activity;
   saved: boolean;
   onToggleSave: (a: Activity) => void;
   dateLine?: string; // e.g. "Registration opens Mar 3" — from approved dates only
+  saveLabel?: string; // e.g. "Save for Ella" when browsing for one child
+  savedLabel?: string;
 }) {
   const style = CATEGORY_STYLES[a.category] ?? { from: '#C5D8E8', to: '#A8C8D8', emoji: '✨' };
   return (
@@ -148,7 +153,7 @@ function ActivityCard({
           <svg width="16" height="16" viewBox="0 0 24 24" fill={saved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z" />
           </svg>
-          {saved ? 'Saved to your dashboard' : 'Save to my dashboard'}
+          {saved ? savedLabel : saveLabel}
         </button>
       </div>
     </article>
@@ -164,6 +169,13 @@ export default function Discover() {
   const [providerActivities, setProviderActivities] = useState<Activity[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+  // Browsing for one child: their age and interests filter the results, and
+  // what's saved remembers them (so its sessions land on their calendar).
+  const [kids, setKids] = useState<MatchKid[]>([]);
+  const [forKidId, setForKidId] = useState<string | null>(null);
+  const [useInterests, setUseInterests] = useState(true);
+  const [savedFor, setSavedFor] = useState<Record<string, string | null>>({});
+  const forKid = useMemo(() => kids.find((k) => k.id === forKidId) ?? null, [kids, forKidId]);
   // Short confirmation after saving (and a visible message if a save fails).
   const [saveNote, setSaveNote] = useState<{ ok: boolean; text: string } | null>(null);
   const noteTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -187,6 +199,8 @@ export default function Discover() {
     const params = new URLSearchParams(window.location.search);
     const cat = params.get('category');
     if (cat && CATEGORIES.includes(cat)) setCategory(cat);
+    const forId = params.get('for');
+    if (forId) setForKidId(forId);
     const age = params.get('age');
     if (age) {
       // Normalize dashes — homepage uses en-dash (–), Discover uses hyphen (-)
@@ -217,11 +231,29 @@ export default function Discover() {
       if (!user) return;
       setUserId(user.id);
       supabase
+        .from('profiles')
+        .select('kids')
+        .eq('id', user.id)
+        .maybeSingle()
+        .then(({ data }: { data: { kids: unknown } | null }) => setKids(browsableKids(data?.kids)));
+      const useRows = (data: { activity_id: string; kid_id?: string | null }[] | null) => {
+        if (!data) return;
+        setSavedIds(new Set(data.map((r) => r.activity_id)));
+        setSavedFor(Object.fromEntries(data.map((r) => [r.activity_id, r.kid_id ?? null])));
+      };
+      supabase
         .from('saved_activities')
-        .select('activity_id')
+        .select('activity_id, kid_id')
         .eq('user_id', user.id)
-        .then(({ data }: { data: { activity_id: string }[] | null }) => {
-          if (data) setSavedIds(new Set(data.map((r) => r.activity_id)));
+        .then(({ data, error }: { data: { activity_id: string; kid_id: string | null }[] | null; error: { message?: string } | null }) => {
+          // Before the kid_id column exists (supabase/saved-activities.sql not re-run yet).
+          if (error) {
+            supabase
+              .from('saved_activities')
+              .select('activity_id')
+              .eq('user_id', user.id)
+              .then(({ data: d }: { data: { activity_id: string }[] | null }) => useRows(d));
+          } else useRows(data);
         });
     });
   }, []);
@@ -241,7 +273,10 @@ export default function Discover() {
         a.description.toLowerCase().includes(query.toLowerCase());
       const matchesCategory = category === 'All' || a.category === category;
       const matchesAge = a.ageMax >= ageGroup.min && a.ageMin <= ageGroup.max;
-      return matchesQuery && matchesCategory && matchesAge;
+      // For one child: their age, and (unless a category is picked or they
+      // asked for everything) the categories their interests point to.
+      const matchesKid = !forKid || fitsKid(a, forKid, useInterests && category === 'All');
+      return matchesQuery && matchesCategory && matchesAge && matchesKid;
     });
     const arr = [...filtered];
     if (sort === 'price-asc')  arr.sort((a, b) => a.price - b.price);
@@ -252,7 +287,7 @@ export default function Discover() {
     // `activities` must be a dependency: provider listings arrive from the API
     // after first render, and without it they never appeared until a filter
     // changed.
-  }, [activities, query, category, ageGroup, sort]);
+  }, [activities, query, category, ageGroup, sort, forKid, useInterests]);
 
   // Subcategory pills — ordered, derived from current results
   const availableSubcategories = useMemo(() => {
@@ -288,7 +323,31 @@ export default function Discover() {
     });
   }, [results, category, query]);
 
+  function chooseKid(id: string | null) {
+    setForKidId(id);
+    setUseInterests(true);
+    setCategory('All');
+    setAgeGroup(AGE_GROUPS[0]);
+    // Keep the address in step, so a refresh or a shared link shows the same.
+    const url = new URL(window.location.href);
+    if (id) url.searchParams.set('for', id);
+    else url.searchParams.delete('for');
+    url.searchParams.delete('age');
+    url.searchParams.delete('category');
+    window.history.replaceState(null, '', url.toString());
+  }
+
+  const kidName = (id: string | null | undefined) => kids.find((k) => k.id === id)?.name ?? null;
+  function labelsFor(a: Activity) {
+    const who = kidName(savedFor[a.id]);
+    return {
+      saveLabel: forKid ? `Save for ${forKid.name}` : 'Save to my dashboard',
+      savedLabel: who ? `Saved for ${who}` : 'Saved to your dashboard',
+    };
+  }
+
   const clearAll = () => {
+    chooseKid(null);
     setQuery('');
     setCategory('All');
     setSubcategory('All');
@@ -334,8 +393,7 @@ export default function Discover() {
         showSaveNote(false, 'Couldn’t remove it. Please try again.');
       } else setSaveNote(null);
     } else {
-      const { error } = await supabase.from('saved_activities').upsert(
-        {
+      const row: Record<string, unknown> = {
           user_id: userId,
           activity_id: a.id,
           title: a.title,
@@ -347,14 +405,27 @@ export default function Discover() {
           price: a.price,
           price_unit: a.priceUnit,
           website: a.website,
-        },
-        { onConflict: 'user_id,activity_id', ignoreDuplicates: true }
-      );
+      };
+      if (forKid) row.kid_id = forKid.id;
+      const save = (r: Record<string, unknown>) =>
+        supabase.from('saved_activities').upsert(r, { onConflict: 'user_id,activity_id', ignoreDuplicates: true });
+      let { error } = await save(row);
+      if (error && row.kid_id && /kid_id/.test(error.message ?? '')) {
+        // kid_id column not added yet: still save, just without the child.
+        delete row.kid_id;
+        ({ error } = await save(row));
+      }
       if (error) {
         revert();
         showSaveNote(false, 'Couldn’t save it. Please try again.');
       } else {
-        showSaveNote(true, `Saved “${a.title}”. Open your dashboard to add its dates to your calendar.`);
+        setSavedFor((prev) => ({ ...prev, [a.id]: (row.kid_id as string | undefined) ?? null }));
+        showSaveNote(
+          true,
+          forKid
+            ? `Saved “${a.title}” for ${forKid.name}. Sessions you add from your dashboard go on ${forKid.name}’s calendar.`
+            : `Saved “${a.title}”. Open your dashboard to add its dates to your calendar.`
+        );
       }
     }
   }
@@ -427,6 +498,62 @@ export default function Discover() {
       <section className="border-b border-[#E8DFC8] bg-[#F5EFE0] px-6 md:px-10 lg:px-16 py-6 sticky top-16 z-10">
         <div className="max-w-[1280px] mx-auto space-y-4">
 
+          {kids.length > 0 && (
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-[#7A9AAA] mb-2">
+                Browsing for
+              </p>
+              <div className="flex gap-2 overflow-x-auto pb-1 md:flex-wrap md:overflow-visible scrollbar-hide">
+                {[null, ...kids].map((k) => {
+                  const active = (k?.id ?? null) === (forKid?.id ?? null);
+                  return (
+                    <button
+                      key={k?.id ?? 'everyone'}
+                      type="button"
+                      onClick={() => chooseKid(k?.id ?? null)}
+                      aria-pressed={active}
+                      className={
+                        active
+                          ? 'px-4 py-2 rounded-full text-[13px] font-semibold bg-[#0D5C6E] text-white shadow-sm whitespace-nowrap shrink-0 transition-all'
+                          : 'px-4 py-2 rounded-full text-[13px] font-medium bg-white text-[#3A5A6A] border border-[#E8DFC8] hover:border-[#1A7A8A] whitespace-nowrap shrink-0 transition-all'
+                      }
+                    >
+                      {k ? `${k.name}${k.age != null ? ` · ${k.age}` : ''}` : 'Everyone'}
+                    </button>
+                  );
+                })}
+              </div>
+              {forKid && (
+                <p className="text-[12.5px] text-[#5A7A8A] mt-2">
+                  {forKid.interests.length > 0 && useInterests && category === 'All' ? (
+                    <>
+                      Matching {forKid.name}&rsquo;s interests: {forKid.interests.join(', ')}
+                      {forKid.age != null ? `, for age ${forKid.age}` : ''}.{' '}
+                      <button type="button" onClick={() => setUseInterests(false)} className="font-semibold text-[#1A7A8A] underline">
+                        Show everything{forKid.age != null ? ` for age ${forKid.age}` : ''}
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      {forKid.age != null ? `Everything for age ${forKid.age}.` : `Everything for ${forKid.name}.`}{' '}
+                      {forKid.interests.length > 0 ? (
+                        category === 'All' && (
+                          <button type="button" onClick={() => setUseInterests(true)} className="font-semibold text-[#1A7A8A] underline">
+                            Just {forKid.name}&rsquo;s interests
+                          </button>
+                        )
+                      ) : (
+                        <a href="/families/dashboard#family-profile" className="font-semibold text-[#1A7A8A] underline">
+                          Add {forKid.name}&rsquo;s interests for better matches
+                        </a>
+                      )}
+                    </>
+                  )}
+                </p>
+              )}
+            </div>
+          )}
+
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-widest text-[#7A9AAA] mb-2">
               Category
@@ -438,8 +565,8 @@ export default function Discover() {
                   onClick={() => setCategory(c)}
                   className={
                     category === c
-                      ? 'px-4 py-2 rounded-full text-[13px] font-medium bg-[#1A7A8A] text-white shadow-sm transition-all'
-                      : 'px-4 py-2 rounded-full text-[13px] font-medium bg-white text-[#3A5A6A] border border-[#E8DFC8] hover:border-[#1A7A8A] transition-all'
+                      ? 'px-4 py-2 rounded-full text-[13px] font-medium bg-[#1A7A8A] text-white shadow-sm whitespace-nowrap shrink-0 transition-all'
+                      : 'px-4 py-2 rounded-full text-[13px] font-medium bg-white text-[#3A5A6A] border border-[#E8DFC8] hover:border-[#1A7A8A] whitespace-nowrap shrink-0 transition-all'
                   }
                 >
                   {c}
@@ -448,6 +575,7 @@ export default function Discover() {
             </div>
           </div>
 
+          {!(forKid && forKid.age != null) && (
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-widest text-[#7A9AAA] mb-2">
               Age
@@ -468,6 +596,7 @@ export default function Discover() {
               ))}
             </div>
           </div>
+          )}
 
         </div>
       </section>
@@ -544,7 +673,7 @@ export default function Discover() {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {items.map((a) => (
-                      <ActivityCard key={a.id} a={a} saved={savedIds.has(a.id)} onToggleSave={toggleSave} dateLine={dateLines[a.id]} />
+                      <ActivityCard key={a.id} a={a} saved={savedIds.has(a.id)} onToggleSave={toggleSave} dateLine={dateLines[a.id]} {...labelsFor(a)} />
                     ))}
                   </div>
                 </div>
@@ -553,7 +682,7 @@ export default function Discover() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredResults.map((a) => (
-                <ActivityCard key={a.id} a={a} saved={savedIds.has(a.id)} onToggleSave={toggleSave} dateLine={dateLines[a.id]} />
+                <ActivityCard key={a.id} a={a} saved={savedIds.has(a.id)} onToggleSave={toggleSave} dateLine={dateLines[a.id]} {...labelsFor(a)} />
               ))}
             </div>
           )}

@@ -60,3 +60,9 @@ drop policy if exists "Families can remove their own saved activities" on public
 create policy "Families can remove their own saved activities"
   on public.saved_activities for delete
   using (auth.uid() = user_id);
+
+-- ── Who it's for (added Nov 2026) ───────────────────────────────────────────
+-- Set when a family saves from Discover while "Browsing for" one child: the
+-- profiles.kids id (k_…). Sessions added from it go on that child's calendar.
+alter table public.saved_activities add column if not exists kid_id text;
+notify pgrst, 'reload schema';

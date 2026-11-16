@@ -228,6 +228,17 @@ export default function FamilyRhythm({
                   <p className="text-[12px] text-[#7A9AAA] mt-1.5">
                     {b.hours ? `${b.hours} hr${b.hours === 1 ? '' : 's'} of activities` : 'Nothing added yet'} · {b.freeAfternoons} free after-school afternoon{b.freeAfternoons === 1 ? '' : 's'}
                   </p>
+                  {k.name && (
+                    <a
+                      href={`/discover?for=${encodeURIComponent(k.id)}`}
+                      className="mt-3 inline-flex items-center gap-1.5 h-9 rounded-full px-4 text-[13px] font-semibold border-2 transition-colors"
+                      style={{ borderColor: t.color, color: t.color }}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = t.color; e.currentTarget.style.color = '#fff'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = ''; e.currentTarget.style.color = t.color; }}
+                    >
+                      <span aria-hidden="true">+</span> Find activities for {k.name}
+                    </a>
+                  )}
                 </div>
               </div>
             );
@@ -338,7 +349,7 @@ export default function FamilyRhythm({
             })}
             {watching.length > 0 && (
               <div className="snap-start shrink-0 w-[240px] rounded-[22px] p-5 border-2 border-dashed border-[#E3DAC5] flex flex-col justify-center">
-                <p className="font-['Cormorant_Garamond'] text-[32px] leading-none text-[#A8865A]">{watching.length}</p>
+                <p className="font-['Cormorant_Garamond'] text-[32px] leading-none text-[#A8865A] [font-variant-numeric:lining-nums]">{watching.length}</p>
                 <p className="text-[14px] font-semibold text-[#1C3A4A] mt-1">saved {watching.length === 1 ? 'activity' : 'activities'} we’re watching</p>
                 <p className="text-[12px] text-[#7A9AAA] mt-1">We check their sites daily and add signup dates here as soon as they’re posted.</p>
               </div>
@@ -363,7 +374,7 @@ export default function FamilyRhythm({
 
       {/* Lanes: tablet / desktop */}
       <div className="hidden md:block bg-white rounded-[24px] shadow-[0_4px_32px_rgba(10,74,90,0.08)] overflow-hidden">
-        <div className="grid grid-cols-[112px_repeat(7,1fr)] border-b border-[#EFE7D4]">
+        <div className="grid grid-cols-[128px_repeat(7,1fr)] border-b border-[#EFE7D4]">
           <div />
           {week.map((d, i) => (
             <div key={d} className={`py-3 text-center ${d === today ? 'bg-[#F5EFE0]' : ''}`}>
@@ -374,7 +385,7 @@ export default function FamilyRhythm({
         </div>
         {/* Signups lane (only when a signup date is in view) */}
         {radarItems.some((r) => week.includes(r.date)) && (
-        <div className="grid grid-cols-[112px_repeat(7,1fr)] border-b border-[#EFE7D4] min-h-[52px]">
+        <div className="grid grid-cols-[128px_repeat(7,1fr)] border-b border-[#EFE7D4] min-h-[52px]">
           <div className="flex items-center gap-2 px-4"><span className="text-[#C4A882]">◆</span><span className="text-[13px] font-semibold text-[#7A5A2E]">Signups</span></div>
           {week.map((d) => (
             <div key={d} className={`p-1.5 flex flex-col gap-1 ${d === today ? 'bg-[#F5EFE0]/60' : ''}`}>
@@ -390,12 +401,12 @@ export default function FamilyRhythm({
         {rows.map((lane) => {
           const t = theme(kids, lane);
           return (
-            <div key={lane} className="grid grid-cols-[112px_repeat(7,1fr)] border-b last:border-b-0 border-[#EFE7D4] min-h-[120px]">
-              <div className="flex items-center gap-2.5 px-4">
+            <div key={lane} className="grid grid-cols-[128px_repeat(7,1fr)] border-b last:border-b-0 border-[#EFE7D4] min-h-[120px]">
+              <div className="flex items-center gap-2.5 px-3 min-w-0">
                 <div className="w-8 h-8 rounded-full flex items-center justify-center text-white font-['Cormorant_Garamond'] text-[16px] shrink-0" style={{ background: t.color }}>
                   {laneName(kids, lane)[0]}
                 </div>
-                <span className="text-[13px] font-semibold text-[#1C3A4A] leading-tight">{laneName(kids, lane)}</span>
+                <span className="text-[13px] font-semibold text-[#1C3A4A] leading-tight min-w-0 break-words">{laneName(kids, lane)}</span>
               </div>
               {week.map((d) => {
                 const list = weekEvents.filter((e) => e.lane === lane && e.date === d);

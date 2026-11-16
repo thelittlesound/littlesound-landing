@@ -99,6 +99,12 @@ const satIdea = ideaFor(d, MAYA, '2026-11-21', ev);
 ok(satIdea?.activity.activityId === '19', 'Sat idea for Maya is soccer (saved, ages 6–12), not a second swim session: ' + satIdea?.activity.activityId);
 ok(ideaFor(d, UNASSIGNED, '2026-11-19', ev) === null, 'no ideas in the unassigned lane');
 
+// saved for one child (Discover's "Browsing for")
+const dFor = base(); dFor.activities = dFor.activities.map((x) => (x.activityId === '19' ? { ...x, forKid: LEO } : x));
+ok(ideaFor(dFor, MAYA, '2026-11-21', ev)?.activity.activityId !== '19', 'soccer saved for Leo is not suggested for Maya');
+eq(kidsFor(dFor.activities.find((x) => x.activityId === '19')!, kids).map((k) => k.name), ['Leo'], 'saved for Leo → radar says Leo, even outside the age range');
+eq(kidsFor({ ...A('x', 'x'), forKid: 'k_gone0000' }, kids), [], 'saved for a child no longer in the profile → back to the age guess');
+
 // summary
 eq(summaryLine(d, T, 1), 'A full Wednesday, a wide-open tomorrow, one clash to sort out, and one signup to catch on Friday.', 'summary with clash + signup');
 const dq = base(); dq.picks = [];

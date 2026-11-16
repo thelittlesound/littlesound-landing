@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
 import { CalendarPanel, SessionPicker, type CalendarPick, type CalendarSession } from './CalendarParts';
 import FamilyRhythm from './FamilyRhythm';
-import { KID_ID_RE, newKidId, type Kid as CalendarKid } from '@/lib/calendar-grid';
+import { KID_ID_RE, kidColor, kidLabel, newKidId, type Kid as CalendarKid } from '@/lib/calendar-grid';
 import type { DateItem } from '@/lib/activity-dates';
 
 import { INTERESTS, NEIGHBORHOODS } from '@/lib/family-profile';
@@ -38,6 +38,8 @@ export interface SavedActivity {
   price_unit: string | null;
   website: string | null;
   created_at: string;
+  /** Saved for this child (Discover's "Browsing for"), if any. */
+  kid_id?: string | null;
 }
 
 export interface CalendarData {
@@ -156,6 +158,13 @@ export default function DashboardClient({
     }
   }
 
+  // The child a saved activity is for, if they're still in the profile.
+  function forKidOf(s: SavedActivity): { id: string; label: string } | null {
+    const kids = calendar?.kids ?? [];
+    const i = s.kid_id ? kids.findIndex((k) => k.id === s.kid_id) : -1;
+    return i >= 0 ? { id: kids[i].id, label: kidLabel(kids[i], i) } : null;
+  }
+
   const isProfileEmpty =
     !profile.first_name && !profile.neighborhood && profile.kids.length === 0 && profile.preferences.length === 0;
 
@@ -252,10 +261,10 @@ export default function DashboardClient({
       <div className="max-w-[1080px] mx-auto">
 
         {/* Header */}
-        <div className="flex items-start justify-between mb-8">
+        <div className="flex items-start justify-between gap-3 mb-8">
           <div>
             <div className="inline-flex items-center gap-2 bg-[#0D5C6E]/8 border border-[#0D5C6E]/15 rounded-full px-4 py-1.5 mb-4">
-              <span className="text-xs font-bold uppercase tracking-widest text-[#0D5C6E]">Family Dashboard</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-[#0D5C6E] whitespace-nowrap">Family Dashboard</span>
             </div>
             {!calendar && (
               <h1 className="font-['Cormorant_Garamond'] text-[clamp(28px,4vw,40px)] font-light leading-[1.1] tracking-tight text-[#1C3A4A]">
@@ -263,13 +272,25 @@ export default function DashboardClient({
               </h1>
             )}
           </div>
-          <button
-            onClick={handleSignOut}
-            disabled={signingOut}
-            className="text-[13px] font-medium text-[#7A9AAA] hover:text-[#0D5C6E] transition-colors shrink-0"
-          >
-            {signingOut ? 'Signing out…' : 'Sign out'}
-          </button>
+          <div className="flex items-center gap-4 shrink-0">
+            <a
+              href="/discover"
+              className="inline-flex items-center gap-1.5 h-10 rounded-full bg-[#0D5C6E] text-white text-[13px] font-semibold px-4 hover:bg-[#1A7A8A] transition-colors"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="7" />
+                <path d="m20 20-3.5-3.5" />
+              </svg>
+              Browse<span className="hidden sm:inline"> activities</span>
+            </a>
+            <button
+              onClick={handleSignOut}
+              disabled={signingOut}
+              className="text-[13px] font-medium text-[#7A9AAA] hover:text-[#0D5C6E] transition-colors"
+            >
+              {signingOut ? 'Signing out…' : 'Sign out'}
+            </button>
+          </div>
         </div>
 
         {isProfileEmpty && !editing && (
@@ -296,6 +317,7 @@ export default function DashboardClient({
                 ageMin: s.age_min,
                 ageMax: s.age_max,
                 category: s.category,
+                forKid: s.kid_id ?? null,
               }))}
               sessions={calendar.sessions}
               registrations={calendar.registrations}
@@ -547,6 +569,12 @@ export default function DashboardClient({
                   key={s.activity_id}
                   className="border border-[#E8DFC8] rounded-[16px] p-4"
                 >
+                  {forKidOf(s) && (
+                    <p className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide mb-1" style={{ color: kidColor(calendar!.kids, s.kid_id) }}>
+                      <span className="w-2 h-2 rounded-full" style={{ background: kidColor(calendar!.kids, s.kid_id) }} />
+                      For {forKidOf(s)!.label}
+                    </p>
+                  )}
                   <h3 className="font-['Cormorant_Garamond'] text-[20px] font-semibold text-[#1C3A4A] leading-snug">
                     {s.title}
                   </h3>
@@ -580,7 +608,8 @@ export default function DashboardClient({
                       picks={picks.filter((p) => p.activityId === s.activity_id)}
                       today={calendar.today}
                       busy={calBusy}
-                      onToggle={(key, isPicked) => pickAction(s.activity_id, key, isPicked ? 'remove' : 'add')}
+                      kidName={forKidOf(s)?.label}
+                      onToggle={(key, isPicked) => pickAction(s.activity_id, key, isPicked ? 'remove' : 'add', isPicked ? null : forKidOf(s)?.id ?? null)}
                     />
                   )}
                   <div className="flex items-center gap-4 mt-3">

@@ -144,8 +144,11 @@ export function SessionPicker({
   picks,
   today,
   busy,
+  kidName,
   onToggle,
 }: {
+  /** The child this activity was saved for: sessions added go to them. */
+  kidName?: string;
   activity: { activityId: string; title: string; provider: string | null; website: string | null; neighborhood: string | null };
   sessions: CalendarSession[];
   /** This activity's picks. */
@@ -202,7 +205,11 @@ export function SessionPicker({
 
       {open && sessions.length > 0 && (
         <div className="mt-3 border border-[#E8DFC8] rounded-[14px] divide-y divide-[#E8DFC8]">
-          <p className="px-4 py-2.5 text-[12px] text-[#7A9AAA]">Pick the session your child is in. You can choose which child in the calendar above.</p>
+          <p className="px-4 py-2.5 text-[12px] text-[#7A9AAA]">
+            {kidName
+              ? `Pick the session ${kidName} is in. It goes on ${kidName}’s calendar.`
+              : 'Pick the session your child is in. You can choose which child in the calendar above.'}
+          </p>
           {shown.map((s) => {
             const isPicked = picked.has(s.key);
             return (

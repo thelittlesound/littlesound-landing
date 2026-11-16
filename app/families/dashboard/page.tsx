@@ -27,12 +27,24 @@ export default async function FamilyDashboardPage() {
 
   // Activities this family has saved from Discover. RLS scopes this to the
   // signed-in user's own rows. Newest first.
-  const { data: savedRows } = await supabase
+  // kid_id: who it was saved for (Discover's "Browsing for"). Two separate
+  // results, as Supabase types each query by its column list.
+  const savedFirst = await supabase
     .from('saved_activities')
-    .select('activity_id, title, provider, category, neighborhood, age_min, age_max, price, price_unit, website, created_at')
+    .select('activity_id, title, provider, category, neighborhood, age_min, age_max, price, price_unit, website, created_at, kid_id')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
-  const savedActivities: SavedActivity[] = (savedRows as SavedActivity[]) ?? [];
+  let savedRows: unknown[] | null = savedFirst.data;
+  if (savedFirst.error) {
+    // Before the kid_id column exists (supabase/saved-activities.sql not re-run yet).
+    const fallback = await supabase
+      .from('saved_activities')
+      .select('activity_id, title, provider, category, neighborhood, age_min, age_max, price, price_unit, website, created_at')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+    savedRows = fallback.data;
+  }
+  const savedActivities: SavedActivity[] = (savedRows as SavedActivity[] | null) ?? [];
 
   // Upcoming registration / session dates for what they've saved.
   const savedIds = savedActivities.map((s) => s.activity_id);

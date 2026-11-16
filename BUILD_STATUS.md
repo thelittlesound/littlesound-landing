@@ -22,6 +22,25 @@ Family activity planning platform ("The Family OS") for Seattle. Helps parents d
 
 ## Completed Work
 
+### Browse for one child: "Find activities for Ella" (Nov 2026)
+
+- **Dashboard:** each child's card in Family Rhythm has a "Find activities for {name}" button in that child's color, linking to `/discover?for=<kid id>`. The dashboard header also has a "Browse activities" button (just "Browse" on phones).
+- **Discover:** signed-in families with named kids see a "Browsing for" row with Everyone and one pill per child (name and age).
+  - Choosing a child filters results to their exact age and to the categories their interests map to; the Age row is hidden.
+  - "Show everything for age N" turns the interest filter off; picking a category also overrides it.
+  - The address keeps `?for=`, so a refresh shows the same.
+  - The interest-to-category map is in `lib/kid-match.ts`. Kids aged 5 and under with interests also get Early Childhood.
+- **Saved activities remember the child:** a new `saved_activities.kid_id` column.
+  - Save buttons read "Save for Ella" and "Saved for Ella".
+  - On the dashboard the saved card shows "For Ella", sessions added from it go straight onto Ella's calendar, Family Rhythm ideas for that activity go to Ella only, and the Signup radar tags it as Ella's.
+  - If the column isn't there yet, saving and reading fall back to the old columns.
+- **SQL to run once:** `alter table public.saved_activities add column if not exists kid_id text; notify pgrst, 'reload schema';` (also at the end of `supabase/saved-activities.sql`).
+- **Small fixes:**
+  - The radar count now uses lining numerals (Cormorant's old-style 1 looked like an I).
+  - The week grid's name column is wider (128px), so "Not assigned" fits.
+  - Discover's category pills don't squash on phones.
+- **Tests:** `tests/kid-match.test.ts` (13 checks) and 3 new checks in `family-rhythm.test.ts`.
+
 ### Family profile: interests per child + saving fixed (Nov 2026)
 
 - **Interests are per child.** In the dashboard profile editor, each child has a card with their first name, age and their own interest chips. The family-wide Interests block is gone. The editor also has a "Your first name" field, which the Family Rhythm greeting uses. Each child is stored in `profiles.kids` as `{ id, name, age, interests }`. `profiles.preferences` is still saved as all the kids' interests together, because older code reads it. Older profiles that only have family interests: with one child, that child gets them; with several, the read view shows the signup interests and asks the parent to pick per child.
