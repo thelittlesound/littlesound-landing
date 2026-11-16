@@ -1,4 +1,4 @@
-# Little Sound: handoff for a new chat (updated 2026-11-15)
+# Little Sound: handoff for a new chat (updated 2026-11-15, after the Summer planner)
 
 Read this first, then `BUILD_STATUS.md` (the repo's source of truth; a copy is in this Project). Both live in the repo on Evan's PC.
 
@@ -38,6 +38,7 @@ Read this first, then `BUILD_STATUS.md` (the repo's source of truth; a copy is i
   - Signup radar with Remind me
   - "The week ahead" lanes per child (rolling 7 days), with ideas
   - a phone day strip
+  - a switch to the **Summer planner**: 10 summer weeks × kids, with covered and open weeks, ideas per open week, and Pencil in (`SummerPlanner.tsx`, `lib/summer.ts`, `/api/families/summer`, `summer_plans` table)
 
   Below it:
   - the collapsed "Sync to your phone & email alerts" panel (ICS feed, alert emails)
@@ -48,7 +49,7 @@ Read this first, then `BUILD_STATUS.md` (the repo's source of truth; a copy is i
 - **Date agent:** a daily cron reads providers' sites (HTML, PDF, iClassPro, JS via Cloudflare) and proposes dates. Admins review them in `/admin`. Eight sites block bots, and we respect that.
 
 ## Next up (see BUILD_STATUS "Next Up" for the full list)
-1. Confirm the `supabase/family-calendar.sql` `kid_id` and `signup_reminders` lines have run, then do the live test of saving for a child, assigning a session and Remind me.
-2. **Family Rhythm Round 2: Summer planner** (10 summer weeks × kids, covered vs open weeks, signup dates, pencil in camps). The prototype is in `docs/design/`.
+1. Run `supabase/family-calendar.sql` (its `kid_id` and `signup_reminders` lines) and `supabase/summer-plans.sql`; both are safe to re-run. Then do the live test: save for a child, assign a session, Remind me, and pencil in a summer camp.
+2. Family Rhythm: smarter weekly ideas beyond the saved list.
 3. Move family signup to per-child interests, and use each child's interests in ideas.
 4. Finish the date agent's first pass (review inbox, stale URLs). Then the launch-readiness items: the honesty pass on placeholder stats, the provider outreach kit, and the small fixes.

@@ -22,6 +22,27 @@ Family activity planning platform ("The Family OS") for Seattle. Helps parents d
 
 ## Completed Work
 
+### Family Rhythm, Round 2: the Summer planner (Nov 2026)
+
+- **Where:** on the family dashboard, a switch above the week grid toggles "The week ahead" and "Summer {year}". The browser remembers the choice (`ls_rhythm_view`).
+- **What it shows:** ten summer weeks × each child, following the approved prototype.
+  - Weeks start on the first Monday on or after June 18. Until the end of August the planner shows this year's summer; from September, next year's. The weeks of July 4 and Juneteenth (as observed) are labeled.
+  - A week is **covered** when a dated session on the calendar runs that week for that child (solid in the child's color, "✓ On your calendar"), or when the family **pencilled in** a camp (soft color, with its signup status).
+  - The header counts weeks covered per child (e.g. 2/10).
+- **Open weeks** offer up to 5 ideas from the whole catalog. Only listings that fit the child's age and look like summer programs are offered (category Camps, "camp" in the subcategory or title), plus anything the family saved.
+  - Ranking: runs that week, then saved for this child, then the child's interests.
+  - A listing whose summer dates are posted for other weeks is left out of this week. Listings saved for a sibling are skipped.
+  - Each idea shows its signup status ("Signups open Jan 13, 2027 at 10am" or "Signup date not posted yet").
+- **Pencil in** saves a `summer_plans` row (one per child per week) and also saves the activity for that child (`saved_activities` with `kid_id`). That way the Signup radar, Remind me and alert emails follow it. The week's sheet then offers Their site, "Remind me when signups open" (when a date is known) and Erase from plan. Each sheet also links to "Browse everything for {child}".
+- **Code:**
+  - `lib/summer.ts` (pure logic: weeks, `runsInWeek`, `signupLine`, `summerIdeas`, `weekCells`)
+  - `app/api/families/summer/route.ts` (GET loads the planner; POST handles pencil and erase)
+  - `app/families/dashboard/SummerPlanner.tsx`
+  - shared look moved to `app/families/dashboard/rhythm-ui.tsx`
+  - `lib/catalog-server.ts`: the Discover catalog for server code. `/api/activities` now uses it, with the same output.
+- **SQL to run once:** `supabase/summer-plans.sql` (the `summer_plans` table, with RLS on and service role only). Until it's run, the planner shows ideas but says pencilling in isn't switched on yet.
+- **Tests:** `tests/summer.test.ts` (29 checks).
+
 ### Browse for one child: "Find activities for Ella" (Nov 2026)
 
 - **Dashboard:** each child's card in Family Rhythm has a "Find activities for {name}" button in that child's color, linking to `/discover?for=<kid id>`. The dashboard header also has a "Browse activities" button (just "Browse" on phones).
@@ -226,7 +247,7 @@ Provider visits `/providers/signup` → fills out account + business info (now i
 
 **Reminders:** `signup_reminders` table + `/api/families/reminders`. The daily alerts job sends a **day-before** email for reminded openings (replacing "opens soon" that day) and the **morning-of** one; reminded alerts go out even if general email alerts are off (the family asked), and the one-click unsubscribe clears reminders too.
 
-**Round 2 (not built):** the **Summer planner** (weeks × kids board, open weeks with ideas, signup dates per week, "pencil in" camps), smarter ideas beyond the saved list, and anything needing travel times or weather.
+**Round 2:** the **Summer planner** was built 2026-11-15 (see its entry at the top of Completed Work). Still open: smarter weekly ideas beyond the saved list, and anything needing travel times or weather.
 
 **Data / deploy:** run the new lines of `supabase/family-calendar.sql` (`calendar_picks.kid_id`, `signup_reminders`). Everything degrades gracefully if they're missing (no reminders, picks still load).
 
@@ -511,7 +532,7 @@ New priorities (agreed with Evan 2026-11-11), tackle top-down:
      - Find activities for Ella, then Save for Ella. The dashboard card should say "For Ella", and a session added from it should land in Ella's row.
      - Assign the Pottery class (now in Not assigned) to a child.
      - Try "Remind me" on the radar.
-   - **Then Round 2:** the Summer planner (see `docs/design/`).
+   - **Round 2, the Summer planner:** built 2026-11-15 (see Completed Work). Run `supabase/summer-plans.sql`, then pencil in a camp for each child and check the Signup radar picks it up.
    - **Follow-ups:** family signup still asks for family-level interests (move it to per child), and ideas beyond the saved list could use each child's interests.
    - **Step B (calendar sync and alerts):** subscribe from a real phone calendar and watch the first alert emails.
 2. **Finish the date agent's first pass:** approve/dismiss the 13 drafts in the review inbox (one-time; they were held under the old rule where any AI note blocked publishing), and fix or remove the stale website addresses listed under the date agent in Completed Work. After that it re-checks every site daily on its own.
