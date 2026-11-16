@@ -505,9 +505,17 @@ The 2026-08-23 list (family saved activities, provider listing editing, homepage
 
 New priorities (agreed with Evan 2026-11-11), tackle top-down:
 
-1. **Family Rhythm Round 1 (built 2026-11-16) + Step B rollout:** run the new `supabase/family-calendar.sql` lines (`kid_id`, `signup_reminders`), push, add kids' first names in the profile, and click through on desktop and phone. Then Round 2 (Summer planner). Step B (built 2026-11-14): run `supabase/family-calendar.sql`, push, and do the live test in Completed Work (subscribe from a real phone calendar). Then watch the first alert emails.
+1. **Family Rhythm: confirm Round 1, then build Round 2.** Live since 2026-11-15, including interests per child in the profile and "Find activities for {child}" (Discover's "Browsing for").
+   - **SQL:** `saved_activities.kid_id` was run 2026-11-15. Still unconfirmed: the `kid_id` and `signup_reminders` lines in `supabase/family-calendar.sql`, which assigning a session to a child and "Remind me" need. They are safe to re-run.
+   - **Live test, desktop and phone:**
+     - Find activities for Ella, then Save for Ella. The dashboard card should say "For Ella", and a session added from it should land in Ella's row.
+     - Assign the Pottery class (now in Not assigned) to a child.
+     - Try "Remind me" on the radar.
+   - **Then Round 2:** the Summer planner (see `docs/design/`).
+   - **Follow-ups:** family signup still asks for family-level interests (move it to per child), and ideas beyond the saved list could use each child's interests.
+   - **Step B (calendar sync and alerts):** subscribe from a real phone calendar and watch the first alert emails.
 2. **Finish the date agent's first pass:** approve/dismiss the 13 drafts in the review inbox (one-time; they were held under the old rule where any AI note blocked publishing), and fix or remove the stale website addresses listed under the date agent in Completed Work. After that it re-checks every site daily on its own.
-3. **Calendar agent, Phase 2:** weekly family digest email; kids' names on profiles so calendar items belong to a specific kid.
+3. **Calendar agent, Phase 2:** weekly family digest email. (Kids' names on profiles and calendar items per child: done in Family Rhythm.)
 4. **Calendar agent, Phase 3:** text alerts, scheduling help, and direct Google Calendar connect. Start the slow external approvals early (Twilio/10DLC registration, Google app verification).
 5. **Automate new listings** (**parked by Evan 2026-11-14 until the calendar agent work is done**). Today the date agent spots other programs on sites it already reads and saves them as Suggestions (50 on the first run). They go live with **Add** (one) or **Add all N** (every pending suggestion at once, with a confirm step; built 2026-11-14 — each Add claims its suggestion first, so nothing is ever added twice). Open questions with Claude's suggested defaults, not yet decided:
    - *Going live without a click:* auto-add when solid (kids' program, in the service area, working site, ages + category, not a duplicate) with a daily "added" list and undo; anything doubtful waits. Alternatives: batch approve with checkboxes, or keep one-by-one.
