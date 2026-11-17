@@ -43,6 +43,15 @@ Family activity planning platform ("The Family OS") for Seattle. Helps parents d
 - **SQL to run once:** `supabase/discovery.sql` (`discovery_queries`; `level`, `serves`, `source_url` on `suggested_listings`; `level`, `serves` on `submissions`). Before it runs, suggestions still save (level/serves folded into the description) but the panel says to run it.
 - Tests: `tests/discovery.test.ts` (20 checks).
 
+**First live runs + review (2026-11-16 night, with Evan in the browser):** `discovery.sql` run; two full passes of 48 searches (no errors). Reviewed every suggestion: **80 programs added** (Discover's provider feed went 40 → 120), 4 non-programs dismissed (one-off masterclass, school matinee, aqua-run events, a mislabeled Camp Long entry), 8 held (4 members-only by Evan's choice: Tennis Center Sand Point ×2, Arbor Heights junior team, Gregory Seahurst; 4 location not confirmed: Seattle Wrestling Club, Jet City Wrestling, Rainier Select Basketball, Let Me Run). Evan's calls: nearby suburbs (Burien, Tukwila, SeaTac, Normandy Park) count; good programs elsewhere in Seattle are welcome with their real neighborhood.
+
+**Fixed along the way:**
+- **Discover was showing a stale catalog** (Bug #15): Next 14 cached server `fetch()` in Vercel's Data Cache, and `/api/activities` reads no cookies, so its Supabase queries were frozen (approved listings and new date lines never reached Discover). `lib/supabase.ts` now sends every request with `cache: 'no-store'`.
+- **Wrong neighborhoods:** the agent first forced everything to West Seattle / White Center / Citywide, then (free text) fell back to the searched area when unsure (Sand Point and Lake Union programs labeled "West Seattle"). Now it records the street address from the own site and the code maps the ZIP (`ZIP_NEIGHBORHOODS`); no address + searched area = "Location not confirmed". Suggestion cards have editable Neighborhood + Ages (sent with Add); Add refuses a suggestion with no neighborhood. "Re-run every search now" added to the panel.
+- **Build error** (strict is off in tsconfig: `if (!r.ok)` doesn't narrow; use `'error' in r`).
+- Neighborhoods set from memory, not re-checked: Vertical World = Interbay, Seattle Yacht Club = Montlake, Pocock = Eastlake, Seattle Canoe & Kayak = Green Lake, Props Lacrosse = Magnolia, Seattle Central LL = Central District.
+- Known gap: the Agent tab's **Add all** ignores card edits.
+
 **Not done yet (next):** the provider listing form doesn't ask for level / who can join, and a claimed seed listing loses `level`/`serves` (the claim copy doesn't include them); tryouts as their own date kind on the radar and alerts; Discover filters by neighborhood/zip.
 
 ### Family Rhythm, Round 2: the Summer planner (Nov 2026)
