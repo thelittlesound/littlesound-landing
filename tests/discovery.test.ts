@@ -1,4 +1,4 @@
-import { allQueries, buildKnown, cleanClub, dueQueries, isNew, isOwnSite, siteKey, DISCOVERY_AREAS } from '@/lib/discovery-logic';
+import { cleanNeighborhood, allQueries, buildKnown, cleanClub, dueQueries, isNew, isOwnSite, siteKey, DISCOVERY_AREAS } from '@/lib/discovery-logic';
 
 let pass = 0, fail = 0;
 const ok = (c: boolean, m: string) => { if (c) pass++; else { fail++; console.log('FAIL:', m); } };
@@ -45,8 +45,15 @@ ok(!('skip' in good) && good.ageMin === 12 && good.ageMax === 16 && good.level =
 ok('skip' in cleanClub({ organization: 'X', website: 'https://www.facebook.com/x' }, ws), 'facebook-only → skipped');
 ok('skip' in cleanClub({ organization: 'X', website: 'https://x.example', source_url: 'https://classcub.com/x' }, ws), 'facts from a directory → skipped');
 ok('skip' in cleanClub({ organization: 'X', website: 'https://x.example', source_url: 'https://y.example/x' }, ws), 'facts from another site → skipped');
-const odd = cleanClub({ organization: 'Y', website: 'y.example', neighborhood: 'Mars', level: 'elite', age_min: 40, price: -1, price_unit: 'week' }, DISCOVERY_AREAS[2]);
+const odd = cleanClub({ organization: 'Y', website: 'y.example', neighborhood: 'Mars 51', level: 'elite', age_min: 40, price: -1, price_unit: 'week' }, DISCOVERY_AREAS[2]);
 ok(!('skip' in odd) && odd.neighborhood === 'White Center' && odd.level === null && odd.ageMin === null && odd.price === null && odd.priceUnit === null && odd.title === 'Y', 'bad values become null, area default neighborhood');
+
+// neighborhoods
+ok(cleanNeighborhood('Ballard') === 'Ballard' && cleanNeighborhood('south park') === 'South Park' && cleanNeighborhood('Burien') === 'Burien', 'real neighborhoods and cities kept, title-cased');
+ok(cleanNeighborhood('Seattle') === 'Citywide' && cleanNeighborhood('Multiple locations') === 'Citywide', 'whole-city answers become Citywide');
+ok(cleanNeighborhood('<b>x</b>') === null && cleanNeighborhood('98106') === null && cleanNeighborhood('') === null && cleanNeighborhood(7) === null, 'junk rejected');
+const g = cleanClub({ organization: 'Seattle Jiu-Jitsu Academy', website: 'https://sjja.example', neighborhood: 'Georgetown' }, DISCOVERY_AREAS[2]);
+ok(!('skip' in g) && g.neighborhood === 'Georgetown', 'Georgetown stays Georgetown (was forced to Citywide)');
 
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);

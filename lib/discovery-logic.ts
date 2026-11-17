@@ -158,6 +158,19 @@ export function buildKnown(rows: { business?: string | null; website?: string | 
   return { sites, names };
 }
 
+/**
+ * Where a program runs, as the AI reports it: a Seattle neighborhood, a nearby
+ * city (Burien, Tukwila…) or "Citywide" for programs at many sites. Free text,
+ * tidied: letters, spaces, apostrophes, hyphens, periods; title case kept.
+ */
+export function cleanNeighborhood(v: unknown): string | null {
+  if (typeof v !== 'string') return null;
+  const t = v.replace(/\s+/g, ' ').trim();
+  if (!t || t.length > 40 || !/^[A-Za-z][A-Za-z .'’-]*$/.test(t)) return null;
+  if (/^(seattle|citywide|city ?wide|multiple|various|many)( locations| sites)?$/i.test(t)) return 'Citywide';
+  return t.replace(/\b([a-z])/g, (m) => m.toUpperCase());
+}
+
 export const LEVELS = ['rec', 'club'] as const;
 
 export interface FoundClub {
@@ -196,7 +209,7 @@ export function cleanClub(raw: unknown, area: DiscoveryArea): FoundClub | { skip
   let ageMin = age(r.age_min);
   let ageMax = age(r.age_max);
   if (ageMin != null && ageMax != null && ageMin > ageMax) [ageMin, ageMax] = [ageMax, ageMin];
-  const neighborhood = r.neighborhood === 'Citywide' ? 'Citywide' : r.neighborhood === 'White Center' ? 'White Center' : r.neighborhood === 'West Seattle' ? 'West Seattle' : area.neighborhood;
+  const neighborhood = cleanNeighborhood(r.neighborhood) ?? area.neighborhood;
   const price = typeof r.price === 'number' && r.price >= 0 && r.price < 100_000 ? r.price : null;
   return {
     organization,

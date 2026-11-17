@@ -40,6 +40,7 @@ export default function DiscoveryPanel({ onNewSuggestions }: { onNewSuggestions:
   const stopRef = useRef(false);
   const [log, setLog] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
+  const [confirmAll, setConfirmAll] = useState(false);
 
   const load = useCallback(async () => {
     const res = await fetch('/api/admin/discovery', { cache: 'no-store' });
@@ -114,7 +115,7 @@ export default function DiscoveryPanel({ onNewSuggestions }: { onNewSuggestions:
             </button>
           </div>
         ) : (
-          <div className="flex gap-2 shrink-0">
+          <div className="flex flex-col items-end gap-1.5 shrink-0">
             <button
               onClick={() => run(due.map((q) => q.key))}
               disabled={data.tableMissing || !data.aiConfigured || due.length === 0}
@@ -122,6 +123,26 @@ export default function DiscoveryPanel({ onNewSuggestions }: { onNewSuggestions:
             >
               {due.length ? `Run ${due.length} due search${due.length === 1 ? '' : 'es'}` : 'All searches are current'}
             </button>
+            {confirmAll ? (
+              <span className="text-xs text-[#1C3A4A]">
+                Re-run all {data.queries.length} now (about $5–10)?{' '}
+                <button
+                  onClick={() => { setConfirmAll(false); run(data.queries.map((q) => q.key)); }}
+                  className="font-semibold text-[#0D5C6E] underline"
+                >
+                  Yes
+                </button>{' '}
+                <button onClick={() => setConfirmAll(false)} className="text-[#1A7A8A] underline">Cancel</button>
+              </span>
+            ) : (
+              <button
+                onClick={() => setConfirmAll(true)}
+                disabled={data.tableMissing || !data.aiConfigured}
+                className="text-xs text-[#1A7A8A] underline disabled:opacity-50"
+              >
+                Re-run every search now
+              </button>
+            )}
           </div>
         )}
       </div>
