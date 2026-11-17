@@ -49,29 +49,34 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     .select('id');
   if (!claimed?.length) return NextResponse.json({ error: 'Already handled.' }, { status: 409 });
 
-  const { data: created, error: insertError } = await supabaseAdmin
-    .from('submissions')
-    .insert({
-      status: 'approved',
-      provider_id: null,
-      contact_name: s.business, // pre-account listings use the business as the contact (claim flow groups by it)
-      contact_email: TEAM_EMAIL,
-      title: s.title,
-      category: s.category,
-      subcategory: s.subcategory,
-      description: s.description,
-      age_min: s.age_min,
-      age_max: s.age_max,
-      price: s.price,
-      price_unit: s.price_unit,
-      neighborhood: s.neighborhood,
-      website: s.website,
-      reviewed_at: reviewed.reviewed_at,
-      reviewed_by: reviewed.reviewed_by,
-      admin_notes: 'Added from a date-agent suggestion',
-    })
-    .select('id')
-    .single();
+  const row: Record<string, unknown> = {
+    status: 'approved',
+    provider_id: null,
+    contact_name: s.business, // pre-account listings use the business as the contact (claim flow groups by it)
+    contact_email: TEAM_EMAIL,
+    title: s.title,
+    category: s.category,
+    subcategory: s.subcategory,
+    description: s.description,
+    age_min: s.age_min,
+    age_max: s.age_max,
+    price: s.price,
+    price_unit: s.price_unit,
+    neighborhood: s.neighborhood,
+    website: s.website,
+    reviewed_at: reviewed.reviewed_at,
+    reviewed_by: reviewed.reviewed_by,
+    admin_notes: s.found_on?.startsWith('search:') ? 'Added from a discovery-agent suggestion (web search)' : 'Added from a date-agent suggestion',
+    level: s.level ?? null,
+    serves: s.serves ?? null,
+  };
+  const insert = (r: Record<string, unknown>) => supabaseAdmin.from('submissions').insert(r).select('id').single();
+  let { data: created, error: insertError } = await insert(row);
+  if (insertError && /level|serves/.test(insertError.message ?? '')) {
+    // supabase/discovery.sql not run yet: add the listing without them.
+    const { level, serves, ...rest } = row;
+    ({ data: created, error: insertError } = await insert(rest));
+  }
   if (insertError || !created) {
     console.error('add suggestion error:', insertError);
     await supabaseAdmin.from('suggested_listings').update({ status: 'pending', reviewed_by: null, reviewed_at: null }).eq('id', s.id);

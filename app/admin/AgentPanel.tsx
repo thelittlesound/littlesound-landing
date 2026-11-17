@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { seattleToday, type DateItem } from '@/lib/activity-dates';
 import { describeItem } from '@/lib/date-agent-logic';
+import DiscoveryPanel from './DiscoveryPanel';
 
 interface ListingStatus {
   activityId: string;
@@ -40,6 +41,10 @@ interface Suggestion {
   website: string | null;
   neighborhood: string | null;
   items: DateItem[];
+  found_on?: string | null;
+  level?: string | null;
+  serves?: string | null;
+  source_url?: string | null;
 }
 interface Overview {
   listings: ListingStatus[];
@@ -426,12 +431,15 @@ export default function AgentPanel({ onToast }: { onToast: (msg: string, ok: boo
         )}
       </div>
 
+      {/* Discovery agent: web searches by sport × area → Suggestions */}
+      <DiscoveryPanel onNewSuggestions={load} />
+
       {/* Suggestions */}
       <div className={card}>
         <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
           <div>
             <h3 className="text-sm font-semibold text-[#1C3A4A] mb-1">Suggested new listings ({data.suggestions.length})</h3>
-            <p className="text-xs text-[#7A9AAA]">Kids&apos; programs the agent found on provider sites that aren&apos;t on Little Sound yet. Adding one puts it on Discover (claimable by the provider later).</p>
+            <p className="text-xs text-[#7A9AAA]">Kids&apos; programs the agents found (on provider sites, or by web search) that aren&apos;t on Little Sound yet. Adding one puts it on Discover (claimable by the provider later), and the date agent then reads its site for dates.</p>
           </div>
           {data.suggestions.length > 1 &&
             (bulk ? (
@@ -489,7 +497,20 @@ export default function AgentPanel({ onToast }: { onToast: (msg: string, ok: boo
                   {s.age_min != null ? ` · Ages ${s.age_min}–${s.age_max ?? s.age_min}` : ''}
                   {s.price != null ? ` · $${s.price}${s.price_unit ? `/${s.price_unit}` : ''}` : ''}
                 </p>
+                {(s.found_on?.startsWith('search:') || s.level) && (
+                  <p className="text-[11px] text-[#0D5C6E] mb-1">
+                    {[s.found_on?.startsWith('search:') ? 'Found by web search' : null, s.level === 'club' ? 'Club · tryouts' : s.level === 'rec' ? 'Rec · everyone plays' : null]
+                      .filter(Boolean)
+                      .join(' · ')}
+                  </p>
+                )}
                 {s.description && <p className="text-sm text-[#3A5A6A] mb-2">{s.description}</p>}
+                {s.serves && <p className="text-xs text-[#3A5A6A] mb-2"><span className="font-semibold">Who can join:</span> {s.serves}</p>}
+                {s.source_url && s.source_url !== s.website && (
+                  <a href={s.source_url} target="_blank" rel="noopener noreferrer" className="text-xs text-[#1A7A8A] underline break-all block mb-1">
+                    Facts from: {s.source_url.replace(/^https?:\/\//, '')}
+                  </a>
+                )}
                 {s.items.length > 0 && (
                   <ul className="text-sm text-[#1C3A4A] mb-2 space-y-0.5">
                     {s.items.slice(0, 5).map((i, k) => <li key={k}>{describeItem(i, today)}</li>)}

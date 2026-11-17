@@ -7,6 +7,10 @@
     {
       "path": "/api/cron/family-alerts",
       "schedule": "5 15 * * *"
+    },
+    {
+      "path": "/api/cron/discovery",
+      "schedule": "40 14 * * *"
     }
   ]
 }
