@@ -29,10 +29,15 @@ export interface ProviderActivity {
   neighborhood: string;
   ageMin: number;
   ageMax: number;
-  price: number;
+  /** null when no fee was given (shown as "Fees on their site", not $0). */
+  price: number | null;
   priceUnit: string;
   description: string;
   website: string;
+  /** Team sports: 'rec' or 'club'. Columns may not exist yet; then null. */
+  level: string | null;
+  /** Who can join (e.g. a league boundary). */
+  serves: string | null;
   source: 'provider';
 }
 
@@ -78,10 +83,12 @@ export async function getProviderActivities(): Promise<{ activities: ProviderAct
     neighborhood: s.neighborhood ?? 'Seattle',
     ageMin: s.age_min ?? 0,
     ageMax: s.age_max ?? 18,
-    price: s.price ?? 0,
+    price: s.price ?? null,
     priceUnit: s.price_unit ?? 'session',
     description: s.description ?? '',
     website: s.website ?? '',
+    level: s.level ?? null,
+    serves: s.serves ?? null,
     source: 'provider', // flag so we can distinguish in UI if needed
   }));
   return { activities, claimedSeedIds, error: null };

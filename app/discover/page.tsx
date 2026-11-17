@@ -5,13 +5,27 @@ import staticActivities from '../data/activities.json';
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
 import { browsableKids, fitsKid, type MatchKid } from '@/lib/kid-match';
 
-type Activity = typeof staticActivities[0] & { subcategory?: string; source?: string };
+type Activity = Omit<typeof staticActivities[0], 'price' | 'level' | 'serves'> & {
+  /** null when the provider doesn't post a fee. */
+  price: number | null;
+  subcategory?: string;
+  source?: string;
+  /** Team sports: 'rec' (everyone plays, no tryouts) or 'club' (select/club, by tryout). */
+  level?: string | null;
+  /** Who can join, e.g. a league's boundary. */
+  serves?: string | null;
+};
+
+const LEVELS: { key: 'rec' | 'club'; label: string; short: string }[] = [
+  { key: 'rec', label: 'Rec · everyone plays', short: 'Rec' },
+  { key: 'club', label: 'Club · tryouts', short: 'Club' },
+];
 
 const CATEGORIES = ['All', 'Sports', 'Swimming', 'Arts', 'Outdoor', 'STEM', 'Music', 'Dance', 'Cooking', 'Language', 'Martial Arts', 'Early Childhood', 'Theater', 'Camps', 'Academic'];
 
 const SUBCATEGORY_ORDER: Record<string, string[]> = {
-  Swimming:       ['Year-Round', 'Group Lessons', 'Private Lessons', 'Outdoor & Beach', 'Seasonal'],
-  Sports:         ['Multi-Sport', 'Gymnastics', 'Climbing', 'Ice Skating', 'Skateboarding'],
+  Swimming:       ['Year-Round', 'Group Lessons', 'Private Lessons', 'Swim Team', 'Outdoor & Beach', 'Seasonal'],
+  Sports:         ['Soccer', 'Baseball & Softball', 'Basketball', 'Volleyball', 'Football', 'Lacrosse', 'Running', 'Roller Derby', 'Multi-Sport', 'Gymnastics', 'Climbing', 'Ice Skating', 'Skateboarding'],
   Arts:           ['Classes & Workshops', 'Drawing & Painting', 'Pottery & Ceramics', 'Private Lessons', 'Workshops & Intensives'],
   STEM:           ['Coding & AI', 'Robotics', 'Science'],
   Music:          ['Private Lessons', 'Bands & Performance', 'Early Childhood'],
@@ -107,6 +121,11 @@ function ActivityCard({
         <p className="text-[13px] text-[#1A7A8A] font-medium mb-3">
           {a.provider}
         </p>
+        {(a.level === 'rec' || a.level === 'club') && (
+          <p className="self-start text-[11px] font-semibold uppercase tracking-[0.06em] rounded-full px-2.5 py-1 mb-3 border border-[#1A7A8A]/30 text-[#0D5C6E]">
+            {LEVELS.find((l) => l.key === a.level)!.label}
+          </p>
+        )}
         {dateLine && (
           <p className="inline-flex items-center gap-1.5 self-start text-[12px] font-semibold text-[#7A5A2E] bg-[#C4A882]/15 rounded-full px-3 py-1 mb-3">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#A8865A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -124,13 +143,22 @@ function ActivityCard({
           <span>&middot;</span>
           <span>{a.neighborhood}</span>
         </div>
+        {a.serves && (
+          <p className="text-[12px] leading-snug text-[#5A7A8A] -mt-3 mb-5">
+            <span className="font-semibold text-[#3A5A6A]">Who can join:</span> {a.serves}
+          </p>
+        )}
         <div className="flex items-center justify-between">
-          <div>
-            <span className="font-['Cormorant_Garamond'] text-[24px] font-medium text-[#1C3A4A]">
-              ${a.price}
-            </span>
-            <span className="text-[13px] text-[#7A9AAA]"> /{a.priceUnit}</span>
-          </div>
+          {a.price == null ? (
+            <span className="text-[13px] text-[#7A9AAA] max-w-[9rem] leading-snug">Fees on their site</span>
+          ) : (
+            <div>
+              <span className="font-['Cormorant_Garamond'] text-[24px] font-medium text-[#1C3A4A]">
+                ${a.price}
+              </span>
+              <span className="text-[13px] text-[#7A9AAA]"> /{a.priceUnit}</span>
+            </div>
+          )}
           <a
             href={a.website}
             target="_blank"
@@ -164,6 +192,7 @@ export default function Discover() {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('All');
   const [subcategory, setSubcategory] = useState('All');
+  const [level, setLevel] = useState<'All' | 'rec' | 'club'>('All');
   const [ageGroup, setAgeGroup] = useState(AGE_GROUPS[0]);
   const [sort, setSort] = useState('default');
   const [providerActivities, setProviderActivities] = useState<Activity[]>([]);
@@ -261,6 +290,7 @@ export default function Discover() {
   // Reset subcategory when category changes
   useEffect(() => {
     setSubcategory('All');
+    setLevel('All');
   }, [category]);
 
   const results = useMemo(() => {
@@ -276,18 +306,27 @@ export default function Discover() {
       // For one child: their age, and (unless a category is picked or they
       // asked for everything) the categories their interests point to.
       const matchesKid = !forKid || fitsKid(a, forKid, useInterests && category === 'All');
-      return matchesQuery && matchesCategory && matchesAge && matchesKid;
+      const matchesLevel = level === 'All' || a.level === level;
+      return matchesQuery && matchesCategory && matchesAge && matchesKid && matchesLevel;
     });
     const arr = [...filtered];
-    if (sort === 'price-asc')  arr.sort((a, b) => a.price - b.price);
-    if (sort === 'price-desc') arr.sort((a, b) => b.price - a.price);
+    // Listings without a posted fee go last either way.
+    const fee = (a: Activity, none: number) => a.price ?? none;
+    if (sort === 'price-asc')  arr.sort((a, b) => fee(a, Infinity) - fee(b, Infinity));
+    if (sort === 'price-desc') arr.sort((a, b) => fee(b, -Infinity) - fee(a, -Infinity));
     if (sort === 'age-asc')    arr.sort((a, b) => a.ageMin - b.ageMin);
     if (sort === 'age-desc')   arr.sort((a, b) => b.ageMin - a.ageMin);
     return arr;
     // `activities` must be a dependency: provider listings arrive from the API
     // after first render, and without it they never appeared until a filter
     // changed.
-  }, [activities, query, category, ageGroup, sort, forKid, useInterests]);
+  }, [activities, query, category, ageGroup, sort, forKid, useInterests, level]);
+
+  // Rec vs club pills, when the chosen category has listings with a level.
+  const showLevels = useMemo(
+    () => category !== 'All' && activities.some((a) => a.category === category && (a.level === 'rec' || a.level === 'club')),
+    [activities, category]
+  );
 
   // Subcategory pills — ordered, derived from current results
   const availableSubcategories = useMemo(() => {
@@ -351,6 +390,7 @@ export default function Discover() {
     setQuery('');
     setCategory('All');
     setSubcategory('All');
+    setLevel('All');
     setAgeGroup(AGE_GROUPS[0]);
     setSort('default');
   };
@@ -640,6 +680,22 @@ export default function Discover() {
                       : 'px-4 py-1.5 rounded-full text-[12px] font-medium bg-white text-[#3A5A6A] border border-[#E8DFC8] hover:border-[#1A7A8A] whitespace-nowrap shrink-0 transition-all'}
                   >
                     {s}
+                  </button>
+                ))}
+              </div>
+            )}
+            {showLevels && (
+              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide" role="group" aria-label="Level">
+                {([{ key: 'All', label: 'Any level' }, ...LEVELS] as { key: 'All' | 'rec' | 'club'; label: string }[]).map((l) => (
+                  <button
+                    key={l.key}
+                    onClick={() => setLevel(l.key)}
+                    aria-pressed={level === l.key}
+                    className={level === l.key
+                      ? 'px-4 py-1.5 rounded-full text-[12px] font-medium bg-[#0D5C6E] text-white whitespace-nowrap shrink-0 transition-all'
+                      : 'px-4 py-1.5 rounded-full text-[12px] font-medium bg-[#F5EFE0] text-[#3A5A6A] border border-[#E8DFC8] hover:border-[#0D5C6E] whitespace-nowrap shrink-0 transition-all'}
+                  >
+                    {l.label}
                   </button>
                 ))}
               </div>
