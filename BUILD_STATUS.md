@@ -29,7 +29,7 @@ Family activity planning platform ("The Family OS") for Seattle. Helps parents d
   - Weeks start on the first Monday on or after June 18. Until the end of August the planner shows this year's summer; from September, next year's. The weeks of July 4 and Juneteenth (as observed) are labeled.
   - A week is **covered** when a dated session on the calendar runs that week for that child (solid in the child's color, "✓ On your calendar"), or when the family **pencilled in** a camp (soft color, with its signup status).
   - The header counts weeks covered per child (e.g. 2/10).
-- **Open weeks** offer up to 5 ideas from the whole catalog. Only listings that fit the child's age and look like summer programs are offered (category Camps, "camp" in the subcategory or title), plus anything the family saved.
+- **Open weeks** offer up to 5 ideas from the whole catalog. Only listings that fit the child's age and look like summer programs are offered (category Camps, "camp" in the subcategory or title), plus anything the family saved. Before-and-after care add-ons are never offered (decided 2026-11-16).
   - Ranking: runs that week, then saved for this child, then the child's interests.
   - A listing whose summer dates are posted for other weeks is left out of this week. Listings saved for a sibling are skipped.
   - Each idea shows its signup status ("Signups open Jan 13, 2027 at 10am" or "Signup date not posted yet").
@@ -538,9 +538,9 @@ New priorities (agreed with Evan 2026-11-11), tackle top-down:
      - Erase from plan reopens the week
      - assigning the Pottery class to a child
      - Remind me on a dated signup
-   - **Open decisions:**
-     - Before-and-after care listings (e.g. Gage "Creative Care") show up as summer ideas because they run that week. Keep them, or leave add-on care out?
-     - Open weeks all say "5 ideas →". Show the top idea's name instead?
+   - **Decided 2026-11-16 (built, not yet pushed/checked live):**
+     - Before-and-after care (e.g. Gage "Creative Care") is **left out** of summer ideas, even when saved: it doesn't fill a week on its own. `isAddOnCare` in `lib/summer.ts` judges by title and subcategory only (care / aftercare / extended day in the name; "Animal Care Camp" stays).
+     - Open weeks show the **top idea's name** with "+N more →" instead of "5 ideas →".
    - **Next builds:**
      - family signup asks for interests per child
      - smarter weekly ideas beyond the saved list, using each child's interests

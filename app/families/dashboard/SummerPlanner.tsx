@@ -126,15 +126,26 @@ export default function SummerPlanner({
         </button>
       );
     }
-    const n = data!.ideas[`${kidId}|${week.start}`]?.length ?? 0;
+    const list = data!.ideas[`${kidId}|${week.start}`] ?? [];
+    const top = list[0];
     return (
       <button
         type="button"
         onClick={() => setOpen({ kidId, week })}
-        className={`w-full rounded-[16px] ${h} border-2 border-dashed border-[#E3DAC5] hover:border-[#1A7A8A] hover:bg-[#F7FBFC] flex flex-col items-center justify-center gap-0.5 transition-colors`}
+        aria-label={top ? `Open week of ${week.label}. Top idea: ${top.title}${list.length > 1 ? `, and ${list.length - 1} more` : ''}` : `Open week of ${week.label}. Find a camp`}
+        className={`w-full rounded-[16px] ${h} px-2 py-2 border-2 border-dashed border-[#E3DAC5] hover:border-[#1A7A8A] hover:bg-[#F7FBFC] flex flex-col items-center justify-center gap-0.5 text-center transition-colors`}
       >
-        <span className="text-[12px] text-[#B5A889] font-semibold">Open week</span>
-        <span className="text-[12px] text-[#1A7A8A] font-semibold">{n ? `${n} idea${n === 1 ? '' : 's'} →` : 'Find a camp →'}</span>
+        <span className="text-[11px] text-[#B5A889] font-semibold uppercase tracking-[0.06em]">Open week</span>
+        {top ? (
+          <>
+            <span className="text-[12px] text-[#1A7A8A] font-semibold leading-tight line-clamp-2 [overflow-wrap:anywhere] [hyphens:auto]" lang="en">
+              {top.title}
+            </span>
+            <span className="text-[11px] text-[#7A9AAA] leading-tight">{list.length > 1 ? `+${list.length - 1} more →` : 'See it →'}</span>
+          </>
+        ) : (
+          <span className="text-[12px] text-[#1A7A8A] font-semibold">Find a camp →</span>
+        )}
       </button>
     );
   }

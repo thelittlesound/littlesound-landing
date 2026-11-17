@@ -59,13 +59,10 @@ Family Rhythm Rounds 1 and 2 are live, and Evan tested them on the live site. Th
 - the Pottery class can be assigned to a child
 - Remind me works on a dated signup
 
-**Open decisions for Evan:**
-
-1. Before-and-after care listings (Gage "Creative Care") appear in summer ideas because they run that week. Keep them, or leave add-on care out?
-2. Open weeks all say "5 ideas →". Show the top idea's name instead?
+**Decided 2026-11-16:** add-on care (Gage "Creative Care") is left out of summer ideas, and open weeks show the top idea's name with "+N more →". Built; check it live after the push.
 
 ## Next up (see BUILD_STATUS "Next Up" for the full list)
-1. Settle the two open decisions above and finish the remaining checks.
+1. Finish the remaining checks above (and look at the new open-week cells).
 2. Family signup: ask for interests per child (the dashboard already does).
 3. Family Rhythm: smarter weekly ideas beyond the saved list, using each child's interests.
 4. Step B check: subscribe from a real phone calendar and watch the first alert emails.

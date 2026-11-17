@@ -86,6 +86,21 @@ export function isSummerProgram(a: Pick<CatalogItem, 'category' | 'subcategory' 
   return a.category === 'Camps' || /camp/i.test(a.subcategory ?? '') || /camp/i.test(a.title);
 }
 
+/**
+ * Before-and-after care and extended-day add-ons (e.g. Gage "Creative Care").
+ * They run during camp weeks but don't fill a week on their own, so the
+ * planner doesn't suggest them. Judged by title and subcategory only: a camp
+ * whose description mentions "before and after care available" is still a camp.
+ */
+const CARE_ADD_ON = /\b(before|after)[\s-]*(and|&)?[\s-]*(after[\s-]*)?(school|camp)?[\s-]*care\b|\baftercare\b|\bextended[\s-]*(day|care|hours)\b/i;
+export function isAddOnCare(a: Pick<CatalogItem, 'subcategory' | 'title'>): boolean {
+  const text = `${a.title} ${a.subcategory ?? ''}`;
+  if (CARE_ADD_ON.test(text)) return true;
+  // "Creative Care", "Camp Care": care in the name, and not a camp itself
+  // ("Animal Care Camp" stays).
+  return /\bcare\b/i.test(a.title) && !/\bcamps?\b/i.test(a.title);
+}
+
 export interface SummerKid {
   id: string;
   name: string;
@@ -134,6 +149,7 @@ export function summerIdeas(opts: {
     const savedFor = saved.has(a.id) ? saved.get(a.id) : undefined;
     const isSaved = savedFor !== undefined;
     if (savedFor && savedFor !== kid.id) continue; // saved for a sibling
+    if (isAddOnCare(a)) continue; // add-on care doesn't fill a week
     if (!isSummerProgram(a) && !isSaved) continue;
     if (!ageFits(a, kid.age)) continue;
     const items = dates.get(a.id) ?? [];

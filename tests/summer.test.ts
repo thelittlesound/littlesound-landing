@@ -1,4 +1,4 @@
-import { isSummerProgram, runsInWeek, signupLine, summerIdeas, summerWeeks, weekCells, type CatalogItem } from '@/lib/summer';
+import { isAddOnCare, isSummerProgram, runsInWeek, signupLine, summerIdeas, summerWeeks, weekCells, type CatalogItem } from '@/lib/summer';
 
 let pass = 0, fail = 0;
 const ok = (c: boolean, m: string) => { if (c) pass++; else { fail++; console.log('FAIL:', m); } };
@@ -70,6 +70,15 @@ ok(savedJack[0].activityId === 'zoo' && /Saved for Jack/.test(savedJack[0].why),
 const planned = summerIdeas({ ...base, kid: jack, week: wk('2027-06-28'), planned: new Set(['day']) });
 ok(planned[planned.length - 1].activityId === 'day', 'already pencilled another week → ranked last, still offered');
 ok(isSummerProgram({ category: 'Language', subcategory: 'Summer Camps', title: 'Immersion' }) && !isSummerProgram({ category: 'Music', subcategory: 'Private Lessons', title: 'Piano' }), 'summer program detection');
+
+// add-on care (decided 2026-11-16: leave it out of ideas)
+const careCat = [...catalog, C({ id: 'care', title: 'Creative Care', category: 'Camps', subcategory: 'Before & After Care' }), C({ id: 'ext', title: 'Extended Day for Camp', category: 'Camps' })];
+const careDates = new Map(dates); careDates.set('care', [it({ start_date: '2027-06-21', end_date: '2027-08-27', days_of_week: ['MO', 'TU', 'WE', 'TH', 'FR'] })]);
+const withCare = summerIdeas({ ...base, catalog: careCat, dates: careDates, kid: jack, week: wk('2027-06-21') });
+ok(!withCare.some((x) => x.activityId === 'care' || x.activityId === 'ext'), 'before/after care is not suggested even when it runs that week: ' + ids(withCare));
+ok(!summerIdeas({ ...base, catalog: careCat, dates: careDates, kid: jack, week: wk('2027-06-21'), saved: new Map([['care', 'k_jack0001']]) }).some((x) => x.activityId === 'care'), 'not even when saved for the child');
+ok(isAddOnCare({ title: 'Before and After Camp Care', subcategory: null }) && isAddOnCare({ title: 'Camp Aftercare', subcategory: null }) && isAddOnCare({ title: 'Creative Care', subcategory: null }) && isAddOnCare({ title: 'Summer Program', subcategory: 'Extended Care' }), 'add-on care names');
+ok(!isAddOnCare({ title: 'Animal Care Camp', subcategory: null }) && !isAddOnCare({ title: 'After-School Climbing Program', subcategory: 'Climbing' }) && !isAddOnCare({ title: 'Summer Day Camp', subcategory: 'Day Camps' }) && !isAddOnCare({ title: 'Licensed School-Age Summer Day Camp', subcategory: 'Day Camps' }), 'real camps and classes are not care');
 
 // cells
 const listings = new Map([['day', { website: 'https://day', category: 'Camps' }], ['art', { website: 'https://art', category: 'Arts' }]]);
