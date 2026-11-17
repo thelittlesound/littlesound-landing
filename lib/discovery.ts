@@ -236,7 +236,8 @@ export async function runDiscoveryQuery(
     const left = TIME_LIMIT_MS - (Date.now() - started);
     if (left < 8_000) break;
     const r = await callClaude({ ...request, messages }, apiKey, left);
-    if (!r.ok) {
+    // `in` narrows even with strict off (the project's tsconfig); `!r.ok` doesn't.
+    if ('error' in r) {
       const result = { status: 'error' as const, found: 0, added: 0, skipped: [], message: r.error };
       await recordRun(q.key, result);
       return { key: q.key, ...result };
