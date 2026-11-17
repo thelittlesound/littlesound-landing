@@ -22,6 +22,29 @@ Family activity planning platform ("The Family OS") for Seattle. Helps parents d
 
 ## Completed Work
 
+### Sports for West Seattle + the discovery agent (Nov 2026; committed, needs `supabase/discovery.sql` + push)
+
+**Why (Evan, 2026-11-16):** "Right now we have nothing for sports, especially club team sports… we need to ingest more, especially in West Seattle zip codes." Sports had 7 generic listings (YMCA, i9, a multi-sport camp, climbing, skating, skateboarding); no club teams, nothing in West Seattle. His calls: add what we find now as seed listings and let the date agent fill dates; listings carry **sport, level (rec vs club), seasons + tryouts, and who can join**; the discovery agent searches **West Seattle + White Center first**; everything it finds goes to the **inbox** for approval (no auto-add yet).
+
+**18 new seed listings (ids 82–99), researched 2026-11-16:** West Seattle Soccer Club (rec), Highline Premier FC (club), West Seattle Little League, Southwest Little League (White Center), West Seattle Baseball spring + Summer CRUSH, Washington Baseball Academy (select), West Seattle Jr. Wildcats football & cheer, West Seattle Lacrosse Club, Southwest Lacrosse Club (Titans), West Seattle Reign (club volleyball/basketball), Seattle Volleyball Academy, Go Time Athletics clinics, West Seattle RoadRunners, Southside Revolution junior roller derby, West Seattle & Fauntleroy YMCA leagues and swim team, Seattle Parks youth track. Seed data is now **93 programs (Sports: 24)**. Facts come from each organization's own pages where reachable, else its own announcements; **fees are blank (`price: null`) unless posted for 2025+**. Unconfirmed, check before launch: Highline Premier FC ages (8–18 assumed), Southwest Little League ages (4–14 assumed), Seattle Volleyball Academy ages (11–16, from a directory). Martial arts studios were left for the discovery agent (websites not confirmed; Evergreen Tang Soo Do's space is now Zoo BJJ).
+
+**Discover:**
+- Sport is the subcategory: Sports pills now include Soccer, Baseball & Softball, Basketball, Volleyball, Football, Lacrosse, Running, Roller Derby; Swimming has Swim Team.
+- New seed fields `level` (`rec` = everyone plays / `club` = tryouts) and `serves` (who can join, e.g. the Little League split at SW Juneau St). Cards show a level tag and a "Who can join" line; a **Rec · everyone plays / Club · tryouts** row appears when the category has leveled listings.
+- A listing with no posted fee shows "Fees on their site" (price sorts put it last). **Bug fixed:** approved provider/agent listings without a price used to show "$0"; the catalog now passes null.
+
+**Discovery agent** (`lib/discovery-logic.ts` pure rules, `lib/discovery.ts`):
+- 16 sports × 3 areas (West Seattle; Delridge/High Point/Highland Park; White Center/South Park) = 48 searches, each re-run every 30 days (failed ones after an hour).
+- One Claude call per search with `web_search_20250305` (max 3) and `web_fetch_20250910` (max 5, beta header `web-fetch-2025-09-10`) plus a `record_programs` tool. Directories, news and social are only for finding names: every program needs its own website, and the facts' source page must be on that site (`isOwnSite`, checked in code). Up to 6 programs per search.
+- De-duplicated against every listing and every past suggestion (any status) by site (host, or host + club path on shared platforms like Blue Sombrero) and by normalized name; a dismissed suggestion never comes back.
+- New programs go to `suggested_listings` (found_on `search:<sport|area>`, with level, serves, source_url). **Add** creates the listing as before and now copies level/serves; the date agent then reads its site for seasons, tryouts and signups.
+- Runs daily from Vercel Cron (`/api/cron/discovery`, 14:40 UTC, CRON_SECRET), one or two searches per day, so the list cycles in about a month. Agent tab → **Find new providers**: **Run N due searches** (one at a time from the browser, ~20–50s each, with Stop), and a sport × area grid to re-run one. Cost estimate: ~$0.10–0.20 per search, so a full pass is ~$5–10.
+- Untested against the live API (the sandbox can't reach it). Web search must be enabled for the org in the Claude Console (Settings → Privacy); if it isn't, the panel shows the API's message.
+- **SQL to run once:** `supabase/discovery.sql` (`discovery_queries`; `level`, `serves`, `source_url` on `suggested_listings`; `level`, `serves` on `submissions`). Before it runs, suggestions still save (level/serves folded into the description) but the panel says to run it.
+- Tests: `tests/discovery.test.ts` (20 checks).
+
+**Not done yet (next):** the provider listing form doesn't ask for level / who can join, and a claimed seed listing loses `level`/`serves` (the claim copy doesn't include them); tryouts as their own date kind on the radar and alerts; Discover filters by neighborhood/zip.
+
 ### Family Rhythm, Round 2: the Summer planner (Nov 2026)
 
 - **Where:** on the family dashboard, a switch above the week grid toggles "The week ahead" and "Summer {year}". The browser remembers the choice (`ls_rhythm_view`).
@@ -526,6 +549,7 @@ The 2026-08-23 list (family saved activities, provider listing editing, homepage
 
 New priorities (agreed with Evan 2026-11-11), tackle top-down:
 
+0. **Sports + discovery (Evan's focus from 2026-11-16):** run `supabase/discovery.sql`, push, then Agent tab → Find new providers → Run due searches and review Suggestions. Then: provider form + claims carry level/who can join; tryout dates on the radar and alerts; more areas once West Seattle looks good; consider auto-add once suggestion quality is proven.
 1. **Family Rhythm: Rounds 1 and 2 are live (2026-11-15).** All the SQL has been run: `saved_activities.kid_id`, `calendar_picks.kid_id`, `signup_reminders` and `summer_plans`.
    - **Tested live by Evan:**
      - Find activities for Ella / Save for Ella; the saved cards show "For Ella" / "For Jack".

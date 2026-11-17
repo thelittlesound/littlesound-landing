@@ -1,69 +1,58 @@
-# Little Sound: handoff for a new chat (updated 2026-11-16, Summer planner live)
+# Little Sound: handoff for a new chat (updated 2026-11-16 night: West Seattle sports + discovery agent)
 
-Read this first, then `BUILD_STATUS.md` (the repo's source of truth; a copy is in this Project). Both live in the repo on Evan's PC.
+Read this first, then `BUILD_STATUS.md` (the repo's source of truth; a copy is in this Project, and the repo's copy is newer). Both live in the repo on Evan's PC.
 
 ## Where things are
 - **Code:** GitHub `thelittlesound/littlesound-landing`. Every push to `main` deploys to Vercel (Hobby plan). The site is still behind a password gate.
 - **Evan's local repo:** `C:\Users\esher\OneDrive\Desktop\Little Sound\littlesound-landing-page`. In a linked session's device shell it is `$HOME/mnt/Little Sound/littlesound-landing-page`.
-- **Stack:** Next.js 14 App Router, TypeScript, Tailwind, Supabase. Email goes through Resend, AI through Anthropic, and pages that need JavaScript to show their schedules are read with the Cloudflare Browser Run `/content` endpoint.
+- **Stack:** Next.js 14 App Router, TypeScript, Tailwind, Supabase. Email through Resend/Brevo, AI through Anthropic (incl. web search + web fetch for the discovery agent), JS-only pages via Cloudflare Browser Run `/content`.
 - **Secrets live only in Vercel env vars:** `ANTHROPIC_API_KEY`, `CLOUDFLARE_API_TOKEN` (Sensitive), `CLOUDFLARE_ACCOUNT_ID`, `CRON_SECRET`, Supabase keys. Never ask for them in chat or put them in the repo.
-- **Pushed and live:** everything through `73016c7` (Summer planner), plus the handoff docs commit after it. If `git status -sb` shows `ahead`, ask Evan to push.
-- **Database:** every SQL file is applied, including `saved_activities.kid_id`, `calendar_picks.kid_id`, `signup_reminders` and `summer_plans`.
+- **Pushed and live:** through `d6e1bf4` (Summer planner: add-on care out, open weeks name the top idea). **Committed locally, not yet pushed (2026-11-16 night):** `dae0061` (18 West Seattle sports listings; sport/level/who-can-join on Discover; "$0" price fix) and `e6872b4` (discovery agent), plus the docs commit after them. If `git status -sb` shows `ahead`, ask Evan to push.
+- **Database:** every SQL file is applied **except `supabase/discovery.sql`** (new; Evan runs it). Code falls back gracefully until it runs.
 
 ## How we work (Evan's rules)
 - Claude commits locally on Evan's PC; **Evan runs `git push`** himself. The cloud sandbox can't reach GitHub.
+- The device shell works in the repo directly (request folder access to `...\Desktop\Little Sound`). Git commits there need **delete permission** for that folder (git removes its own lock files); request it once per session with `device_request_delete_permission`.
 - If a commit fails with "Another git process seems to be running", ask Evan to `del` the `.git\*.lock` file in PowerShell.
-- On server components that show live per-user data (dashboards, admin), add `export const dynamic = 'force-dynamic'`, and use plain `<a>` tags (not `<Link>`) for navigation after a mutation.
-- Any new `supabase.auth.signUp()` flow must check `data.user.identities.length === 0` to catch duplicate emails.
-- Commit trailers: `Co-Authored-By: Claude …` plus the session link given by the attribution reminder.
-- Show Evan a mockup before shipping anything big and visual. He likes bold, distinctive UX ("lead with creativity and the user experience").
-- Schema changes are SQL Evan runs in the Supabase SQL editor. Always end with `notify pgrst, 'reload schema';`. Code should fall back gracefully until the SQL has run.
+- Server components with live per-user data: `export const dynamic = 'force-dynamic'`; plain `<a>` (not `<Link>`) after a mutation.
+- New `supabase.auth.signUp()` flows must check `data.user.identities.length === 0`.
+- Commit trailers: `Co-Authored-By: Claude …` plus the session link from the attribution reminder.
+- Show Evan a mockup before shipping anything big and visual. He likes bold, distinctive UX.
+- Schema changes are SQL Evan runs in the Supabase SQL editor, ending with `notify pgrst, 'reload schema';`. Code must fall back until it has run.
+- Facts on listings come from the provider's own site; directories/news/social only for finding names. Don't invent fees: leave `price: null` ("Fees on their site").
 
 ## Gotchas learned the hard way
-- **Supabase types each query by its select string.** Don't reassign a fallback query's result into the first query's variable; Vercel's build fails. Keep separate `first` and `fallback` results.
-- **`profiles` has no client insert policy.** Profile rows are created server-side. The admin account (Evan's) had none, so browser `.update()` silently saved nothing. Saves now go through `POST /api/families/profile` (service-role upsert).
-- **CRLF files:** `app/discover/page.tsx`, privacy and terms. Edit them with Python using `newline=''`, and convert to LF and back.
-- **Moving files to Evan's PC:** tar the changed files, then `device_commit_files` to `...\Little Sound\<unique-name>.tgz` (use a **new file name each time**; reusing a name delivered a stale bundle once). Then in the device shell: extract, `rm` the tgz, compare sha256 with the sandbox, check `git status`, commit.
+- **Supabase types each query by its select string.** Keep separate `first` and `fallback` results.
+- **`profiles` has no client insert policy.** Profile saves go through `POST /api/families/profile`.
+- **CRLF files:** `app/discover/page.tsx`, privacy, terms. Edit with Python `newline=''`, convert to LF and back.
+- **`app/data/activities.json` mixes `\u` escapes and literal characters.** Append new entries as text before the final `]`; don't re-serialize the whole file (it rewrites old lines).
+- **WebFetch in chat only works on URLs a search returned**; search first, then fetch the result link.
+- **Moving files from the cloud sandbox to the PC:** write them under `/mnt/user-data/outputs/<new folder>/`, then `device_commit_files` straight to their repo paths (new folder name each time).
 
 ## Testing
-- **Pure-logic tests** are in `tests/*.test.ts`: calendar-grid, family-rhythm, alerts, family-profile, kid-match, summer (148 checks). Run them with `bash tests/run.sh`; it needs Node and esbuild.
-- **Typechecking in the cloud sandbox:** npm is blocked there. Use tsc with a sandbox tsconfig and shims for react, next, supabase and node globals. These aren't in the repo, so rebuild them if needed.
-- **Previews:** render components with esbuild + react-dom, compile Tailwind v4 via `tailwindcss/dist/lib.js` `compile` (don't split tokens on commas), and screenshot with Playwright.
+- **Pure-logic tests** in `tests/*.test.ts` (172 checks: alerts, calendar-grid, discovery, family-profile, family-rhythm, kid-match, summer). esbuild isn't available anywhere (npm blocked), so run them with Node 22 type stripping plus a resolver hook: in a scratch folder write `hooks.mjs` (a `resolve` hook mapping `@/x` → `<repo>/x`, trying `.ts`/`.tsx`/`/index.ts`, also for relative imports) and `reg.mjs` (`register('./hooks.mjs', import.meta.url)`), then `LS_ROOT=$(pwd) node --experimental-strip-types --no-warnings --import <scratch>/reg.mjs tests/<name>.test.ts`.
+- **Typechecking:** the cloud sandbox has `tsc` but no node_modules. Stage the files, write small `.d.ts` shims (react hooks, `next/server`, `@/lib/supabase`, other server modules), and run `tsc` with `paths: {"@/*": ["./repo/*"]}` (no `baseUrl`; TS 6 removed it). Errors left are only shim gaps (untyped event handlers, browser globals).
 
-## Current product state (family side)
-- **Discover:** a "Save for {child}" button on each card. When a signed-in family has named kids, a **"Browsing for"** row filters by that child's age and interests (`lib/kid-match.ts`). `?for=<kid id>` selects the child.
-- **Family dashboard:** **Family Rhythm** sits on top (`FamilyRhythm.tsx`, `lib/family-rhythm.ts`):
-  - a greeting and a one-line summary of the week
-  - a breathing-room card per child, each with a "Find activities for {child}" button
-  - clash cards with a fix
-  - Signup radar with Remind me
-  - "The week ahead" lanes per child (rolling 7 days), with ideas
-  - a phone day strip
-  - a switch to the **Summer planner**: 10 summer weeks × kids, with covered and open weeks, ideas per open week, and Pencil in (`SummerPlanner.tsx`, `lib/summer.ts`, `/api/families/summer`, `summer_plans` table)
+## Current product state
+- **Discover:** sport pills under Sports (Soccer, Baseball & Softball, Basketball, Volleyball, Football, Lacrosse, Running, Roller Derby, …), a Rec / Club row, level tags and "Who can join" on cards, "Fees on their site" when no price. "Browsing for {child}" filters by age + interests.
+- **Catalog:** 93 seed programs (Sports 24, 18 of them new for West Seattle/White Center on 2026-11-16) plus approved provider/agent listings. Seed fields `level` (`rec`/`club`) and `serves`.
+- **Family dashboard:** Family Rhythm (week ahead, breathing room, clashes, Signup radar, Summer planner) above sync/alerts, profile and saved activities.
+- **Date agent:** daily, reads every listing's site (HTML, PDF, iClassPro, JS via Cloudflare) and proposes dates; admins review in `/admin` → Agent.
+- **Discovery agent (new):** 16 sports × 3 areas (West Seattle, Delridge, White Center), monthly per search, daily cron + "Find new providers" panel in the Agent tab. Finds clubs by web search, takes facts from their own sites, files new ones in Suggestions (inbox only; Evan approves). Untested against the live API.
 
-  Below it:
-  - the collapsed "Sync to your phone & email alerts" panel (ICS feed, alert emails)
-  - the profile, with your first name and per-child name, age and interests
-  - saved activities, each tagged "For {child}" when saved for one, with a session picker
+## Where we stopped (2026-11-16, night)
+Evan's new focus: **sports, especially club team sports, and ingesting more providers, starting with West Seattle zips.**
 
-  Kids have stable ids `k_xxxxxxxx` in `profiles.kids` and colors by order.
-- **Date agent:** a daily cron reads providers' sites (HTML, PDF, iClassPro, JS via Cloudflare) and proposes dates. Admins review them in `/admin`. Eight sites block bots, and we respect that.
+**For Evan to do:**
+1. Run `supabase/discovery.sql` in Supabase, then `git push`.
+2. `/admin` → Agent → Find new providers → **Run N due searches** (keep the tab open; ~20–50s each; ~$5–10 for all 48). Review Suggestions: Add or Dismiss.
+3. Look at Discover → Sports (sport pills, Rec/Club row, "Who can join", "Fees on their site").
 
-## Where we stopped (2026-11-16)
-Family Rhythm Rounds 1 and 2 are live, and Evan tested them on the live site. The Summer planner is in use: Ella's Jul 5 week has Hands-On Science Camps pencilled in.
+**Still to confirm from before:** the pencilled camp shows "For Ella" in saved; Erase from plan reopens the week; Pottery can be assigned to a child; Remind me on a dated signup; no Creative Care in summer ideas.
 
-**Still to confirm** (ask Evan to check):
-
-- the pencilled camp is in the saved list as "For Ella"
-- Erase from plan reopens the week
-- the Pottery class can be assigned to a child
-- Remind me works on a dated signup
-
-**Decided 2026-11-16:** add-on care (Gage "Creative Care") is left out of summer ideas, and open weeks show the top idea's name with "+N more →". Built; check it live after the push.
-
-## Next up (see BUILD_STATUS "Next Up" for the full list)
-1. Finish the remaining checks above (and look at the new open-week cells).
-2. Family signup: ask for interests per child (the dashboard already does).
-3. Family Rhythm: smarter weekly ideas beyond the saved list, using each child's interests.
-4. Step B check: subscribe from a real phone calendar and watch the first alert emails.
-5. Finish the date agent's first pass (the 13 drafts in the review inbox, stale URLs). Then the launch-readiness items: the honesty pass on placeholder stats, the provider outreach kit, and the small fixes.
+## Next up
+1. Provider listing form asks for level + who can join (Sports); claimed seed listings keep `level`/`serves` (add to `seedToSubmissionRow` now that the columns exist).
+2. Tryout dates as their own kind (date agent extracts them; Signup radar + alert emails show them).
+3. Verify the 3 assumed age ranges (Highline Premier FC, Southwest LL, Seattle Volleyball Academy); martial arts studios via discovery.
+4. After West Seattle looks good: more areas; consider auto-add for solid suggestions.
+5. Earlier list: family signup asks interests per child; smarter weekly ideas; Step B phone-calendar check; date agent first-pass cleanup; launch-readiness (honesty pass, outreach kit, small fixes).
