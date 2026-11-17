@@ -38,10 +38,14 @@ const RECORD_TOOL = {
             program_title: { type: 'string', description: 'A short listing title, e.g. "Recreational Youth Soccer" or "Select Baseball, 9U–14U".' },
             website: { type: 'string', description: "The organization's OWN website (home page). Never a directory, news article, Facebook or Instagram page." },
             source_url: { type: 'string', description: 'The page on that same website you read the facts from.' },
+            address: {
+              type: ['string', 'null'],
+              description: 'The street address with ZIP code where it runs, copied from its own site (the main one if several). Null if the site does not give one.',
+            },
             neighborhood: {
-              type: 'string',
+              type: ['string', 'null'],
               description:
-                'Where it actually runs, from its own site: a Seattle neighborhood (West Seattle, Delridge, White Center, South Park, Georgetown, Ballard…) or a nearby city (Burien, Tukwila, SeaTac…). "Citywide" ONLY for a program that runs at many sites across Seattle.',
+                'Where it actually runs, ONLY if its own site says: a Seattle neighborhood (West Seattle, White Center, South Park, Georgetown, Ballard…) or a nearby city (Burien, Tukwila…). "Citywide" only for a program at many sites across Seattle. Null if you can\'t tell. Never use the area you searched as a default.',
             },
             age_min: { type: ['integer', 'null'] },
             age_max: { type: ['integer', 'null'] },
@@ -51,7 +55,7 @@ const RECORD_TOOL = {
             price_unit: { type: ['string', 'null'], enum: ['season', 'session', 'class', 'week', 'month', 'year', 'camp', null] },
             description: { type: ['string', 'null'], description: 'Two plain sentences for parents, in your own words, based only on the own website: what it is, ages/levels, when the season runs.' },
           },
-          required: ['organization', 'program_title', 'website', 'source_url', 'neighborhood'],
+          required: ['organization', 'program_title', 'website', 'source_url', 'address', 'neighborhood'],
         },
       },
       notes: { type: 'array', items: { type: 'string' }, description: 'Anything the admin should know (e.g. a club that seems to have closed).' },
@@ -94,7 +98,7 @@ How:
 2. For each promising candidate, use web_fetch to read the organization's OWN website. Every fact you record must come from that own site, never from a directory or article.
 3. Call record_programs once with what you found. At most 6 programs. One entry per program (an organization with a rec league and a select program can have two).
 
-Where: start with ${q.area.label}. Programs just outside Seattle that these families use (Burien, Tukwila, SeaTac, Normandy Park) count. Good programs elsewhere in Seattle are welcome too, but always record the neighborhood or city where each one actually runs.
+Where: start with ${q.area.label}. Programs just outside Seattle that these families use (Burien, Tukwila, SeaTac, Normandy Park) count. Good programs elsewhere in Seattle are welcome too, but record where each one actually runs: its address with ZIP from its own site, or null. Never guess a location, and never fill in the area you searched just because that's where you looked.
 
 Skip:
 - Organizations already on Little Sound (list below), and renamed versions of them.

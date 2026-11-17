@@ -1,4 +1,4 @@
-import { cleanNeighborhood, allQueries, buildKnown, cleanClub, dueQueries, isNew, isOwnSite, siteKey, DISCOVERY_AREAS } from '@/lib/discovery-logic';
+import { neighborhoodFromAddress, cleanNeighborhood, allQueries, buildKnown, cleanClub, dueQueries, isNew, isOwnSite, siteKey, DISCOVERY_AREAS } from '@/lib/discovery-logic';
 
 let pass = 0, fail = 0;
 const ok = (c: boolean, m: string) => { if (c) pass++; else { fail++; console.log('FAIL:', m); } };
@@ -46,7 +46,7 @@ ok('skip' in cleanClub({ organization: 'X', website: 'https://www.facebook.com/x
 ok('skip' in cleanClub({ organization: 'X', website: 'https://x.example', source_url: 'https://classcub.com/x' }, ws), 'facts from a directory → skipped');
 ok('skip' in cleanClub({ organization: 'X', website: 'https://x.example', source_url: 'https://y.example/x' }, ws), 'facts from another site → skipped');
 const odd = cleanClub({ organization: 'Y', website: 'y.example', neighborhood: 'Mars 51', level: 'elite', age_min: 40, price: -1, price_unit: 'week' }, DISCOVERY_AREAS[2]);
-ok(!('skip' in odd) && odd.neighborhood === 'White Center' && odd.level === null && odd.ageMin === null && odd.price === null && odd.priceUnit === null && odd.title === 'Y', 'bad values become null, area default neighborhood');
+ok(!('skip' in odd) && odd.neighborhood === null && odd.level === null && odd.ageMin === null && odd.price === null && odd.priceUnit === null && odd.title === 'Y', 'bad values become null, location unconfirmed');
 
 // neighborhoods
 ok(cleanNeighborhood('Ballard') === 'Ballard' && cleanNeighborhood('south park') === 'South Park' && cleanNeighborhood('Burien') === 'Burien', 'real neighborhoods and cities kept, title-cased');
@@ -54,6 +54,13 @@ ok(cleanNeighborhood('Seattle') === 'Citywide' && cleanNeighborhood('Multiple lo
 ok(cleanNeighborhood('<b>x</b>') === null && cleanNeighborhood('98106') === null && cleanNeighborhood('') === null && cleanNeighborhood(7) === null, 'junk rejected');
 const g = cleanClub({ organization: 'Seattle Jiu-Jitsu Academy', website: 'https://sjja.example', neighborhood: 'Georgetown' }, DISCOVERY_AREAS[2]);
 ok(!('skip' in g) && g.neighborhood === 'Georgetown', 'Georgetown stays Georgetown (was forced to Citywide)');
+ok(neighborhoodFromAddress('7400 Sand Point Way NE, Seattle, WA 98115') === 'Northeast Seattle' && neighborhoodFromAddress('5432 California Ave SW, Seattle WA 98136-1234') === 'West Seattle' && neighborhoodFromAddress('no zip') === null && neighborhoodFromAddress('Portland, OR 97201') === null, 'ZIP → neighborhood');
+const sp = cleanClub({ organization: 'Sail Sand Point', website: 'https://sailsandpoint.example', neighborhood: 'White Center', address: '7861 62nd Ave NE, Seattle, WA 98115' }, DISCOVERY_AREAS[2]);
+ok(!('skip' in sp) && sp.neighborhood === 'Northeast Seattle', 'the address ZIP beats a wrong AI label');
+const unk = cleanClub({ organization: 'Some Club', website: 'https://club.example', neighborhood: 'West Seattle', address: null }, DISCOVERY_AREAS[0]);
+ok(!('skip' in unk) && unk.neighborhood === null, 'the searched area with no address = not confirmed');
+const wsc = cleanClub({ organization: 'Alki Club', website: 'https://alki.example', neighborhood: 'West Seattle', address: '2700 Alki Ave SW, Seattle, WA 98116' }, DISCOVERY_AREAS[0]);
+ok(!('skip' in wsc) && wsc.neighborhood === 'West Seattle', 'a real West Seattle address stays West Seattle');
 
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);

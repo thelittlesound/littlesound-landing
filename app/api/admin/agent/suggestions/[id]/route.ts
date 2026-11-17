@@ -5,6 +5,7 @@ import { validateItems, type DateItem } from '@/lib/activity-dates';
 import { AGENT, isPast } from '@/lib/date-agent-logic';
 import { seattleToday } from '@/lib/activity-dates';
 import { TEAM_EMAIL } from '@/lib/notify';
+import { cleanNeighborhood } from '@/lib/discovery-logic';
 
 // Add a suggested program as a real listing, dismiss it (never suggested
 // again), or clear it (removed from the list, but the agent may suggest it
@@ -18,7 +19,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
   if (!admin) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  const { action } = await request.json().catch(() => ({}));
+  const { action, edits } = await request.json().catch(() => ({}));
   if (action !== 'add' && action !== 'dismiss' && action !== 'clear') {
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
   }
@@ -37,6 +38,25 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
   if (action === 'dismiss') {
     await supabaseAdmin.from('suggested_listings').update({ status: 'dismissed', ...reviewed }).eq('id', s.id);
     return NextResponse.json({ success: true });
+  }
+
+  // An admin can correct the neighborhood and ages on the card before adding.
+  const e = (edits && typeof edits === 'object' ? edits : {}) as Record<string, unknown>;
+  const age = (v: unknown, fallback: number | null) => {
+    if (v === undefined) return fallback;
+    if (v === null || v === '') return null;
+    const n = Number(v);
+    return Number.isInteger(n) && n >= 0 && n <= 18 ? n : fallback;
+  };
+  const neighborhood = e.neighborhood !== undefined ? cleanNeighborhood(e.neighborhood) : s.neighborhood;
+  let ageMin = age(e.age_min, s.age_min);
+  let ageMax = age(e.age_max, s.age_max);
+  if (ageMin != null && ageMax != null && ageMin > ageMax) [ageMin, ageMax] = [ageMax, ageMin];
+  if (!neighborhood) {
+    return NextResponse.json({ error: `Set a neighborhood for "${s.title}" first: the agent couldn't confirm where it runs.` }, { status: 400 });
+  }
+  if (neighborhood !== s.neighborhood || ageMin !== s.age_min || ageMax !== s.age_max) {
+    await supabaseAdmin.from('suggested_listings').update({ neighborhood, age_min: ageMin, age_max: ageMax }).eq('id', s.id);
   }
 
   // Claim it first (pending → added in one step), so two Adds at once —
@@ -58,11 +78,11 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     category: s.category,
     subcategory: s.subcategory,
     description: s.description,
-    age_min: s.age_min,
-    age_max: s.age_max,
+    age_min: ageMin,
+    age_max: ageMax,
     price: s.price,
     price_unit: s.price_unit,
-    neighborhood: s.neighborhood,
+    neighborhood,
     website: s.website,
     reviewed_at: reviewed.reviewed_at,
     reviewed_by: reviewed.reviewed_by,

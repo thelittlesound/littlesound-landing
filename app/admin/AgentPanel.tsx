@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { seattleToday, type DateItem } from '@/lib/activity-dates';
 import { describeItem } from '@/lib/date-agent-logic';
 import DiscoveryPanel from './DiscoveryPanel';
+import { NEIGHBORHOOD_CHOICES } from '@/lib/discovery-logic';
 
 interface ListingStatus {
   activityId: string;
@@ -106,6 +107,10 @@ export default function AgentPanel({ onToast }: { onToast: (msg: string, ok: boo
   const [confirmBulk, setConfirmBulk] = useState<'add' | 'clear' | null>(null);
   const [bulk, setBulk] = useState<{ action: 'add' | 'clear'; done: number; total: number } | null>(null);
   const [forceAI, setForceAI] = useState(false);
+  // Corrections typed on suggestion cards (neighborhood, ages), sent with Add.
+  const [edits, setEdits] = useState<Record<string, { neighborhood?: string; age_min?: string; age_max?: string }>>({});
+  const setEdit = (id: string, field: 'neighborhood' | 'age_min' | 'age_max', value: string) =>
+    setEdits((all) => ({ ...all, [id]: { ...all[id], [field]: value } }));
   const stopRef = useRef(false);
   const today = seattleToday();
 
@@ -237,7 +242,7 @@ export default function AgentPanel({ onToast }: { onToast: (msg: string, ok: boo
       const res = await fetch(`/api/admin/agent/${kind}/${id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action }),
+        body: JSON.stringify(kind === 'suggestions' && action === 'add' && edits[id] ? { action, edits: edits[id] } : { action }),
       });
       const r = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(r.error || 'Failed');
@@ -439,6 +444,9 @@ export default function AgentPanel({ onToast }: { onToast: (msg: string, ok: boo
         <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
           <div>
             <h3 className="text-sm font-semibold text-[#1C3A4A] mb-1">Suggested new listings ({data.suggestions.length})</h3>
+            <datalist id="ls-neighborhoods">
+              {NEIGHBORHOOD_CHOICES.map((n) => <option key={n} value={n} />)}
+            </datalist>
             <p className="text-xs text-[#7A9AAA]">Kids&apos; programs the agents found (on provider sites, or by web search) that aren&apos;t on Little Sound yet. Adding one puts it on Discover (claimable by the provider later), and the date agent then reads its site for dates.</p>
           </div>
           {data.suggestions.length > 1 &&
@@ -510,6 +518,39 @@ export default function AgentPanel({ onToast }: { onToast: (msg: string, ok: boo
                   <a href={s.source_url} target="_blank" rel="noopener noreferrer" className="text-xs text-[#1A7A8A] underline break-all block mb-1">
                     Facts from: {s.source_url.replace(/^https?:\/\//, '')}
                   </a>
+                )}
+                <div className="flex flex-wrap items-end gap-2 mb-2">
+                  <label className="flex flex-col gap-1 text-[11px] font-semibold text-[#3A5A6A]">
+                    Neighborhood
+                    <input
+                      list="ls-neighborhoods"
+                      value={edits[s.id]?.neighborhood ?? s.neighborhood ?? ''}
+                      onChange={(ev) => setEdit(s.id, 'neighborhood', ev.target.value)}
+                      placeholder="Not confirmed"
+                      className={`w-44 rounded-lg border px-2 py-1 text-sm font-normal text-[#1C3A4A] ${(edits[s.id]?.neighborhood ?? s.neighborhood) ? 'border-[#E8DFC8]' : 'border-amber-400 bg-amber-50'}`}
+                    />
+                  </label>
+                  <label className="flex flex-col gap-1 text-[11px] font-semibold text-[#3A5A6A]">
+                    Ages
+                    <span className="flex items-center gap-1 font-normal">
+                      <input
+                        type="number" min={0} max={18} aria-label="Youngest age"
+                        value={edits[s.id]?.age_min ?? (s.age_min ?? '')}
+                        onChange={(ev) => setEdit(s.id, 'age_min', ev.target.value)}
+                        className="w-14 rounded-lg border border-[#E8DFC8] px-2 py-1 text-sm text-[#1C3A4A]"
+                      />
+                      –
+                      <input
+                        type="number" min={0} max={18} aria-label="Oldest age"
+                        value={edits[s.id]?.age_max ?? (s.age_max ?? '')}
+                        onChange={(ev) => setEdit(s.id, 'age_max', ev.target.value)}
+                        className="w-14 rounded-lg border border-[#E8DFC8] px-2 py-1 text-sm text-[#1C3A4A]"
+                      />
+                    </span>
+                  </label>
+                </div>
+                {!(edits[s.id]?.neighborhood ?? s.neighborhood) && (
+                  <p className="text-xs text-amber-800 mb-2">Location not confirmed: set the neighborhood before adding.</p>
                 )}
                 {s.items.length > 0 && (
                   <ul className="text-sm text-[#1C3A4A] mb-2 space-y-0.5">

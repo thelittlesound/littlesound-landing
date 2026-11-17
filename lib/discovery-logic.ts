@@ -171,6 +171,34 @@ export function cleanNeighborhood(v: unknown): string | null {
   return t.replace(/\b([a-z])/g, (m) => m.toUpperCase());
 }
 
+// Where a ZIP code is, for listings. A street address on the provider's own
+// site beats the AI's guess (2026-11-16: the agent labeled Sand Point and Lake
+// Union programs "West Seattle" because that's where it was searching).
+// Ambiguous ZIPs get the broader name.
+export const ZIP_NEIGHBORHOODS: Record<string, string> = {
+  '98116': 'West Seattle', '98126': 'West Seattle', '98136': 'West Seattle', '98106': 'West Seattle',
+  '98146': 'White Center', '98108': 'South Seattle', '98134': 'SODO', '98144': 'Beacon Hill',
+  '98118': 'Columbia City', '98178': 'Rainier Beach', '98122': 'Central District', '98104': 'Downtown',
+  '98101': 'Downtown', '98154': 'Downtown', '98121': 'Belltown', '98109': 'Queen Anne', '98119': 'Queen Anne',
+  '98199': 'Magnolia', '98102': 'Capitol Hill', '98112': 'Capitol Hill', '98105': 'University District',
+  '98103': 'Fremont', '98107': 'Ballard', '98117': 'Ballard', '98115': 'Northeast Seattle', '98125': 'Lake City',
+  '98133': 'North Seattle', '98177': 'North Seattle', '98155': 'Shoreline',
+  '98166': 'Burien', '98148': 'Burien', '98168': 'Tukwila', '98188': 'Tukwila', '98158': 'SeaTac', '98198': 'SeaTac',
+  '98004': 'Bellevue', '98005': 'Bellevue', '98006': 'Bellevue', '98007': 'Bellevue', '98008': 'Bellevue',
+  '98033': 'Kirkland', '98034': 'Kirkland', '98052': 'Redmond', '98040': 'Mercer Island',
+  '98055': 'Renton', '98056': 'Renton', '98057': 'Renton', '98058': 'Renton',
+};
+
+/** Choices offered when an admin sets a listing's neighborhood. */
+export const NEIGHBORHOOD_CHOICES = [...Array.from(new Set(Object.values(ZIP_NEIGHBORHOODS))), 'Georgetown', 'South Park', 'Delridge', 'Normandy Park', 'Des Moines', 'Citywide'].sort();
+
+/** The neighborhood for an address, from its Seattle-area ZIP code. */
+export function neighborhoodFromAddress(address: unknown): string | null {
+  if (typeof address !== 'string') return null;
+  const zip = address.match(/\b(98\d{3})(?:-\d{4})?\b/);
+  return zip ? ZIP_NEIGHBORHOODS[zip[1]] ?? null : null;
+}
+
 export const LEVELS = ['rec', 'club'] as const;
 
 export interface FoundClub {
@@ -178,7 +206,8 @@ export interface FoundClub {
   title: string;
   website: string;
   sourceUrl: string;
-  neighborhood: string;
+  /** null = the agent couldn't confirm where it runs: an admin sets it before Add. */
+  neighborhood: string | null;
   ageMin: number | null;
   ageMax: number | null;
   level: 'rec' | 'club' | null;
@@ -209,7 +238,11 @@ export function cleanClub(raw: unknown, area: DiscoveryArea): FoundClub | { skip
   let ageMin = age(r.age_min);
   let ageMax = age(r.age_max);
   if (ageMin != null && ageMax != null && ageMin > ageMax) [ageMin, ageMax] = [ageMax, ageMin];
-  const neighborhood = cleanNeighborhood(r.neighborhood) ?? area.neighborhood;
+  // A ZIP from the own site's address wins. Without one, trust the AI's answer
+  // unless it's just the area we were searching (its fallback when it doesn't
+  // know): then the location is unconfirmed.
+  const said = cleanNeighborhood(r.neighborhood);
+  const neighborhood = neighborhoodFromAddress(r.address) ?? (said && said !== area.neighborhood ? said : null);
   const price = typeof r.price === 'number' && r.price >= 0 && r.price < 100_000 ? r.price : null;
   return {
     organization,
