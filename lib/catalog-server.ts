@@ -4,6 +4,7 @@
 
 import seedData from '@/app/data/activities.json';
 import { supabaseAdmin } from '@/lib/supabase';
+import { campTheme } from '@/lib/camps';
 
 // Map provider form categories → Discover page categories
 const CATEGORY_MAP: Record<string, string> = {
@@ -38,6 +39,8 @@ export interface ProviderActivity {
   level: string | null;
   /** Who can join (e.g. a league boundary). */
   serves: string | null;
+  /** Camps: what it's about (a Discover category or "All-around"); null for other listings. */
+  theme: string | null;
   source: 'provider';
 }
 
@@ -72,13 +75,15 @@ export async function getProviderActivities(): Promise<{ activities: ProviderAct
   );
 
   // Map Supabase submission shape → activity card shape
-  const activities: ProviderActivity[] = (data || []).map((s) => ({
+  const activities: ProviderActivity[] = (data || []).map((s) => {
+    const category = CATEGORY_MAP[s.category ?? ''] ?? s.category ?? 'Other';
+    return {
     // A claimed seed listing keeps its original Discover id ("42"), so it
     // replaces the static card in place and families' saved hearts still match.
     id: s.seed_id ?? `sub_${s.id}`,
     title: s.title,
     provider: (s.provider_id && businessById.get(s.provider_id)) || s.contact_name,
-    category: CATEGORY_MAP[s.category ?? ''] ?? s.category ?? 'Other',
+    category,
     subcategory: s.subcategory ?? null,
     neighborhood: s.neighborhood ?? 'Seattle',
     ageMin: s.age_min ?? 0,
@@ -89,8 +94,11 @@ export async function getProviderActivities(): Promise<{ activities: ProviderAct
     website: s.website ?? '',
     level: s.level ?? null,
     serves: s.serves ?? null,
-    source: 'provider', // flag so we can distinguish in UI if needed
-  }));
+    // camp_theme may not exist yet (supabase/camps.sql); then read it from the title.
+    theme: category === 'Camps' ? campTheme({ theme: s.camp_theme, title: s.title }) : null,
+    source: 'provider' as const, // flag so we can distinguish in UI if needed
+    };
+  });
   return { activities, claimedSeedIds, error: null };
 }
 
@@ -114,6 +122,7 @@ export async function getCatalog() {
       price: s.price,
       priceUnit: s.priceUnit,
       website: s.website,
+      theme: s.category === 'Camps' ? campTheme({ theme: (s as { theme?: string }).theme, title: s.title }) : null,
     }));
   return [...seeds, ...activities];
 }

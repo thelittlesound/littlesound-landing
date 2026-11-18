@@ -61,12 +61,17 @@ export function ageFits(a: { ageMin: number | null | undefined; ageMax: number |
 
 /** Does this activity suit the child? `useInterests` false = any category at their age. */
 export function fitsKid(
-  a: { ageMin: number | null | undefined; ageMax: number | null | undefined; category: string | null | undefined },
+  a: { ageMin: number | null | undefined; ageMax: number | null | undefined; category: string | null | undefined; theme?: string | null },
   kid: Pick<MatchKid, 'age' | 'interests'>,
   useInterests = true
 ): boolean {
   if (!ageFits(a, kid.age)) return false;
   if (!useInterests) return true;
   const cats = categoriesFor(kid);
-  return !cats.size || cats.has(a.category ?? '');
+  return !cats.size || matchesInterest(a, cats);
+}
+
+/** A listing matches the child's categories by its category, or (a camp) by its theme: a sailing camp suits an Outdoor kid. */
+export function matchesInterest(a: { category: string | null | undefined; theme?: string | null }, cats: Set<string>): boolean {
+  return cats.has(a.category ?? '') || (a.category === 'Camps' && !!a.theme && cats.has(a.theme));
 }

@@ -4,8 +4,9 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import staticActivities from '../data/activities.json';
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
 import { browsableKids, fitsKid, type MatchKid } from '@/lib/kid-match';
+import { CAMP_WHEN, CAMP_THEMES, campTheme, campWhens, themeLabel } from '@/lib/camps';
 
-type Activity = Omit<typeof staticActivities[0], 'price' | 'level' | 'serves'> & {
+type Activity = Omit<typeof staticActivities[0], 'price' | 'level' | 'serves' | 'theme' | 'subcategory'> & {
   /** null when the provider doesn't post a fee. */
   price: number | null;
   subcategory?: string;
@@ -14,6 +15,8 @@ type Activity = Omit<typeof staticActivities[0], 'price' | 'level' | 'serves'> &
   level?: string | null;
   /** Who can join, e.g. a league's boundary. */
   serves?: string | null;
+  /** Camps: what it's about (a Discover category or "All-around"). */
+  theme?: string | null;
 };
 
 const LEVELS: { key: 'rec' | 'club'; label: string; short: string }[] = [
@@ -34,7 +37,7 @@ const SUBCATEGORY_ORDER: Record<string, string[]> = {
   'Martial Arts': ['Karate', 'Karate & Kickboxing', 'Mixed Martial Arts'],
   'Early Childhood': ['Movement & Play', 'Nature Programs'],
   Outdoor:        ['Nature & Forest', 'Zoo Programs', 'Water Sports'],
-  Camps:          ['Day Camps', 'Multi-Theme'],
+  Camps:          [...CAMP_WHEN],
   Academic:       ['Academic Camps'],
   Cooking:        ['Classes & Workshops', 'Summer Camps'],
   Language:       ['Group Classes', 'Summer Camps', 'Year-Round Programs'],
@@ -92,7 +95,7 @@ function ActivityCard({
           {style.emoji}
         </span>
         <span className="absolute top-4 left-4 px-3 py-1 rounded-full bg-white/80 text-[11px] font-semibold uppercase tracking-wide text-[#1A7A8A]">
-          {a.category}
+          {a.category === 'Camps' && campTheme(a) !== 'All-around' ? `Camps · ${campTheme(a)}` : a.category}
         </span>
         <button
           type="button"
@@ -193,6 +196,8 @@ export default function Discover() {
   const [category, setCategory] = useState('All');
   const [subcategory, setSubcategory] = useState('All');
   const [level, setLevel] = useState<'All' | 'rec' | 'club'>('All');
+  // Camps only: which theme (a subject category or "All-around").
+  const [theme, setTheme] = useState('All');
   const [ageGroup, setAgeGroup] = useState(AGE_GROUPS[0]);
   const [sort, setSort] = useState('default');
   const [providerActivities, setProviderActivities] = useState<Activity[]>([]);
@@ -228,6 +233,8 @@ export default function Discover() {
     const params = new URLSearchParams(window.location.search);
     const cat = params.get('category');
     if (cat && CATEGORIES.includes(cat)) setCategory(cat);
+    const th = params.get('theme');
+    if (cat === 'Camps' && th && (CAMP_THEMES as readonly string[]).includes(th)) setTheme(th);
     const forId = params.get('for');
     if (forId) setForKidId(forId);
     const age = params.get('age');
@@ -307,7 +314,8 @@ export default function Discover() {
       // asked for everything) the categories their interests point to.
       const matchesKid = !forKid || fitsKid(a, forKid, useInterests && category === 'All');
       const matchesLevel = level === 'All' || a.level === level;
-      return matchesQuery && matchesCategory && matchesAge && matchesKid && matchesLevel;
+      const matchesTheme = category !== 'Camps' || theme === 'All' || campTheme(a) === theme;
+      return matchesQuery && matchesCategory && matchesAge && matchesKid && matchesLevel && matchesTheme;
     });
     const arr = [...filtered];
     // Listings without a posted fee go last either way.
@@ -320,7 +328,28 @@ export default function Discover() {
     // `activities` must be a dependency: provider listings arrive from the API
     // after first render, and without it they never appeared until a filter
     // changed.
-  }, [activities, query, category, ageGroup, sort, forKid, useInterests, level]);
+  }, [activities, query, category, ageGroup, sort, forKid, useInterests, level, theme]);
+
+  // Inside Camps the subcategory is when it runs, and one camp can run in
+  // several (e.g. summer and school breaks).
+  const subsOf = (a: Activity): string[] => (a.category === 'Camps' ? campWhens(a) : [a.subcategory ?? 'Other']);
+
+  // Camps: the theme pills (only themes that have camps).
+  const campThemes = useMemo(
+    () => (category === 'Camps' ? CAMP_THEMES.filter((t) => activities.some((a) => a.category === 'Camps' && campTheme(a) === t)) : []),
+    [activities, category]
+  );
+
+  // On a subject page (e.g. Outdoor): how many camps of that subject fit, for
+  // the "see them under Camps" link. Camps live only in Camps.
+  const campsForSubject = useMemo(() => {
+    if (category === 'All' || category === 'Camps') return 0;
+    return activities.filter(
+      (a) => a.category === 'Camps' && campTheme(a) === category &&
+        a.ageMax >= ageGroup.min && a.ageMin <= ageGroup.max &&
+        (!forKid || fitsKid(a, forKid, false))
+    ).length;
+  }, [activities, category, ageGroup, forKid]);
 
   // Rec vs club pills, when the chosen category has listings with a level.
   const showLevels = useMemo(
@@ -332,7 +361,7 @@ export default function Discover() {
   const availableSubcategories = useMemo(() => {
     if (category === 'All') return [];
     const order = SUBCATEGORY_ORDER[category] ?? [];
-    const present = new Set(results.map(a => (a as Activity).subcategory ?? 'Other'));
+    const present = new Set(results.flatMap((a) => subsOf(a as Activity)));
     const ordered = order.filter(s => present.has(s));
     present.forEach(s => { if (!order.includes(s)) ordered.push(s); });
     return ordered;
@@ -341,16 +370,17 @@ export default function Discover() {
   // Results after subcategory filter
   const filteredResults = useMemo(() => {
     if (subcategory === 'All') return results;
-    return results.filter(a => (a as Activity).subcategory === subcategory);
+    return results.filter((a) => subsOf(a as Activity).includes(subcategory));
   }, [results, subcategory]);
 
   const grouped = useMemo(() => {
     if (category === 'All' || query !== '' || subcategory !== 'All') return null;
     const groups: Record<string, typeof results> = {};
     results.forEach((a) => {
-      const key = (a as typeof a & { subcategory?: string }).subcategory ?? 'Other';
-      if (!groups[key]) groups[key] = [];
-      groups[key].push(a);
+      for (const key of subsOf(a as Activity)) {
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(a);
+      }
     });
     const order = SUBCATEGORY_ORDER[category] ?? [];
     return Object.entries(groups).sort(([a], [b]) => {
@@ -366,6 +396,7 @@ export default function Discover() {
     setForKidId(id);
     setUseInterests(true);
     setCategory('All');
+    setTheme('All');
     setAgeGroup(AGE_GROUPS[0]);
     // Keep the address in step, so a refresh or a shared link shows the same.
     const url = new URL(window.location.href);
@@ -389,6 +420,7 @@ export default function Discover() {
     chooseKid(null);
     setQuery('');
     setCategory('All');
+    setTheme('All');
     setSubcategory('All');
     setLevel('All');
     setAgeGroup(AGE_GROUPS[0]);
@@ -602,7 +634,7 @@ export default function Discover() {
               {CATEGORIES.map((c) => (
                 <button
                   key={c}
-                  onClick={() => setCategory(c)}
+                  onClick={() => { setCategory(c); setTheme('All'); }}
                   className={
                     category === c
                       ? 'px-4 py-2 rounded-full text-[13px] font-medium bg-[#1A7A8A] text-white shadow-sm whitespace-nowrap shrink-0 transition-all'
@@ -700,7 +732,33 @@ export default function Discover() {
                 ))}
               </div>
             )}
+            {campThemes.length > 1 && (
+              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide" role="group" aria-label="Camp theme">
+                {['All', ...campThemes].map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => setTheme(t)}
+                    aria-pressed={theme === t}
+                    className={theme === t
+                      ? 'px-4 py-1.5 rounded-full text-[12px] font-medium bg-[#0D5C6E] text-white whitespace-nowrap shrink-0 transition-all'
+                      : 'px-4 py-1.5 rounded-full text-[12px] font-medium bg-[#F5EFE0] text-[#3A5A6A] border border-[#E8DFC8] hover:border-[#0D5C6E] whitespace-nowrap shrink-0 transition-all'}
+                  >
+                    {t === 'All' ? 'Any theme' : themeLabel(t)}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
+
+          {campsForSubject > 0 && (
+            <button
+              type="button"
+              onClick={() => { const c = category; setCategory('Camps'); setTheme(c); }}
+              className="mb-8 -mt-4 inline-flex items-center gap-2 min-h-[44px] px-4 rounded-full bg-[#C4A882]/15 text-[13px] font-semibold text-[#7A5A2E] hover:bg-[#C4A882]/25 transition-colors"
+            >
+              {campsForSubject} {category === 'STEM' ? 'STEM' : category.toLowerCase()} {campsForSubject === 1 ? 'camp' : 'camps'} are under Camps: see {campsForSubject === 1 ? 'it' : 'them'} →
+            </button>
+          )}
 
           {filteredResults.length === 0 ? (
             <div className="text-center py-20">

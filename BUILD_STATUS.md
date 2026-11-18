@@ -22,6 +22,22 @@ Family activity planning platform ("The Family OS") for Seattle. Helps parents d
 
 ## Completed Work
 
+### Camps are their own category (2026-11-17; pending `supabase/camps.sql` + push)
+
+First step of "go granular on each category" (inventory + mockup: https://claude.ai/artifact/BJtMqWnvNgneRa1LqMPbJ2, notes in the Project doc `claude/category-inventory.md`). Evan's call: camps are mostly a summer / out-of-school thing, so **every listing that is mainly a camp lives only in Camps**, sorted by When, then Theme.
+
+- **When** is the Camps subcategory: Summer weeks · School breaks · Overnight · Before & after care. A camp can have several, comma-separated ("Summer weeks, School breaks").
+- **Theme** is what it's about: a Discover category (Sports, Outdoor, STEM, Arts, Theater, Swimming, Cooking, Martial Arts, Language, Academic…) or All-around. Stored in `submissions.camp_theme` / seed `theme`; when missing, it's read from the title.
+- **Mainly a camp** ("Youth Summer Sailing Camps") moves; **a program that also runs camps** ("Kids Baking Classes, Camps & After-School", "Chess Classes, Camps & Clubs") stays in its subject. "Camp Long" (a park) and "Base Camp" (a class) are not camps.
+- **Moved:** 12 seed (Multi-Sport Day Camp, Summer Tech Camp at UW, LEGO Robotics & Minecraft, Hands-On Science, both zoo camps, Rowing & Sailing, Small Craft & Paddling, 2 academic camps, Summer Cooking, Language Immersion) + 10 live (3 cooking, 5 sailing/paddling/nature, ultimate, pickleball). Camps now: 15 seed + 41 live = 56. Friday Night Soccer Skills "Camps" (weekly clinics) stays in Sports.
+- **Discover:** Camps shows When pills and a Theme row ("Any theme", "All-around day camps"…); cards say "Camps · Outdoor". A subject page shows "6 outdoor camps are under Camps: see them →", which opens Camps on that theme. `?category=Camps&theme=Outdoor` works.
+- **Kids:** a camp matches a child's interests by its theme (an Outdoor kid sees sailing camps). The Summer planner no longer offers break-only camps (a Thanksgiving day camp) as summer weeks.
+- **Agents:** a suggestion that is mainly a camp is added to Camps with When + theme (`placeListing` in the suggestion Add route); the camps search defaults to "Summer weeks".
+- **Code:** `lib/camps.ts` (pure), `lib/kid-match.ts` (`matchesInterest`), `lib/summer.ts`, `lib/catalog-server.ts` (`theme`), `app/discover/page.tsx`, `app/api/admin/agent/suggestions/[id]/route.ts`, `lib/discovery-logic.ts`, `app/data/activities.json` (15 seed camps), `supabase/camps.sql`.
+- **SQL to run once:** `supabase/camps.sql` (adds `camp_theme`, moves/labels the 41 live camps by id). Until then Discover reads When + Theme from titles and the 10 live camps stay in their old categories.
+- **Unchecked guesses:** season of Secret Agent Camp (Emerald City Karate) and the two Cooking camps without a season in the title (set to Summer weeks); Seattle Parks Activity Camps set to Summer weeks only.
+- **Tests:** `tests/camps.test.ts` (40 checks); all 223 pass.
+
 ### West Seattle + nearby, all categories (2026-11-17)
 
 **Why (Evan):** "Let's proceed with going as deep as we can with west seattle and the surrounding neighborhoods." Discovery widened (`179b149`) to 28 topics (16 sports + arts, music, dance, theater, STEM, swim lessons, camps, early learning, languages, cooking, outdoor, tutoring) × 5 areas (adds South Park/Georgetown and Burien/Normandy Park) = 140 searches; "Add all" now sends each card's neighborhood/ages edits.

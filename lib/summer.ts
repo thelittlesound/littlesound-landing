@@ -9,7 +9,8 @@
 import { formatDay, formatTime, type DateItem } from '@/lib/activity-dates';
 import { occurrences } from '@/lib/calendar-grid';
 import { plusDays, weekdayOf } from '@/lib/ics';
-import { categoriesFor, ageFits } from '@/lib/kid-match';
+import { categoriesFor, ageFits, matchesInterest } from '@/lib/kid-match';
+import { campWhens } from '@/lib/camps';
 
 export const SUMMER_WEEKS = 10;
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -79,11 +80,20 @@ export interface CatalogItem {
   ageMin: number;
   ageMax: number;
   website: string;
+  /** Camps: what it's about (a Discover category or "All-around"). */
+  theme?: string | null;
 }
 
-/** Camps and other summer programs (what the planner suggests). */
+/**
+ * Camps and other summer programs (what the planner suggests). A camp that
+ * only runs on school breaks (e.g. a Thanksgiving day camp) isn't a summer week.
+ */
 export function isSummerProgram(a: Pick<CatalogItem, 'category' | 'subcategory' | 'title'>): boolean {
-  return a.category === 'Camps' || /camp/i.test(a.subcategory ?? '') || /camp/i.test(a.title);
+  if (a.category === 'Camps') {
+    const w = campWhens(a);
+    return w.includes('Summer weeks') || w.includes('Overnight');
+  }
+  return /camp/i.test(a.subcategory ?? '') || /camp/i.test(a.title);
 }
 
 /**
@@ -160,7 +170,7 @@ export function summerIdeas(opts: {
     );
     if (!runs && summerDated) continue;
     if (!runs && isSaved && !isSummerProgram(a)) continue; // a saved weekly class isn't a summer week
-    const interest = cats.has(a.category);
+    const interest = matchesInterest(a, cats);
     const score = (runs ? 8 : 0) + (savedFor === kid.id ? 5 : isSaved ? 3 : 0) + (interest ? 4 : 0) + (planned.has(a.id) ? -6 : 0);
     const why = [runs ? 'Runs this week' : null, savedFor === kid.id ? `Saved for ${kid.name}` : isSaved ? 'You saved this' : null, interest ? `Matches ${kid.name}’s interests` : null]
       .filter(Boolean)

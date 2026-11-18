@@ -6,6 +6,7 @@ import { AGENT, isPast } from '@/lib/date-agent-logic';
 import { seattleToday } from '@/lib/activity-dates';
 import { TEAM_EMAIL } from '@/lib/notify';
 import { cleanNeighborhood } from '@/lib/discovery-logic';
+import { placeListing } from '@/lib/camps';
 
 // Add a suggested program as a real listing, dismiss it (never suggested
 // again), or clear it (removed from the list, but the agent may suggest it
@@ -69,14 +70,17 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     .select('id');
   if (!claimed?.length) return NextResponse.json({ error: 'Already handled.' }, { status: 409 });
 
+  // Camps are their own category: a sailing camp found by the water search
+  // goes to Camps, with "Outdoor" as its theme and when it runs as its subcategory.
+  const placed = placeListing({ category: s.category, subcategory: s.subcategory, title: s.title });
   const row: Record<string, unknown> = {
     status: 'approved',
     provider_id: null,
     contact_name: s.business, // pre-account listings use the business as the contact (claim flow groups by it)
     contact_email: TEAM_EMAIL,
     title: s.title,
-    category: s.category,
-    subcategory: s.subcategory,
+    category: placed.category,
+    subcategory: placed.subcategory,
     description: s.description,
     age_min: ageMin,
     age_max: ageMax,
@@ -89,12 +93,18 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     admin_notes: s.found_on?.startsWith('search:') ? 'Added from a discovery-agent suggestion (web search)' : 'Added from a date-agent suggestion',
     level: s.level ?? null,
     serves: s.serves ?? null,
+    ...(placed.theme ? { camp_theme: placed.theme } : {}),
   };
   const insert = (r: Record<string, unknown>) => supabaseAdmin.from('submissions').insert(r).select('id').single();
   let { data: created, error: insertError } = await insert(row);
+  if (insertError && /camp_theme/.test(insertError.message ?? '')) {
+    // supabase/camps.sql not run yet: add it without the theme (Discover reads it from the title).
+    const { camp_theme, ...rest } = row;
+    ({ data: created, error: insertError } = await insert(rest));
+  }
   if (insertError && /level|serves/.test(insertError.message ?? '')) {
     // supabase/discovery.sql not run yet: add the listing without them.
-    const { level, serves, ...rest } = row;
+    const { level, serves, camp_theme, ...rest } = row;
     ({ data: created, error: insertError } = await insert(rest));
   }
   if (insertError || !created) {

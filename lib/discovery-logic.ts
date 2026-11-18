@@ -61,7 +61,7 @@ export const DISCOVERY_SPORTS: DiscoverySport[] = [
   { key: 'theater', name: 'Theater', label: 'kids theater, acting and improv classes and youth productions', category: 'Theater', subcategory: 'Acting & Improv' },
   { key: 'stem', name: 'STEM', label: 'kids STEM classes: coding, robotics, science, engineering and chess', category: 'STEM', subcategory: 'Science' },
   { key: 'swim-lessons', name: 'Swim lessons', label: 'kids swim lessons and learn-to-swim programs', category: 'Swimming', subcategory: 'Group Lessons' },
-  { key: 'camps', name: 'Day camps', label: 'summer day camps and school-break camps for kids', category: 'Camps', subcategory: 'Day Camps' },
+  { key: 'camps', name: 'Day camps', label: 'summer day camps and school-break camps for kids', category: 'Camps', subcategory: 'Summer weeks' },
   { key: 'early', name: 'Early childhood', label: 'classes for toddlers and preschoolers, parent-and-me and baby programs (not daycare or full-time preschool)', category: 'Early Childhood', subcategory: 'Movement & Play' },
   { key: 'language', name: 'Language', label: 'kids language classes and weekend language schools', category: 'Language', subcategory: 'Group Classes' },
   { key: 'cooking', name: 'Cooking', label: 'kids cooking and baking classes and camps', category: 'Cooking', subcategory: 'Classes & Workshops' },

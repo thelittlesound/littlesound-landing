@@ -11,7 +11,8 @@
     "priceUnit": "week",
     "description": "Half-day themed camps at community centers citywide. Themes include animation, art, carpentry, D&D, fishing, jewelry, LEGO, pottery, science, sports, and theater. Scholarships available.",
     "website": "https://www.seattle.gov/parks/learning-and-childcare/camps",
-    "subcategory": "Multi-Theme"
+    "subcategory": "Summer weeks",
+    "theme": "All-around"
   },
   {
     "id": "2",
@@ -25,7 +26,8 @@
     "priceUnit": "week",
     "description": "Full-day licensed childcare with field trips and weekly themes, June 22 through August 27. Accepts DCYF Working Connections, CCAP, and Best Starts for Kids subsidies.",
     "website": "https://www.seattle.gov/parks/learning-and-childcare/camps",
-    "subcategory": "Day Camps"
+    "subcategory": "Summer weeks",
+    "theme": "All-around"
   },
   {
     "id": "3",
@@ -255,7 +257,7 @@
     "id": "21",
     "title": "Multi-Sport Day Camp",
     "provider": "Hall of Fame Team Camp",
-    "category": "Sports",
+    "category": "Camps",
     "neighborhood": "Citywide",
     "ageMin": 5,
     "ageMax": 12,
@@ -263,7 +265,8 @@
     "priceUnit": "week",
     "description": "Creative sports games where counselors work actively alongside kids. One parent called it organized recess with great counselors \u2014 equally fun across ability levels.",
     "website": "https://www.hof-teamcamp.com",
-    "subcategory": "Multi-Sport"
+    "subcategory": "Summer weeks",
+    "theme": "Sports"
   },
   {
     "id": "22",
@@ -339,7 +342,7 @@
     "id": "27",
     "title": "Summer Tech Camp at UW",
     "provider": "iD Tech",
-    "category": "STEM",
+    "category": "Camps",
     "neighborhood": "University District",
     "ageMin": 7,
     "ageMax": 18,
@@ -347,7 +350,8 @@
     "priceUnit": "week",
     "description": "Coding, game dev, robotics, and 3D printing on the UW campus, with breaks for ultimate frisbee and capture the flag on the university's fields.",
     "website": "https://www.idtech.com/locations/washington-summer-camps/uw-seattle",
-    "subcategory": "Coding & AI"
+    "subcategory": "Summer weeks",
+    "theme": "STEM"
   },
   {
     "id": "28",
@@ -367,7 +371,7 @@
     "id": "29",
     "title": "LEGO Robotics & Minecraft Camps",
     "provider": "Techknowhow",
-    "category": "STEM",
+    "category": "Camps",
     "neighborhood": "Citywide",
     "ageMin": 5,
     "ageMax": 14,
@@ -375,13 +379,14 @@
     "priceUnit": "week",
     "description": "Small, focused camps built around LEGO robotics and coding. Younger students build motorized vehicles and creatures; older kids go deeper into robotics and Scratch.",
     "website": "https://www.techknowhowkids.com",
-    "subcategory": "Robotics"
+    "subcategory": "Summer weeks",
+    "theme": "STEM"
   },
   {
     "id": "30",
     "title": "Hands-On Science Camps",
     "provider": "Pacific Science Center",
-    "category": "STEM",
+    "category": "Camps",
     "neighborhood": "Seattle Center",
     "ageMin": 4,
     "ageMax": 14,
@@ -389,7 +394,8 @@
     "priceUnit": "week",
     "description": "Camps at a Seattle institution operating since the 1962 World's Fair, home to a saltwater tide pool, butterfly garden, science playground, and IMAX theater.",
     "website": "https://pacificsciencecenter.org",
-    "subcategory": "Science"
+    "subcategory": "Summer weeks",
+    "theme": "STEM"
   },
   {
     "id": "31",
@@ -675,7 +681,7 @@
     "id": "51",
     "title": "Kinder Camp at the Zoo",
     "provider": "Woodland Park Zoo",
-    "category": "Outdoor",
+    "category": "Camps",
     "neighborhood": "Phinney Ridge",
     "ageMin": 3,
     "ageMax": 5,
@@ -683,13 +689,14 @@
     "priceUnit": "week",
     "description": "Games, activities, and animal encounters with routes kept short for little legs. Each day has a theme \u2014 colors, numbers, families. Half day for 3-4s, full day for 4-5s.",
     "website": "https://zoo.org/programs/",
-    "subcategory": "Zoo Programs"
+    "subcategory": "Summer weeks",
+    "theme": "Outdoor"
   },
   {
     "id": "52",
     "title": "Zoo Camps \u2014 Tiny Turtles to Eco Explorers",
     "provider": "Woodland Park Zoo",
-    "category": "Outdoor",
+    "category": "Camps",
     "neighborhood": "Phinney Ridge",
     "ageMin": 5,
     "ageMax": 14,
@@ -697,7 +704,8 @@
     "priceUnit": "week",
     "description": "Wildlife-themed camps teaching STEAM skills, scientific inquiry, and global conservation. Extended day care and financial assistance available.",
     "website": "https://zoo.org/programs/",
-    "subcategory": "Zoo Programs"
+    "subcategory": "Summer weeks",
+    "theme": "Outdoor"
   },
   {
     "id": "54",
@@ -759,7 +767,7 @@
     "id": "58",
     "title": "Youth Rowing & Sailing Camps",
     "provider": "Mt. Baker Rowing & Sailing Center",
-    "category": "Outdoor",
+    "category": "Camps",
     "neighborhood": "Mount Baker",
     "ageMin": 9,
     "ageMax": 18,
@@ -767,13 +775,14 @@
     "priceUnit": "week",
     "description": "Learn to row or sail on Lake Washington. A Seattle Parks facility with its own registration timeline, separate from general camp registration.",
     "website": "https://www.seattle.gov/parks/learning-and-childcare/camps",
-    "subcategory": "Water Sports"
+    "subcategory": "Summer weeks",
+    "theme": "Outdoor"
   },
   {
     "id": "59",
     "title": "Small Craft & Paddling Camps",
     "provider": "Green Lake Small Craft Center",
-    "category": "Outdoor",
+    "category": "Camps",
     "neighborhood": "Green Lake",
     "ageMin": 8,
     "ageMax": 17,
@@ -781,13 +790,14 @@
     "priceUnit": "week",
     "description": "Canoeing, kayaking, rowing, and sailing on Green Lake. Registration opens later than general Seattle Parks camps, so watch the date.",
     "website": "https://www.seattle.gov/parks/learning-and-childcare/camps",
-    "subcategory": "Water Sports"
+    "subcategory": "Summer weeks",
+    "theme": "Outdoor"
   },
   {
     "id": "60",
     "title": "Summer Camp \u2014 Academic & Arts Blocks",
     "provider": "The Northwest School",
-    "category": "Academic",
+    "category": "Camps",
     "neighborhood": "Capitol Hill",
     "ageMin": 10,
     "ageMax": 16,
@@ -795,7 +805,8 @@
     "priceUnit": "week",
     "description": "Four instructional blocks daily with lunch provided, drawing campers from across Seattle and internationally. Boarding available for ages 12 to 16.",
     "website": "https://www.northwestschool.org/summer",
-    "subcategory": "Academic Camps"
+    "subcategory": "Summer weeks",
+    "theme": "Academic"
   },
   {
     "id": "61",
@@ -809,13 +820,14 @@
     "priceUnit": "week",
     "description": "Long-running Seattle childcare provider running full-summer day camp with weekly themes at school and community sites across the city.",
     "website": "https://www.kidscompany.org/childcare/summer-camp/",
-    "subcategory": "Day Camps"
+    "subcategory": "Summer weeks",
+    "theme": "All-around"
   },
   {
     "id": "62",
     "title": "Investigative Learning Camps",
     "provider": "Lakeside School Summer Programs",
-    "category": "Academic",
+    "category": "Camps",
     "neighborhood": "North Seattle",
     "ageMin": 10,
     "ageMax": 14,
@@ -823,7 +835,8 @@
     "priceUnit": "week",
     "description": "Computing, game creation, robotics, and Python for students in fifth grade and up. Themes and lessons differ by level through grades 6 to 8.",
     "website": "https://www.lakesideschool.org",
-    "subcategory": "Academic Camps"
+    "subcategory": "Summer weeks",
+    "theme": "Academic"
   },
   {
     "id": "63",
@@ -955,8 +968,9 @@
     "id": "74",
     "title": "Summer Cooking Camps",
     "provider": "FrogLegs Culinary Academy",
-    "category": "Cooking",
-    "subcategory": "Summer Camps",
+    "category": "Camps",
+    "subcategory": "Summer weeks",
+    "theme": "Cooking",
     "neighborhood": "University Village",
     "ageMin": 4,
     "ageMax": 16,
@@ -997,8 +1011,9 @@
     "id": "78",
     "title": "Language Immersion Summer Camps",
     "provider": "Sponge School",
-    "category": "Language",
-    "subcategory": "Summer Camps",
+    "category": "Camps",
+    "subcategory": "Summer weeks",
+    "theme": "Language",
     "neighborhood": "Capitol Hill",
     "ageMin": 4,
     "ageMax": 9,
