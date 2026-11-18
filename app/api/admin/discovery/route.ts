@@ -33,8 +33,8 @@ export async function GET() {
       const r = byKey.get(q.key);
       return {
         key: q.key,
-        sport: q.sport.subcategory,
-        area: q.area.neighborhood === 'White Center' ? 'White Center' : q.area.key === 'delridge' ? 'Delridge' : 'West Seattle',
+        sport: q.sport.name ?? q.sport.subcategory,
+        area: q.area.short,
         lastRunAt: r?.last_run_at ?? null,
         lastStatus: r?.last_status ?? null,
         found: r?.found ?? 0,

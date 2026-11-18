@@ -11,6 +11,8 @@ export interface DiscoveryArea {
   zips: string[];
   /** Discover neighborhood for what's found here (unless the AI says Citywide). */
   neighborhood: string;
+  /** Short name for the Agent tab. */
+  short: string;
 }
 
 export interface DiscoverySport {
@@ -18,14 +20,21 @@ export interface DiscoverySport {
   /** How the search names the sport. */
   label: string;
   category: string;
+  /** Default subcategory; the AI may give a more specific one (e.g. "Pottery & Ceramics"). */
   subcategory: string;
+  /** Short name for the Agent tab (defaults to the subcategory). */
+  name?: string;
 }
 
-// West Seattle + White Center first (decided 2026-11-16). Add areas here to grow.
+// West Seattle and its neighbors first (decided 2026-11-16; Burien and South
+// Park/Georgetown added 2026-11-17: go as deep as we can here before going
+// wide). Add areas here to grow.
 export const DISCOVERY_AREAS: DiscoveryArea[] = [
-  { key: 'west-seattle', label: 'West Seattle (Alki, Admiral, the Junction, Morgan Junction, Fauntleroy, Arbor Heights)', zips: ['98116', '98136', '98126'], neighborhood: 'West Seattle' },
-  { key: 'delridge', label: 'Delridge, High Point and Highland Park in West Seattle', zips: ['98106', '98126'], neighborhood: 'West Seattle' },
-  { key: 'white-center', label: 'White Center and South Park', zips: ['98146', '98106', '98108'], neighborhood: 'White Center' },
+  { key: 'west-seattle', short: 'West Seattle', label: 'West Seattle (Alki, Admiral, the Junction, Morgan Junction, Fauntleroy, Arbor Heights)', zips: ['98116', '98136', '98126'], neighborhood: 'West Seattle' },
+  { key: 'delridge', short: 'Delridge', label: 'Delridge, High Point and Highland Park in West Seattle', zips: ['98106', '98126'], neighborhood: 'West Seattle' },
+  { key: 'white-center', short: 'White Center', label: 'White Center and Boulevard Park', zips: ['98146', '98168'], neighborhood: 'White Center' },
+  { key: 'south-park', short: 'South Park', label: 'South Park and Georgetown in south Seattle', zips: ['98108', '98134'], neighborhood: 'South Seattle' },
+  { key: 'burien', short: 'Burien', label: 'Burien and Normandy Park, just south of Seattle', zips: ['98166', '98148'], neighborhood: 'Burien' },
 ];
 
 export const DISCOVERY_SPORTS: DiscoverySport[] = [
@@ -45,6 +54,19 @@ export const DISCOVERY_SPORTS: DiscoverySport[] = [
   { key: 'climbing', label: 'kids climbing and bouldering programs', category: 'Sports', subcategory: 'Climbing' },
   { key: 'wrestling', label: 'youth wrestling clubs', category: 'Sports', subcategory: 'Wrestling' },
   { key: 'water', label: 'youth rowing, sailing, kayaking and paddling programs', category: 'Outdoor', subcategory: 'Water Sports' },
+  // Beyond sports (2026-11-17): every Discover category.
+  { key: 'arts', name: 'Art', label: 'kids art classes and art studios (drawing, painting, pottery, crafts)', category: 'Arts', subcategory: 'Classes & Workshops' },
+  { key: 'music', name: 'Music', label: 'kids music lessons, music schools, youth choirs and bands', category: 'Music', subcategory: 'Private Lessons' },
+  { key: 'dance', name: 'Dance', label: 'kids dance studios and dance classes (ballet, hip hop, jazz, cultural dance)', category: 'Dance', subcategory: 'Multi-Style' },
+  { key: 'theater', name: 'Theater', label: 'kids theater, acting and improv classes and youth productions', category: 'Theater', subcategory: 'Acting & Improv' },
+  { key: 'stem', name: 'STEM', label: 'kids STEM classes: coding, robotics, science, engineering and chess', category: 'STEM', subcategory: 'Science' },
+  { key: 'swim-lessons', name: 'Swim lessons', label: 'kids swim lessons and learn-to-swim programs', category: 'Swimming', subcategory: 'Group Lessons' },
+  { key: 'camps', name: 'Day camps', label: 'summer day camps and school-break camps for kids', category: 'Camps', subcategory: 'Day Camps' },
+  { key: 'early', name: 'Early childhood', label: 'classes for toddlers and preschoolers, parent-and-me and baby programs (not daycare or full-time preschool)', category: 'Early Childhood', subcategory: 'Movement & Play' },
+  { key: 'language', name: 'Language', label: 'kids language classes and weekend language schools', category: 'Language', subcategory: 'Group Classes' },
+  { key: 'cooking', name: 'Cooking', label: 'kids cooking and baking classes and camps', category: 'Cooking', subcategory: 'Classes & Workshops' },
+  { key: 'outdoor', name: 'Outdoor & nature', label: 'kids nature, outdoor education, environmental and gardening programs', category: 'Outdoor', subcategory: 'Nature & Forest' },
+  { key: 'tutoring', name: 'Tutoring', label: 'tutoring, learning centers and academic enrichment classes for kids', category: 'Academic', subcategory: 'Tutoring & Enrichment' },
 ];
 
 export interface DiscoveryQuery {
@@ -208,6 +230,8 @@ export interface FoundClub {
   sourceUrl: string;
   /** null = the agent couldn't confirm where it runs: an admin sets it before Add. */
   neighborhood: string | null;
+  /** A more specific type the AI gave (e.g. "Pottery & Ceramics"), or null for the search's default. */
+  subcategory: string | null;
   ageMin: number | null;
   ageMax: number | null;
   level: 'rec' | 'club' | null;
@@ -244,8 +268,10 @@ export function cleanClub(raw: unknown, area: DiscoveryArea): FoundClub | { skip
   const said = cleanNeighborhood(r.neighborhood);
   const neighborhood = neighborhoodFromAddress(r.address) ?? (said && said !== area.neighborhood ? said : null);
   const price = typeof r.price === 'number' && r.price >= 0 && r.price < 100_000 ? r.price : null;
+  const sub = str(r.subcategory, 40);
   return {
     organization,
+    subcategory: sub && /^[A-Za-z][A-Za-z &/'’-]*$/.test(sub) ? sub : null,
     title: str(r.program_title, 120) ?? organization,
     website: parseUrl(website)!.toString(),
     sourceUrl: parseUrl(sourceUrl)!.toString(),

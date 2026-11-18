@@ -5,9 +5,10 @@ const ok = (c: boolean, m: string) => { if (c) pass++; else { fail++; console.lo
 
 // searches
 const qs = allQueries();
-ok(qs.length === 48 && new Set(qs.map((q) => q.key)).size === 48, '16 sports × 3 areas, unique keys: ' + qs.length);
+ok(qs.length === 140 && new Set(qs.map((q) => q.key)).size === 140, '28 topics × 5 areas, unique keys: ' + qs.length);
+ok(qs.some((q) => q.key === 'music|burien') && qs.some((q) => q.key === 'camps|south-park'), 'non-sports topics and the new areas are searched');
 const now = new Date('2026-11-17T06:00:00Z');
-ok(dueQueries(new Map(), now).length === 48, 'nothing run yet → all due');
+ok(dueQueries(new Map(), now).length === 140, 'nothing run yet → all due');
 const runs = new Map<string, { at: string | null; failed?: boolean }>([
   ['soccer|west-seattle', { at: '2026-11-10T00:00:00Z' }],
   ['baseball|west-seattle', { at: '2026-10-01T00:00:00Z' }],
@@ -47,6 +48,12 @@ ok('skip' in cleanClub({ organization: 'X', website: 'https://x.example', source
 ok('skip' in cleanClub({ organization: 'X', website: 'https://x.example', source_url: 'https://y.example/x' }, ws), 'facts from another site → skipped');
 const odd = cleanClub({ organization: 'Y', website: 'y.example', neighborhood: 'Mars 51', level: 'elite', age_min: 40, price: -1, price_unit: 'week' }, DISCOVERY_AREAS[2]);
 ok(!('skip' in odd) && odd.neighborhood === null && odd.level === null && odd.ageMin === null && odd.price === null && odd.priceUnit === null && odd.title === 'Y', 'bad values become null, location unconfirmed');
+
+// subcategory from the AI
+const pot = cleanClub({ organization: 'Clay Studio', website: 'https://clay.example', subcategory: 'Pottery & Ceramics' }, DISCOVERY_AREAS[0]);
+ok(!('skip' in pot) && pot.subcategory === 'Pottery & Ceramics', 'a specific subcategory is kept');
+const junk = cleanClub({ organization: 'X', website: 'https://x.example', subcategory: '<script>' }, DISCOVERY_AREAS[0]);
+ok(!('skip' in junk) && junk.subcategory === null, 'a junk subcategory falls back to the default');
 
 // neighborhoods
 ok(cleanNeighborhood('Ballard') === 'Ballard' && cleanNeighborhood('south park') === 'South Park' && cleanNeighborhood('Burien') === 'Burien', 'real neighborhoods and cities kept, title-cased');

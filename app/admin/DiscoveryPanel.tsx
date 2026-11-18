@@ -101,7 +101,7 @@ export default function DiscoveryPanel({ onNewSuggestions }: { onNewSuggestions:
         <div>
           <h3 className="text-sm font-semibold text-[#1C3A4A] mb-1">Find new providers</h3>
           <p className="text-xs text-[#7A9AAA] max-w-xl">
-            Searches the web sport by sport in West Seattle, Delridge and White Center, reads each club&apos;s own site, and adds what isn&apos;t
+            Searches the web topic by topic (sports, arts, music, camps and more) in West Seattle, Delridge, White Center, South Park and Burien, reads each provider&apos;s own site, and adds what isn&apos;t
             on Little Sound to Suggestions below. Each search re-runs every {data.refreshDays} days, one or two a day on its own.
           </p>
         </div>
@@ -125,7 +125,7 @@ export default function DiscoveryPanel({ onNewSuggestions }: { onNewSuggestions:
             </button>
             {confirmAll ? (
               <span className="text-xs text-[#1C3A4A]">
-                Re-run all {data.queries.length} now (about $5–10)?{' '}
+                Re-run all {data.queries.length} now (about ${Math.round(data.queries.length * 0.15)}–{Math.round(data.queries.length * 0.3)})?{' '}
                 <button
                   onClick={() => { setConfirmAll(false); run(data.queries.map((q) => q.key)); }}
                   className="font-semibold text-[#0D5C6E] underline"
@@ -154,7 +154,7 @@ export default function DiscoveryPanel({ onNewSuggestions }: { onNewSuggestions:
 
       <p className="text-xs text-[#3A5A6A] mb-2">
         {ranOnce.length} of {data.queries.length} searches run · {addedTotal} suggestion{addedTotal === 1 ? '' : 's'} filed · about 3 web searches each
-        (~$0.03) plus AI reading. Running all {data.queries.length} costs roughly $5–10. Keep this tab open while it runs.
+        (~$0.03) plus AI reading, roughly $0.15–0.30 per search in all. Keep this tab open while it runs.
       </p>
 
       {log.length > 0 && (

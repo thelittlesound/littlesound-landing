@@ -214,7 +214,8 @@ export default function AgentPanel({ onToast }: { onToast: (msg: string, ok: boo
           const res = await fetch(`/api/admin/agent/suggestions/${id}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action }),
+            // Corrections typed on a card (neighborhood, ages) go with Add all too.
+            body: JSON.stringify(action === 'add' && edits[id] ? { action, edits: edits[id] } : { action }),
           });
           if (res.status === 401) signedOut = true;
           if (res.ok) added += 1;
