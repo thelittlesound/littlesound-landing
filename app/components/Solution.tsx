@@ -25,14 +25,6 @@ export default function Solution() {
 
   return (
     <section className="bg-[#0D5C6E] py-24 px-6 md:px-10 lg:px-16 relative overflow-hidden">
-      {/* Wave art from the investor deck cover, anchored to the corner */}
-      <img
-        src="/images/waves-corner.svg"
-        alt=""
-        aria-hidden="true"
-        className="absolute bottom-0 right-0 w-[300px] md:w-[480px] max-w-none opacity-[0.12] pointer-events-none select-none"
-      />
-
       <div className="max-w-[1280px] mx-auto relative z-10">
 
         {/* Eyebrow */}
