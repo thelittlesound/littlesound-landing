@@ -390,7 +390,9 @@ export default function Discover() {
       if (bi === -1) return -1;
       return ai - bi;
     });
-  }, [results, category, query]);
+    // subcategory must be a dependency: without it, picking a subcategory pill
+    // kept showing every group (the count changed, the cards didn't).
+  }, [results, category, query, subcategory]);
 
   function chooseKid(id: string | null) {
     setForKidId(id);
