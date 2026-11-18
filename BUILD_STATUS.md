@@ -22,6 +22,12 @@ Family activity planning platform ("The Family OS") for Seattle. Helps parents d
 
 ## Completed Work
 
+### West Seattle + nearby, all categories (2026-11-17)
+
+**Why (Evan):** "Let's proceed with going as deep as we can with west seattle and the surrounding neighborhoods." Discovery widened (`179b149`) to 28 topics (16 sports + arts, music, dance, theater, STEM, swim lessons, camps, early learning, languages, cooking, outdoor, tutoring) × 5 areas (adds South Park/Georgetown and Burien/Normandy Park) = 140 searches; "Add all" now sends each card's neighborhood/ages edits.
+
+**Run + review:** 92 new searches run; 118 suggestions reviewed with Evan. 86 added (with neighborhood fixes by address), 13 cleared as too far (incl. Seattle Starz, Issaquah), 2 dismissed. Discover now shows ~211 listings, 96 of them in the southwest areas. 8 still need a location; school-based/members-only items held. See `docs/SESSION_HANDOFF.md` for the per-listing notes (KidSounds' Normandy Park location is assumed). No Limits Academy (AAU basketball, White Center tryouts 11/23–24) approved but waiting on ages.
+
 ### Sports for West Seattle + the discovery agent (Nov 2026; committed, needs `supabase/discovery.sql` + push)
 
 **Why (Evan, 2026-11-16):** "Right now we have nothing for sports, especially club team sports… we need to ingest more, especially in West Seattle zip codes." Sports had 7 generic listings (YMCA, i9, a multi-sport camp, climbing, skating, skateboarding); no club teams, nothing in West Seattle. His calls: add what we find now as seed listings and let the date agent fill dates; listings carry **sport, level (rec vs club), seasons + tryouts, and who can join**; the discovery agent searches **West Seattle + White Center first**; everything it finds goes to the **inbox** for approval (no auto-add yet).

@@ -1,4 +1,4 @@
-# Little Sound: handoff for a new chat (updated 2026-11-16, 11pm: sports + discovery live, 120 provider listings)
+# Little Sound: handoff for a new chat (updated 2026-11-17: all-category discovery for West Seattle + nearby, ~211 listings live)
 
 Read this first, then `BUILD_STATUS.md` (the repo's source of truth; the repo copy is newer than the Project copy). Both live in the repo on Evan's PC.
 
@@ -7,7 +7,7 @@ Read this first, then `BUILD_STATUS.md` (the repo's source of truth; the repo co
 - **Evan's local repo:** `C:\Users\esher\OneDrive\Desktop\Little Sound\littlesound-landing-page`. In a linked session's device shell it is `$HOME/mnt/Little Sound/littlesound-landing-page`.
 - **Stack:** Next.js 14 App Router, TypeScript (strict OFF), Tailwind, Supabase. Email via Brevo, AI via Anthropic (web search + web fetch for the discovery agent), JS-only pages via Cloudflare Browser Run.
 - **Secrets live only in Vercel env vars:** `ANTHROPIC_API_KEY`, `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `CRON_SECRET`, Supabase keys. Never ask for them in chat or put them in the repo.
-- **Pushed and live:** everything through `7ffa608` (discovery ZIP locations + editable suggestion cards). Only the docs commit after it may be unpushed: if `git status -sb` shows `ahead`, ask Evan to push.
+- **Pushed and live:** everything through `179b149` (discovery for 28 topics × 5 areas; Add all carries card edits). Only the docs commit after it may be unpushed: if `git status -sb` shows `ahead`, ask Evan to push.
 - **Database:** every SQL file is applied, including `supabase/discovery.sql` (2026-11-16).
 
 ## How we work (Evan's rules)
@@ -33,32 +33,38 @@ Goal: the most comprehensive, easiest-to-search place for kids' camps, activitie
 - **`app/data/activities.json` mixes `\u` escapes and literal characters:** append new entries as text before the final `]`; never re-serialize the file.
 - **WebFetch in chat only works on URLs a search returned;** search first.
 - **Built-in browser** (preferred) has its own sign-ins: Evan types the site password and admin login himself. Long JS jobs in the page: start them in the background (`window.__log`) and poll, or the tool times out at 45s.
-- **Agent tab "Add all" ignores card edits** (neighborhood/ages). Use each card's Add after editing.
+- **Agent tab "Add all" now carries card edits** (fixed in `179b149`).
+- **Many provider sites are not on the chat WebFetch allowlist.** To read one, open it in the built-in browser (`request_access` once per site).
 
 ## Testing
 - `tests/*.test.ts`: 180 checks (alerts, calendar-grid, discovery 28, family-profile, family-rhythm, kid-match, summer). No esbuild anywhere (npm blocked): run with Node 22 type stripping plus a resolver hook. In a scratch folder write `hooks.mjs` (a `resolve` hook mapping `@/x` → `<repo>/x`, trying `.ts`/`.tsx`/`/index.ts`, also for relative imports) and `reg.mjs` (`register('./hooks.mjs', import.meta.url)`), then `LS_ROOT=$(pwd) node --experimental-strip-types --no-warnings --import <scratch>/reg.mjs tests/<name>.test.ts`.
 - Typecheck in the cloud sandbox: stage files, small `.d.ts` shims (react hooks, `next/server`, `@supabase/supabase-js`, server modules), `tsc` with `strict: false` and `paths: {"@/*": ["./repo/*"]}` (no `baseUrl`).
 
 ## Current product state
-- **Catalog:** 93 seed programs (Sports 24, incl. 18 West Seattle/White Center clubs added 2026-11-16) + **120 approved provider/agent listings** (80 added from discovery suggestions on 2026-11-16: soccer, baseball/softball, basketball, volleyball, football, lacrosse, running, swim, gymnastics, martial arts, tennis/pickleball, climbing, wrestling, ultimate, water sports, roller derby; West Seattle, White Center, Burien, Tukwila and the rest of Seattle with real neighborhoods).
+- **Catalog:** 93 seed programs + **~211 live listings on Discover** (`/api/activities` total on 2026-11-17; 96 of them in West Seattle, Delridge, White Center, South Seattle, Burien, Normandy Park, Des Moines, Tukwila). Covers sports plus arts, music, dance, theater, STEM, swim lessons, camps, early learning, languages, cooking, outdoor, tutoring.
 - **Discover:** sport pills under Sports, Rec / Club row, level tag and "Who can join" on cards, "Fees on their site" when no price; "Browsing for {child}".
 - **Family dashboard:** Family Rhythm (week ahead, breathing room, clashes, Signup radar, Summer planner).
-- **Date agent:** daily; reads every listing's site for dates (now including the new ones).
-- **Discovery agent:** 16 sports × 3 areas (West Seattle, Delridge, White Center); daily cron (one or two searches), each search monthly; Agent tab → **Find new providers** (Run due searches / **Re-run every search now**). Locations come from the address ZIP on the provider's own site (`ZIP_NEIGHBORHOODS`); without one, "Location not confirmed". Suggestion cards have editable Neighborhood + Ages; Add refuses a suggestion with no neighborhood.
+- **Date agent:** daily; reads every listing's site for dates.
+- **Discovery agent:** 28 topics (16 sports + 12 other categories) × 5 areas (West Seattle; Delridge; White Center & Boulevard Park; South Park/Georgetown → "South Seattle"; Burien/Normandy Park) = 140 searches, each monthly, daily cron. Agent tab → **Find new providers**. Locations come from the address ZIP on the provider's own site; without one, "Location not confirmed". Suggestion cards have editable Neighborhood + Ages, sent with Add and Add all; Add refuses a suggestion with no neighborhood.
 
-## Where we stopped (2026-11-16, 11pm)
-Two full discovery runs reviewed with Evan in the browser. Added 80 programs; dismissed 4 non-programs; corrected neighborhoods by address.
+## Where we stopped (2026-11-17)
+Ran the 92 new all-category searches, reviewed the 118 suggestions with Evan. **86 added** (74 in one batch with label fixes, then 12 after looking up addresses), 13 cleared (12 farther suburbs + Seattle Starz in Issaquah), 2 dismissed (restricted).
 
-**Still in the Agent inbox (8):**
-- **Members-only (Evan chose to hold):** Tennis Center Sand Point ×2, Arbor Heights junior tennis team, Gregory Seahurst Swim Club.
-- **Location not confirmed:** Seattle Wrestling Club, Jet City Wrestling, Rainier Select Basketball, Let Me Run (school-based, boys grades 3–5).
+**Neighborhoods set from address lookups (2026-11-17):** Mode Music ×2 = Delridge (3801 Delridge Way SW), Cooking With Friends = West Seattle (pop-ups at 9131 California Ave SW), Nemo Swim = Burien (home-pool lessons), NWAA TeenSounds = Normandy Park (John Knox Presbyterian); **KidSounds = Normandy Park is assumed** (same org, rehearsal site not found); Seattle Languages International = Citywide (private lessons, PO box only); Seattle Outrigger = Wallingford (Waterway 18; an older directory gives a south-end address).
 
-**Unverified neighborhoods** set from memory (correct if wrong): Vertical World = Interbay, Seattle Yacht Club = Montlake, Pocock = Eastlake, Seattle Canoe & Kayak = Green Lake, Props Lacrosse = Magnolia, Seattle Central LL = Central District. Also assumed ages: Highline Premier FC 8–18, Southwest LL 4–14, Seattle Volleyball Academy 11–16.
+**Still pending in the Agent inbox:**
+- **Location not found (8):** Art & Soul Kids, Out in the Wild Learning, Write Seattle, Inclusive Tech WA, Seattle Vision Basketball, LOCALHOOPS, NPJ Volleyball, STMP Kids. Their own sites aren't reachable from chat WebFetch; open them in the built-in browser to find an address.
+- **School-based / restricted (held):** Jump On Languages, Seattle Young Engineers, TGA ×2, WorldKids, Ochre Outdoor Learning, Starfire competitive league, Highline Tutoring, Burien Green Teens (16–18 internship).
+- **From 11-16:** members-only (Tennis Center Sand Point ×2, Arbor Heights, Gregory Seahurst) and location-unknown (Seattle Wrestling Club, Jet City Wrestling, Rainier Select, Let Me Run).
+
+**Evan approved adding No Limits Academy** (West Seattle/Burien AAU basketball; tryouts 11/23–24/26 at Salvation Army White Center, 9050 16th Ave SW; practices at Salvation Army White Center + White Center Heights Elementary; nolimitsacademyseattle.com). **Not added yet:** its site posts no ages/grades; ask them (nolimitsacademyseattle@gmail.com) or add once known. Seed listings need numeric ages.
+
+**Unverified from 11-16** (correct if wrong): Vertical World = Interbay, Seattle Yacht Club = Montlake, Pocock = Eastlake, Seattle Canoe & Kayak = Green Lake, Props Lacrosse = Magnolia, Seattle Central LL = Central District; assumed ages Highline Premier FC 8–18, Southwest LL 4–14, Seattle Volleyball Academy 11–16.
 
 **Still to confirm from before:** pencilled camp shows "For Ella" in saved; Erase from plan reopens the week; Pottery can be assigned to a child; Remind me on a dated signup; no Creative Care in summer ideas.
 
 ## Next up
 1. **Go granular on each existing category** (Evan's next focus), mockup first: per category, inventory → subcategories parents filter by + 1–2 category-specific fields → mockup → approve → build → discovery searches for that category.
 2. **Build the approved child-first Discover** (mockup above).
-3. Small fixes: "Add all" should carry card edits; provider listing form asks for level + who can join; claimed seed listings keep `level`/`serves`; tryout dates on the Signup radar and alerts; a way to edit a live listing's neighborhood from `/admin`.
+3. Small fixes: provider listing form asks for level + who can join; claimed seed listings keep `level`/`serves`; tryout dates on the Signup radar and alerts; a way to edit a live listing's neighborhood from `/admin`.
 4. Earlier list: family signup asks interests per child; smarter weekly ideas; Step B phone-calendar check; launch-readiness (honesty pass on stats now that the catalog is ~210 programs, outreach kit, small fixes).
