@@ -22,7 +22,7 @@ Family activity planning platform ("The Family OS") for Seattle. Helps parents d
 
 ## Completed Work
 
-### Discover redesign + natural search (2026-11-17; pending push + live check)
+### Discover redesign + natural search (2026-11-17; live 29460de, checked live by Claude; follow-ups in 2a1c7df)
 
 Mockup approved by Evan: https://claude.ai/artifact/6X92QMqHuL21RV2p1f3MPB ("I like this", category names must read in full, then "build"). Replaces the tall hero, the three pill walls and the sticky filter panel.
 
@@ -35,6 +35,7 @@ Mockup approved by Evan: https://claude.ai/artifact/6X92QMqHuL21RV2p1f3MPB ("I l
 - **Slim bar:** once the hero scrolls away, a thin bar pins under the nav with the count, what's searched, and a Search button (scrolls up, focuses the box). Nothing else is sticky.
 - **Not in this version:** days/times ("Saturday", "after school"): only 55 of 211 live listings have dates.
 - **Fixed earlier tonight (22e153b):** subcategory pills changed the count but not the cards (grouped view memo missed `subcategory`); the grouped view is gone now anyway.
+- **Live check (2026-11-17, built-in browser, desktop + 375px phone):** empty-box panel (Near West Seattle from the profile, Use my location, examples); "swim lessons near 98126 for a 5 year old" → 3 chips, Swimming → Group lessons, "about 3 mi", "Not posted yet", "Who can join", slim bar; `?q=free summer camp in Burien` → 1 free camp in South Park; "choir for Ella" → Ella + Music → Sing. Follow-ups (2a1c7df): kind tiles two per row on phones (one per row pushed cards a screen down), shorter rotating hints (cut off on phones), `?q=` removed from the address after it runs, the chosen category tile scrolls into view in the rail. Use my location not tried (it would prompt Evan's browser).
 - `app/discover/page.tsx` is now LF (was CRLF). Tests: `tests/search.test.ts` (53 checks; kinds + search); all 276 pass. Typecheck clean.
 
 ### Camps are their own category (2026-11-17; pending `supabase/camps.sql` + push)
