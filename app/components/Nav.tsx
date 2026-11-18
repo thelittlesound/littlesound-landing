@@ -21,9 +21,17 @@ export default function Nav() {
         {/* Logo */}
         <Link
           href="/"
-          className="font-['Cormorant_Garamond'] text-xl font-semibold text-white tracking-tight shrink-0"
+          className="h-full flex items-center shrink-0 [clip-path:inset(0_-48px)]"
         >
-          Little Sound
+          <span className="relative font-['Cormorant_Garamond'] text-xl font-semibold text-white tracking-tight">
+            <img
+              src="/images/logo-waves.svg"
+              alt=""
+              aria-hidden="true"
+              className="pointer-events-none select-none absolute -left-1.5 -top-4 w-[120px] max-w-none -rotate-[8deg] opacity-60"
+            />
+            <span className="relative">Little Sound</span>
+          </span>
         </Link>
 
         {/* Desktop links */}

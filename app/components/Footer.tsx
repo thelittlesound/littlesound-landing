@@ -7,7 +7,15 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
           {/* Brand */}
           <div>
-            <h3 className="text-xl font-semibold mb-4">Little Sound</h3>
+            <h3 className="relative inline-block font-['Cormorant_Garamond'] text-xl font-semibold mb-4">
+              <img
+                src="/images/logo-waves.svg"
+                alt=""
+                aria-hidden="true"
+                className="pointer-events-none select-none absolute -left-1.5 -top-4 w-[120px] max-w-none -rotate-[8deg] opacity-60"
+              />
+              <span className="relative">Little Sound</span>
+            </h3>
             <p className="text-sm text-blue-grey-300">
               The Family OS. Discover, plan, and book kids' activities in one place.
             </p>
