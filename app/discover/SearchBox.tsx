@@ -21,11 +21,12 @@ interface Option {
   run: () => void;
 }
 
+// Short enough to fit a phone's search box.
 const PLACEHOLDERS = [
-  'Try “swim lessons near 98126”',
-  'Try “jiu-jitsu for a 7 year old”',
-  'Try “free summer camp in Burien”',
-  'Try “piano lessons under $150”',
+  'Try “swim near 98126”',
+  'Try “jiu-jitsu, age 7”',
+  'Try “free summer camp”',
+  'Try “piano under $150”',
 ];
 
 export default function SearchBox({

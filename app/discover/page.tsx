@@ -309,6 +309,10 @@ export default function Discover() {
     if (pendingQuery == null) return;
     applySearch(parse(pendingQuery, kids));
     setPendingQuery(null);
+    // Clear ?q= so a refresh after editing the chips doesn't bring it back.
+    const url = new URL(window.location.href);
+    url.searchParams.delete('q');
+    window.history.replaceState(null, '', url.toString());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pendingQuery, kids]);
 
@@ -372,6 +376,18 @@ export default function Discover() {
     setUnder(null);
     setText(null);
   }
+
+  // On a phone the tiles scroll sideways: keep the chosen one in view.
+  const railRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const rail = railRef.current;
+    const el = rail?.querySelector('[aria-pressed="true"]') as HTMLElement | null;
+    if (!rail || !el) return;
+    // Scroll the rail sideways only (never the page).
+    const r = rail.getBoundingClientRect();
+    const e = el.getBoundingClientRect();
+    if (e.left < r.left || e.right > r.right) rail.scrollBy({ left: e.left - r.left - 16, behavior: 'smooth' });
+  }, [category]);
 
   const kidAge = ageExact ?? forKid?.age ?? null;
   const ageFits = (a: Activity) =>
@@ -673,6 +689,7 @@ export default function Discover() {
       {/* Category tiles: one row on desktop (2 lines), two rows that swipe on a phone */}
       <section className="px-4 md:px-10 pt-5 pb-1 border-b border-[#E3DAC5]">
         <div
+          ref={railRef}
           className="max-w-[1200px] mx-auto grid grid-flow-col grid-rows-2 auto-cols-[minmax(160px,1fr)] gap-2.5 overflow-x-auto pb-4 scrollbar-hide"
           role="group"
           aria-label="Category"
@@ -724,7 +741,7 @@ export default function Discover() {
                 {kindDef.question.replace('{name}', forKid?.name ?? 'your child')}
               </span>
               {kindDef.mode === 'tiles' ? (
-                <div className="grid grid-cols-[repeat(auto-fit,minmax(170px,1fr))] gap-2.5">
+                <div className="grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-2.5">
                   {kindDef.kinds.map((k) => {
                     const n = kindCounts[k.key] ?? 0;
                     const on = kind === k.key;
@@ -734,7 +751,7 @@ export default function Discover() {
                         type="button"
                         onClick={() => { setKind(on ? null : k.key); setAct(null); }}
                         aria-pressed={on}
-                        className={`min-h-[96px] px-4 py-3.5 rounded-[18px] border-[1.5px] text-left flex flex-col gap-1.5 transition-colors ${
+                        className={`min-h-[88px] px-3.5 py-3 rounded-[18px] border-[1.5px] text-left flex flex-col gap-1.5 transition-colors ${
                           on ? 'bg-[#0D5C6E] border-[#0D5C6E] text-white' : 'bg-white border-[#E3DAC5] text-[#1C3A4A] hover:border-[#1A7A8A]'
                         } ${n === 0 && !on ? 'opacity-60' : ''}`}
                       >
