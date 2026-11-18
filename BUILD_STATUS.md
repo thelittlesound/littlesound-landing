@@ -22,6 +22,21 @@ Family activity planning platform ("The Family OS") for Seattle. Helps parents d
 
 ## Completed Work
 
+### Discover redesign + natural search (2026-11-17; pending push + live check)
+
+Mockup approved by Evan: https://claude.ai/artifact/6X92QMqHuL21RV2p1f3MPB ("I like this", category names must read in full, then "build"). Replaces the tall hero, the three pill walls and the sticky filter panel.
+
+- **Hero:** short; holds "Browsing for" (kids) and the search box. Category tiles: one row of 14 icon tiles (thin tan line icons, name + "N programs", names wrap instead of cutting off), two rows that swipe on a phone. Tap again (or "← All categories") to go back to everything.
+- **"What kind?"** inside a category (`lib/kinds.ts`): tiles with a one-line description and a count (Swimming, Martial arts, Music, Dance (styles, a studio can be several), Theater, Arts, Outdoor, Early childhood, Camps = When), pills for Sports (one per sport) and Language. **Cooking, STEM, Academic skip it** (fewer than 8 programs: decision B, Claude's default). Camps keeps its Theme row; subject pages keep "N outdoor camps are under Camps".
+- **Refine line:** count, age (hidden when browsing for a child or searching an age), Rec/Club where a category has levels, sort (Best match / Dates posted first / Price).
+- **Cards:** no colored block or paragraph. Kind line, title, provider, then When (date line or "Schedule on their site"), Ages ("Not posted yet" for provider listings at 0–18), Where ("Several locations" for Citywide; "about N mi" when searching a place), Cost; "Who can join" when set; Save (for a child) + Their site.
+- **Search** (`lib/search.ts`, `app/discover/SearchBox.tsx`): typed phrases become removable chips: activity (+ kind), place (ZIP via `ZIP_NEIGHBORHOODS`, neighborhood names and aliases like Alki), age ("7 year old", "2nd grade", "preschool", "teen"), a kid's name, "free", "under $150", camp words (summer, winter break, overnight; the subject becomes the camp's theme). Unrecognized words search titles/providers/descriptions. While typing: "Reads as…", Activities (with counts), Places, Programs; arrow keys + Enter. Empty box: "Near {profile neighborhood}" for signed-in families, "Use my location" (browser location → nearest neighborhood; outside ~15 mi or denied → asks for a ZIP), and examples. `?q=` runs a search on load.
+- **Places, closest first:** approximate neighborhood centers (`AREA_CENTERS`); same neighborhood, then within 7 miles ("nearby"), then several-location programs; farther ones behind "Show N farther away". Unknown neighborhoods count as several-location (never hidden). We only store neighborhoods, so distances are neighborhood to neighborhood.
+- **Slim bar:** once the hero scrolls away, a thin bar pins under the nav with the count, what's searched, and a Search button (scrolls up, focuses the box). Nothing else is sticky.
+- **Not in this version:** days/times ("Saturday", "after school"): only 55 of 211 live listings have dates.
+- **Fixed earlier tonight (22e153b):** subcategory pills changed the count but not the cards (grouped view memo missed `subcategory`); the grouped view is gone now anyway.
+- `app/discover/page.tsx` is now LF (was CRLF). Tests: `tests/search.test.ts` (53 checks; kinds + search); all 276 pass. Typecheck clean.
+
 ### Camps are their own category (2026-11-17; pending `supabase/camps.sql` + push)
 
 First step of "go granular on each category" (inventory + mockup: https://claude.ai/artifact/BJtMqWnvNgneRa1LqMPbJ2, notes in the Project doc `claude/category-inventory.md`). Evan's call: camps are mostly a summer / out-of-school thing, so **every listing that is mainly a camp lives only in Camps**, sorted by When, then Theme.
