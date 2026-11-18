@@ -25,15 +25,13 @@ export default function Solution() {
 
   return (
     <section className="bg-[#0D5C6E] py-24 px-6 md:px-10 lg:px-16 relative overflow-hidden">
-      {/* Subtle wave decoration */}
-      <svg
-        className="absolute bottom-0 right-0 opacity-5 pointer-events-none"
-        width="400" height="300" viewBox="0 0 400 300" fill="none"
-      >
-        <path d="M50,150 Q100,80 150,150 Q200,220 250,150 Q300,80 350,150" stroke="white" strokeWidth="2" fill="none"/>
-        <path d="M50,180 Q100,110 150,180 Q200,250 250,180 Q300,110 350,180" stroke="white" strokeWidth="2" fill="none"/>
-        <path d="M50,210 Q100,140 150,210 Q200,280 250,210 Q300,140 350,210" stroke="white" strokeWidth="2" fill="none"/>
-      </svg>
+      {/* Wave art from the investor deck cover, anchored to the corner */}
+      <img
+        src="/images/waves-corner.svg"
+        alt=""
+        aria-hidden="true"
+        className="absolute bottom-0 right-0 w-[300px] md:w-[480px] max-w-none opacity-[0.12] pointer-events-none select-none"
+      />
 
       <div className="max-w-[1280px] mx-auto relative z-10">
 
