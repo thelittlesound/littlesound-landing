@@ -1,4 +1,4 @@
-# Little Sound: handoff for a new chat (updated 2026-11-17: all-category discovery for West Seattle + nearby, ~211 listings live)
+# Little Sound: handoff for a new chat (updated 2026-11-17 evening: wave logo added; next session = full-site brand sweep)
 
 Read this first, then `BUILD_STATUS.md` (the repo's source of truth; the repo copy is newer than the Project copy). Both live in the repo on Evan's PC.
 
@@ -47,7 +47,27 @@ Goal: the most comprehensive, easiest-to-search place for kids' camps, activitie
 - **Date agent:** daily; reads every listing's site for dates.
 - **Discovery agent:** 28 topics (16 sports + 12 other categories) × 5 areas (West Seattle; Delridge; White Center & Boulevard Park; South Park/Georgetown → "South Seattle"; Burien/Normandy Park) = 140 searches, each monthly, daily cron. Agent tab → **Find new providers**. Locations come from the address ZIP on the provider's own site; without one, "Location not confirmed". Suggestion cards have editable Neighborhood + Ages, sent with Add and Add all; Add refuses a suggestion with no neighborhood.
 
-## Where we stopped (2026-11-17)
+## Wave logo (2026-11-17 evening)
+- **Logo:** three lines taken from the wave art on the investor deck cover (Canva PDF in the Project; the art is vector, 16 lines, cut from one large swirl). Saved as `public/images/logo-waves.svg`: lines 0/3/6 of the cover corner, ends faded, blue-grey `#C5D8E8`.
+- **Placement Evan approved ("F1"):** behind the "Little Sound" wordmark, angled up and to the right (`-rotate-[8deg]`, 120px wide, 60% opacity). In `Nav.tsx` (bar stays 64px; the Link clips the waves vertically with `[clip-path:inset(0_-48px)]`) and the `Footer.tsx` heading. Evan likes it in the nav.
+- **Rejected:** all 16 lines (too busy at nav size), a redrawn symmetric wave ("worse"), waves as section decoration. The old floating 3-wave SVG in `Solution.tsx` (How It Works) was removed; Evan wants no wave decoration on sections.
+- The unused `waves-corner.svg` was moved to `Little Sound\_to_delete\` for Evan to delete.
+- Commits `1df4488`, `7d59ba4`, `045c11a`. If `git status -sb` shows `ahead`, ask Evan to push.
+
+## Next session: full-site brand sweep (Evan, 2026-11-17)
+Goal: every page matches the design files and is **consistent, coherent, and representative of the brand and product**.
+
+**Sources of truth:** `little-sound-design-tokens.css` (Project) and the project instructions (Dark Teal #0D5C6E, Medium Teal #1A7A8A, Blue-Grey #C5D8E8, Cream #F5EFE0, tan #C4A882; Cormorant Garamond 300/400 for display, DM Sans 400/500/600 for body/UI; pill buttons; cream cards with soft shadows; rounded photos; thin line icons in tan), the investor deck PDF, and the brand voice (warm, parent-friendly; taglines "One platform. Zero friction." / "Less searching. More living. Families first.").
+
+**Pages (25):** `/`, `/discover`, `/for-families`, `/for-providers`, `/about`, `/unlock`, `/privacy`, `/terms`; families: signup, login, forgot/reset password, dashboard; providers: signup, login, forgot/reset password, dashboard, claim, claim/[activityId], listings/new, listings/[id]/edit; `/admin`, `/admin/login`. Home sections: Hero, Problem, Solution, Categories, Founders, Providers, CTA, Footer.
+
+**Suggested process:**
+1. Read the tokens file and grep for off-token values (raw hex not in the palette, default Tailwind colors, font families, radii, shadows). Already spotted: `Footer.tsx` uses `bg-teal-900` / `text-blue-grey-300` while Nav uses `#0D5C6E`; nav hover tan `#A8865A` and mobile menu `#0A4A5A` are off-palette; How It Works uses emoji icons (✏️ 🌲 ☕) instead of thin tan line icons; check the fonts are actually loaded site-wide (the nav sets Cormorant by arbitrary class).
+2. Screenshot every page at desktop and phone (375px) in the built-in browser (Evan types the site password and logins).
+3. Publish one audit page grouped by page, each issue tagged colors / type / components / imagery / copy / mobile, with a proposed fix. Include copy: voice, taglines, and the honesty pass on placeholder stats (catalog is now ~211 programs).
+4. Evan approves, then fix in batches (shared components first: Nav, Footer, buttons, cards), mockup first for anything visual, and re-screenshot to check.
+
+## Where we stopped (2026-11-17, discovery)
 Ran the 92 new all-category searches, reviewed the 118 suggestions with Evan. **86 added** (74 in one batch with label fixes, then 12 after looking up addresses), 13 cleared (12 farther suburbs + Seattle Starz in Issaquah), 2 dismissed (restricted).
 
 **Neighborhoods set from address lookups (2026-11-17):** Mode Music ×2 = Delridge (3801 Delridge Way SW), Cooking With Friends = West Seattle (pop-ups at 9131 California Ave SW), Nemo Swim = Burien (home-pool lessons), NWAA TeenSounds = Normandy Park (John Knox Presbyterian); **KidSounds = Normandy Park is assumed** (same org, rehearsal site not found); Seattle Languages International = Citywide (private lessons, PO box only); Seattle Outrigger = Wallingford (Waterway 18; an older directory gives a south-end address).
@@ -64,6 +84,7 @@ Ran the 92 new all-category searches, reviewed the 118 suggestions with Evan. **
 **Still to confirm from before:** pencilled camp shows "For Ella" in saved; Erase from plan reopens the week; Pottery can be assigned to a child; Remind me on a dated signup; no Creative Care in summer ideas.
 
 ## Next up
+0. **Full-site brand sweep** (see the section above). Evan asked for this to be the next session.
 1. **Go granular on each existing category** (Evan's next focus), mockup first: per category, inventory → subcategories parents filter by + 1–2 category-specific fields → mockup → approve → build → discovery searches for that category.
 2. **Build the approved child-first Discover** (mockup above).
 3. Small fixes: provider listing form asks for level + who can join; claimed seed listings keep `level`/`serves`; tryout dates on the Signup radar and alerts; a way to edit a live listing's neighborhood from `/admin`.
