@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { IconChip } from '@/app/components/LineIcon';
 
 const CATEGORIES = [
   'Camps', 'Sports & Athletics', 'Arts & Crafts', 'Music & Dance',
@@ -561,7 +562,7 @@ function SuccessScreen({ businessName }: { businessName: string }) {
   return (
     <main className="min-h-screen bg-[#F5EFE0] flex items-center justify-center px-4 py-16">
       <div className="bg-white rounded-[24px] shadow-[0_4px_32px_rgba(10,74,90,0.09)] w-full max-w-[480px] p-10 text-center">
-        <div className="text-5xl mb-5">🎉</div>
+        <IconChip name="sparkle" className="mx-auto mb-5" />
         <h2 className="font-['Cormorant_Garamond'] text-[32px] font-light text-[#1C3A4A] mb-3">
           You&apos;re submitted!
         </h2>

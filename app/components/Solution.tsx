@@ -1,24 +1,26 @@
+import { IconChip } from './LineIcon';
+
 export default function Solution() {
   const steps = [
     {
       num: '01',
-      icon: '✏️',
+      icon: 'pencil',
       title: 'Tell Us About Your Family',
-      body: 'Ages, interests, your neighborhood, your budget, your schedule. Takes two minutes. You\'ll never fill out another intake form again.',
+      body: 'Your kids\' ages, what they\'re into, and your neighborhood. Takes two minutes.',
       honest: 'No fluff. No five-page onboarding. Just the essentials.',
     },
     {
       num: '02',
-      icon: '🌲',
+      icon: 'sparkle',
       title: 'We Find the Best Options',
-      body: 'Personalized picks based on your actual family — verified providers, real reviews, and current availability. No guesswork.',
-      honest: 'We check credentials so you don\'t have to.',
+      body: 'Picks matched to your kids, with details straight from each provider\'s own site.',
+      honest: 'We read their sites so you don\'t have to.',
     },
     {
       num: '03',
-      icon: '☕',
+      icon: 'go',
       title: 'Compare and Get Going',
-      body: 'View details, compare your top picks side by side, and connect directly with providers. You\'ll know exactly what you\'re signing up for before you commit.',
+      body: 'Compare your top picks side by side, save them to your family plan, and sign up directly with the provider.',
       honest: 'Go make some coffee. You\'ve earned it.',
     },
   ];
@@ -49,17 +51,17 @@ export default function Solution() {
               key={step.num}
               className="bg-white/5 border border-white/10 rounded-[20px] p-9"
             >
-              <p className="font-['Cormorant_Garamond'] text-[52px] font-medium text-white/8 leading-none mb-4">
-                {step.num}
-              </p>
-              <span className="text-[26px] mb-4 block">{step.icon}</span>
+              <div className="flex items-center justify-between mb-5">
+                <IconChip name={step.icon} dark />
+                <span className="font-display text-[44px] font-medium leading-none text-white/15">{step.num}</span>
+              </div>
               <h3 className="font-['Cormorant_Garamond'] text-[20px] font-medium text-white/90 mb-3">
                 {step.title}
               </h3>
               <p className="text-[14px] leading-[1.8] text-white/45 mb-4">
                 {step.body}
               </p>
-              <p className="text-[13px] italic text-[#A8C8D8] font-['Cormorant_Garamond']">
+              <p className="text-[13px] italic text-blue-grey-300 font-['Cormorant_Garamond']">
                 {step.honest}
               </p>
             </div>

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { LineIcon } from '@/app/components/LineIcon';
 
 const NEIGHBORHOODS = [
   'Ballard', 'Beacon Hill', 'Capitol Hill', 'Central District', 'Columbia City',
@@ -161,7 +162,7 @@ export default function FamilySignupPage() {
       <main className="min-h-screen bg-[#F5EFE0] flex flex-col items-center px-4 py-16 pt-28">
         <div className="bg-white rounded-[24px] shadow-[0_4px_32px_rgba(10,74,90,0.09)] w-full max-w-[480px] p-8 md:p-10 text-center">
           <div className="w-14 h-14 rounded-full bg-[#0D5C6E]/8 flex items-center justify-center mx-auto mb-5">
-            <span className="text-2xl">✉️</span>
+            <LineIcon name="mail" size={26} color="#A8865A" />
           </div>
           <h1 className="font-['Cormorant_Garamond'] text-[28px] font-light text-[#1C3A4A] mb-3">
             Check your email

@@ -4,25 +4,26 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Footer from '../components/Footer';
 import { useCatalogStats } from '../components/useCatalogStats';
+import { IconChip } from '../components/LineIcon';
 
 const BENEFITS = [
   {
-    emoji: '🔍',
+    icon: 'search',
     title: 'Get discovered organically',
     body: 'Families searching by age, neighborhood, and category find you directly — no ad budget, no algorithm to beat. Just parents looking for exactly what you offer.',
   },
   {
-    emoji: '📋',
+    icon: 'clipboard',
     title: 'You may already be listed',
     body: "We've catalogued hundreds of Seattle providers. Your listing might already be live. Claim it, keep the details accurate, and start appearing in search results.",
   },
   {
-    emoji: '🤝',
+    icon: 'tag',
     title: 'Free to list',
     body: 'Listing on Little Sound is free. Claim your listing or add a new one, and families searching for what you offer will find you.',
   },
   {
-    emoji: '📍',
+    icon: 'pin',
     title: 'Built for Seattle first',
     body: "We're not trying to be everything everywhere. We're going deep in Seattle — building real density and real family trust before expanding.",
   },
@@ -31,19 +32,19 @@ const BENEFITS = [
 const STEPS = [
   {
     num: '01',
-    icon: '📬',
+    icon: 'mail',
     title: 'Claim or submit your listing',
     body: 'Email us at hello@thelittlesound.com. If you\'re already catalogued, we\'ll get you verified in 24 hours. New to the platform? We\'ll set you up.',
   },
   {
     num: '02',
-    icon: '✏️',
+    icon: 'pencil',
     title: 'Keep your details current',
     body: 'Update your age ranges, pricing, availability windows, and descriptions any time. Accurate listings get more clicks — and more families in the door.',
   },
   {
     num: '03',
-    icon: '📈',
+    icon: 'chart',
     title: 'Get found by the right families',
     body: "When a parent searches for swimming lessons for a 7-year-old near Fremont, you show up. No middlemen, no commission on discovery — just a direct connection.",
   },
@@ -160,7 +161,7 @@ export default function ForProviders() {
                 key={b.title}
                 className="bg-[#F5EFE0] rounded-[20px] p-8 border border-[#E8DFC8]"
               >
-                <span className="text-4xl mb-5 block">{b.emoji}</span>
+                <IconChip name={b.icon} className="mb-5" />
                 <h3 className="font-['Cormorant_Garamond'] text-[20px] font-medium text-[#1C3A4A] mb-3">
                   {b.title}
                 </h3>
@@ -191,7 +192,7 @@ export default function ForProviders() {
                 <p className="font-['Cormorant_Garamond'] text-[52px] font-medium text-[#1C3A4A]/8 leading-none mb-4">
                   {step.num}
                 </p>
-                <span className="text-3xl mb-5 block">{step.icon}</span>
+                <IconChip name={step.icon} className="mb-5" />
                 <h3 className="font-['Cormorant_Garamond'] text-[20px] font-medium text-[#1C3A4A] mb-3">
                   {step.title}
                 </h3>

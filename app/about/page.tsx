@@ -1,25 +1,26 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import Footer from '../components/Footer';
+import { IconChip } from '../components/LineIcon';
 
 const VALUES = [
   {
-    emoji: '👨‍👩‍👧‍👦',
+    icon: 'heart',
     title: 'Families first, always',
     body: 'Every decision we make starts with one question: does this make life easier for Seattle families? Not easier for us. Not better for our metrics. Better for parents.',
   },
   {
-    emoji: '🎯',
+    icon: 'layers',
     title: 'Go deep before going wide',
     body: "We're not trying to be everywhere at once. We're building something genuinely useful for Seattle families before we think about the next city. Depth beats breadth.",
   },
   {
-    emoji: '🤝',
+    icon: 'honest',
     title: 'Honest about what we are',
     body: "We're a small team. We don't have everything figured out. We'd rather be upfront about that than overpromise and underdeliver.",
   },
   {
-    emoji: '🌱',
+    icon: 'people',
     title: 'Build with the community',
     body: 'The best ideas come from Seattle parents and providers — not from us. We talk to families and activity providers constantly, and what we build reflects what we hear.',
   },
@@ -151,7 +152,7 @@ export default function About() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {VALUES.map((v) => (
               <div key={v.title} className="bg-white rounded-[20px] p-9 border border-[#E8DFC8]">
-                <span className="text-4xl mb-5 block">{v.emoji}</span>
+                <IconChip name={v.icon} className="mb-5" />
                 <h3 className="font-['Cormorant_Garamond'] text-[22px] font-medium text-[#1C3A4A] mb-3">
                   {v.title}
                 </h3>

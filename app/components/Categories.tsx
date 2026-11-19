@@ -3,6 +3,7 @@
 import activities from '../data/activities.json';
 import Link from 'next/link';
 import { useState } from 'react';
+import { IconChip } from './LineIcon';
 
 const AGE_FILTERS = ['2–4', '5–7', '8–11', '12+'];
 
@@ -15,16 +16,16 @@ export default function Categories() {
   }, {});
 
   const categories = [
-    { emoji: '⚽', name: 'Sports & Fitness', count: (counts['Sports'] || 0) + (counts['Martial Arts'] || 0), filter: 'Sports' },
-    { emoji: '🎨', name: 'Arts & Crafts',    count: counts['Arts'] || 0,                                     filter: 'Arts' },
-    { emoji: '🎵', name: 'Music & Dance',    count: (counts['Music'] || 0) + (counts['Dance'] || 0),         filter: 'Music' },
-    { emoji: '🏕️', name: 'Camps & Outdoors', count: (counts['Camps'] || 0) + (counts['Outdoor'] || 0),      filter: 'Outdoor' },
-    { emoji: '🧠', name: 'STEM & Academics', count: (counts['STEM'] || 0) + (counts['Academic'] || 0),       filter: 'STEM' },
-    { emoji: '🎭', name: 'Theater & Drama',  count: counts['Theater'] || 0,                                  filter: 'Theater' },
-    { emoji: '🌱', name: 'Early Childhood',  count: counts['Early Childhood'] || 0,                          filter: 'Early Childhood' },
-    { emoji: '🏊', name: 'Swimming',         count: counts['Swimming'] || 0,                                 filter: 'Swimming' },
-    { emoji: '🍳', name: 'Cooking',          count: counts['Cooking'] || 0,                                  filter: 'Cooking' },
-    { emoji: '🌍', name: 'Language',         count: counts['Language'] || 0,                                 filter: 'Language' },
+    { icon: 'Sports', name: 'Sports & Fitness', count: (counts['Sports'] || 0) + (counts['Martial Arts'] || 0), filter: 'Sports' },
+    { icon: 'Arts', name: 'Arts & Crafts',    count: counts['Arts'] || 0,                                     filter: 'Arts' },
+    { icon: 'Music', name: 'Music & Dance',    count: (counts['Music'] || 0) + (counts['Dance'] || 0),         filter: 'Music' },
+    { icon: 'Camps', name: 'Camps & Outdoors', count: (counts['Camps'] || 0) + (counts['Outdoor'] || 0),      filter: 'Outdoor' },
+    { icon: 'STEM', name: 'STEM & Academics', count: (counts['STEM'] || 0) + (counts['Academic'] || 0),       filter: 'STEM' },
+    { icon: 'Theater', name: 'Theater & Drama',  count: counts['Theater'] || 0,                                  filter: 'Theater' },
+    { icon: 'Early Childhood', name: 'Early Childhood',  count: counts['Early Childhood'] || 0,                          filter: 'Early Childhood' },
+    { icon: 'Swimming', name: 'Swimming',         count: counts['Swimming'] || 0,                                 filter: 'Swimming' },
+    { icon: 'Cooking', name: 'Cooking',          count: counts['Cooking'] || 0,                                  filter: 'Cooking' },
+    { icon: 'Language', name: 'Language',         count: counts['Language'] || 0,                                 filter: 'Language' },
   ];
 
   const buildHref = (filter: string) => {
@@ -79,8 +80,8 @@ export default function Categories() {
               href={buildHref(cat.filter)}
               className="card text-center hover:bg-cream-300 transition-colors duration-base cursor-pointer group no-underline"
             >
-              <div className="text-5xl mb-4 group-hover:scale-110 transition-transform duration-base">
-                {cat.emoji}
+              <div className="mb-4 flex justify-center group-hover:scale-110 transition-transform duration-base">
+                <IconChip name={cat.icon} />
               </div>
               <h3 className="text-heading-sm mb-2">{cat.name}</h3>
               <p className="text-xs text-text-muted font-medium">{cat.count} activities</p>

@@ -1,11 +1,12 @@
 import Link from 'next/link';
+import { LineIcon } from './LineIcon';
 
 // Hero CTAs mirror /for-families: account creation is the primary action,
 // browsing is secondary. (The waitlist fallback was removed 2026-11-18.)
 export default function Hero() {
   const activities = [
     {
-      icon: '⚽',
+      icon: 'Sports',
       bg: '#D6EEF2',
       name: 'Fremont Youth Soccer',
       provider: 'Seattle FC Academy',
@@ -16,7 +17,7 @@ export default function Hero() {
       tagColor: 'bg-emerald-100 text-emerald-700',
     },
     {
-      icon: '🎨',
+      icon: 'Arts',
       bg: '#F5EFE0',
       name: 'Phinney Arts Studio',
       provider: 'Phinney Ridge Arts',
@@ -27,7 +28,7 @@ export default function Hero() {
       tagColor: 'bg-amber-100 text-amber-700',
     },
     {
-      icon: '🔬',
+      icon: 'STEM',
       bg: '#EBF2F8',
       name: 'Burke Museum STEM',
       provider: 'Burke Museum',
@@ -38,7 +39,7 @@ export default function Hero() {
       tagColor: 'bg-emerald-100 text-emerald-700',
     },
     {
-      icon: '🎭',
+      icon: 'Theater',
       bg: '#F0EBF8',
       name: 'Seattle Children\'s Theatre',
       provider: 'SCT Drama Camp',
@@ -119,7 +120,7 @@ export default function Hero() {
             {/* Search bar header */}
             <div className="bg-[#0A4A5A] px-5 pt-5 pb-4">
               <div className="flex items-center gap-2 bg-white/10 rounded-xl px-3 py-2.5 mb-3">
-                <span className="text-white/50 text-[12px]">🔍</span>
+                <LineIcon name="search" size={14} color="rgba(255,255,255,0.5)" />
                 <span className="text-white/70 text-[12px]">Activities near Fremont, Seattle</span>
               </div>
               {/* Filter pills */}
@@ -165,7 +166,7 @@ export default function Hero() {
                     className="w-10 h-10 rounded-[10px] flex items-center justify-center text-lg flex-shrink-0"
                     style={{ background: item.bg }}
                   >
-                    {item.icon}
+                    <LineIcon name={item.icon} size={20} color="#A8865A" />
                   </div>
 
                   <div className="flex-1 min-w-0">

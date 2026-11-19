@@ -1,22 +1,24 @@
+import { IconChip } from './LineIcon';
+
 export default function Problem() {
   const problems = [
     {
-      icon: '🏃',
+      icon: 'tabs',
       title: 'The Camp & Activity Marathon',
       body: 'Every season it\'s the same. Hours of searching, comparing, and second-guessing — before you\'ve booked a single thing.',
       realTalk: '"We counted. 6 sites. That\'s too many."',
     },
     {
-      icon: '🌀',
+      icon: 'inbox',
       title: 'The Booking Black Hole',
       body: 'Payment here. Schedule there. Confirmation buried in your inbox. Nothing talks to anything else.',
       realTalk: '"One place. That\'s all it should take."',
     },
     {
-      icon: '⏰',
+      icon: 'full',
       title: 'The Always-Full Problem',
       body: 'You found the perfect one. Great reviews. Right age group. Right price. Waitlist only. Try again next year.',
-      realTalk: '"Little Sound shows you what\'s open right now."',
+      realTalk: '"Little Sound tracks signup dates, so you hear before spots go."',
     },
   ];
 
@@ -49,7 +51,7 @@ export default function Problem() {
               {/* Top accent bar */}
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#1A7A8A] to-[#2A9AAA]" />
 
-              <span className="text-3xl mb-4 block">{p.icon}</span>
+              <IconChip name={p.icon} className="mb-5" />
 
               <h3 className="font-['Cormorant_Garamond'] text-[19px] font-medium text-[#1C3A4A] mb-3">
                 {p.title}

@@ -4,29 +4,30 @@ import Link from 'next/link';
 import Footer from '../components/Footer';
 import CTA from '../components/CTA';
 import { useCatalogStats } from '../components/useCatalogStats';
+import { IconChip } from '../components/LineIcon';
 
 const CATEGORY_TILES = [
-  { emoji: '⚽', name: 'Sports & Fitness',  filter: 'Sports' },
-  { emoji: '🎨', name: 'Arts & Crafts',     filter: 'Arts' },
-  { emoji: '🏊', name: 'Swimming',          filter: 'Swimming' },
-  { emoji: '🏕️', name: 'Camps & Outdoors', filter: 'Outdoor' },
-  { emoji: '🧠', name: 'STEM & Academics',  filter: 'STEM' },
-  { emoji: '🎵', name: 'Music & Dance',     filter: 'Music' },
+  { icon: 'Sports', name: 'Sports & Fitness',  filter: 'Sports' },
+  { icon: 'Arts', name: 'Arts & Crafts',     filter: 'Arts' },
+  { icon: 'Swimming', name: 'Swimming',          filter: 'Swimming' },
+  { icon: 'Camps', name: 'Camps & Outdoors', filter: 'Outdoor' },
+  { icon: 'STEM', name: 'STEM & Academics',  filter: 'STEM' },
+  { icon: 'Music', name: 'Music & Dance',     filter: 'Music' },
 ];
 
 const BENEFITS = [
   {
-    emoji: '🔍',
+    icon: 'search',
     title: 'One search, every option',
     body: 'Hundreds of Seattle programs, from sports to STEM, all searchable by age, neighborhood, and price. No more cross-referencing six different websites.',
   },
   {
-    emoji: '🎯',
+    icon: 'fit',
     title: 'Built for your kid',
     body: 'Filter by age, category, and neighborhood. See only what actually fits your family — not every activity in the city.',
   },
   {
-    emoji: '✅',
+    icon: 'fresh',
     title: 'Actually up to date',
     body: 'Details come straight from each provider&apos;s own site, and we check for new dates every day.',
   },
@@ -35,19 +36,19 @@ const BENEFITS = [
 const STEPS = [
   {
     num: '01',
-    icon: '🔍',
+    icon: 'search',
     title: 'Search by age and category',
     body: "Tell us what your kid is into and how old they are. We'll show you exactly what's available in Seattle — sorted and filtered for your family.",
   },
   {
     num: '02',
-    icon: '📋',
+    icon: 'compare',
     title: 'Compare your options',
     body: 'Browse providers side by side — prices, age ranges, neighborhoods, and descriptions all in one view. No more tab chaos.',
   },
   {
     num: '03',
-    icon: '🤝',
+    icon: 'connect',
     title: 'Connect with the right fit',
     body: "Click through to providers directly. You'll have everything you need to make a confident choice before you reach out.",
   },
@@ -145,7 +146,7 @@ export default function ForFamilies() {
                 key={b.title}
                 className="bg-[#F5EFE0] rounded-[20px] p-8 border border-[#E8DFC8]"
               >
-                <span className="text-4xl mb-5 block">{b.emoji}</span>
+                <IconChip name={b.icon} className="mb-5" />
                 <h3 className="font-['Cormorant_Garamond'] text-[22px] font-medium text-[#1C3A4A] mb-3">
                   {b.title}
                 </h3>
@@ -176,7 +177,7 @@ export default function ForFamilies() {
                 <p className="font-['Cormorant_Garamond'] text-[52px] font-medium text-[#1C3A4A]/8 leading-none mb-4">
                   {step.num}
                 </p>
-                <span className="text-3xl mb-5 block">{step.icon}</span>
+                <IconChip name={step.icon} className="mb-5" />
                 <h3 className="font-['Cormorant_Garamond'] text-[20px] font-medium text-[#1C3A4A] mb-3">
                   {step.title}
                 </h3>
@@ -207,8 +208,8 @@ export default function ForFamilies() {
                 href={`/discover?category=${encodeURIComponent(cat.filter)}`}
                 className="bg-[#F5EFE0] border border-[#E8DFC8] rounded-[20px] p-6 text-center hover:bg-[#EDE5D4] hover:border-[#0D5C6E]/20 transition-all duration-200 group no-underline"
               >
-                <div className="text-4xl mb-3 group-hover:scale-110 transition-transform duration-200">
-                  {cat.emoji}
+                <div className="mb-3 flex justify-center group-hover:scale-110 transition-transform duration-200">
+                  <IconChip name={cat.icon} />
                 </div>
                 <p className="text-[13px] font-semibold text-[#1C3A4A]">{cat.name}</p>
               </Link>
