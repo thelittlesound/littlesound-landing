@@ -5,49 +5,44 @@ import { LineIcon } from './LineIcon';
 // browsing is secondary. (The waitlist fallback was removed 2026-11-18.)
 export default function Hero() {
   const activities = [
+    // Real listings from the catalog (2026-11-19), shown as a search for a
+    // 9-year-old in West Seattle under $300. No ratings, reviews or
+    // availability: Little Sound doesn't have those.
     {
       icon: 'Sports',
-      bg: '#D6EEF2',
-      name: 'Fremont Youth Soccer',
-      provider: 'Seattle FC Academy',
-      detail: 'Ages 7–12 · $280/wk · 0.6 mi',
-      rating: '4.9',
-      reviews: '124',
-      tag: 'Open',
-      tagColor: 'bg-emerald-100 text-emerald-700',
+      name: 'Youth Pickleball Program',
+      provider: 'Westside Pickleball',
+      ages: 'Ages 8–15',
+      where: 'West Seattle',
+      cost: '$160/season',
+      tag: 'Sports',
     },
     {
       icon: 'Arts',
-      bg: '#F5EFE0',
-      name: 'Phinney Arts Studio',
-      provider: 'Phinney Ridge Arts',
-      detail: 'Ages 6–14 · $95/mo · 1.1 mi',
-      rating: '4.8',
-      reviews: '89',
-      tag: '2 spots left',
-      tagColor: 'bg-amber-100 text-amber-700',
+      name: 'Outdoor Art Camps & Workshops',
+      provider: 'West Seattle Art Nest',
+      ages: 'Ages 2–12',
+      where: 'West Seattle',
+      cost: '$195/session',
+      tag: 'Arts',
     },
     {
-      icon: 'STEM',
-      bg: '#EBF2F8',
-      name: 'Burke Museum STEM',
-      provider: 'Burke Museum',
-      detail: 'Ages 8–12 · $310/wk · 2.3 mi',
-      rating: '4.7',
-      reviews: '56',
-      tag: 'Open',
-      tagColor: 'bg-emerald-100 text-emerald-700',
+      icon: 'Swimming',
+      name: 'Beach-Side Swim Lessons at Colman Pool',
+      provider: 'Seattle Parks & Recreation',
+      ages: 'Ages 0–16',
+      where: 'West Seattle',
+      cost: '$105/session',
+      tag: 'Swimming',
     },
     {
-      icon: 'Theater',
-      bg: '#F0EBF8',
-      name: 'Seattle Children\'s Theatre',
-      provider: 'SCT Drama Camp',
-      detail: 'Ages 6–16 · $250/wk · 3.1 mi',
-      rating: '4.9',
-      reviews: '201',
-      tag: 'Filling fast',
-      tagColor: 'bg-red-100 text-red-600',
+      icon: 'Dance',
+      name: 'Dance, Acting & Music at the Junction',
+      provider: 'West Seattle Performing Arts',
+      ages: 'Ages 3–18',
+      where: 'West Seattle',
+      cost: '$170/month',
+      tag: 'Dance',
     },
   ];
 
@@ -67,7 +62,7 @@ export default function Hero() {
 
           {/* Headline */}
           <h1 className="font-['Cormorant_Garamond'] text-[clamp(44px,5.5vw,72px)] font-light leading-[1.1] tracking-tight text-white mb-6">
-            Every activity in Seattle,<br />
+            Seattle kids&apos; activities,<br />
             <em className="italic text-[#C4A882]">in one place.</em>
           </h1>
 
@@ -121,15 +116,15 @@ export default function Hero() {
             <div className="bg-[#0A4A5A] px-5 pt-5 pb-4">
               <div className="flex items-center gap-2 bg-white/10 rounded-xl px-3 py-2.5 mb-3">
                 <LineIcon name="search" size={14} color="rgba(255,255,255,0.5)" />
-                <span className="text-white/70 text-[12px]">Activities near Fremont, Seattle</span>
+                <span className="text-white/70 text-[12px]">age 9 in West Seattle under $300</span>
               </div>
               {/* Filter pills */}
               <div className="flex gap-2 overflow-x-auto pb-1">
                 {[
-                  { label: 'Age: 9', active: true },
-                  { label: 'All Categories', active: false },
-                  { label: 'Under $300/wk', active: true },
-                  { label: 'Within 3 mi', active: false },
+                  { label: 'Age 9', active: true },
+                  { label: 'West Seattle', active: true },
+                  { label: 'Under $300', active: true },
+                  { label: 'All categories', active: false },
                 ].map((f) => (
                   <span
                     key={f.label}
@@ -148,10 +143,10 @@ export default function Hero() {
             {/* Results meta */}
             <div className="px-4 pt-3 pb-2 flex items-center justify-between border-b border-[#E8DFC8]">
               <p className="text-[10px] font-bold uppercase tracking-widest text-[#7A9AAA]">
-                24 results near Fremont
+                Closest first
               </p>
               <div className="flex items-center gap-1 text-[10px] text-[#1A7A8A] font-semibold">
-                Sort: Best Match ▾
+                Best match
               </div>
             </div>
 
@@ -162,29 +157,22 @@ export default function Hero() {
                   key={item.name}
                   className="flex items-center gap-3 bg-[#F5EFE0] border border-[#E8DFC8] rounded-[14px] px-3 py-3 cursor-pointer hover:border-[#1A7A8A]/30 transition-colors"
                 >
-                  <div
-                    className="w-10 h-10 rounded-[10px] flex items-center justify-center text-lg flex-shrink-0"
-                    style={{ background: item.bg }}
-                  >
+                  <div className="w-10 h-10 rounded-[10px] flex items-center justify-center flex-shrink-0 bg-white border border-[#E8DFC8]">
                     <LineIcon name={item.icon} size={20} color="#A8865A" />
                   </div>
 
                   <div className="flex-1 min-w-0">
                     <p className="text-[12px] font-semibold text-[#1C3A4A] truncate">{item.name}</p>
                     <p className="text-[10px] text-[#7A9AAA] truncate">{item.provider}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      
-                      <span className="text-[10px] text-[#7A9AAA]">({item.reviews})</span>
-                      <span className="text-[10px] text-[#7A9AAA]">· {item.detail.split('·')[2]}</span>
-                    </div>
+                    <p className="text-[10px] text-[#3A5A6A] mt-1">{item.ages} · {item.where}</p>
                   </div>
 
                   <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-                    <span className={`text-[10px] font-semibold px-2 py-1 rounded-full whitespace-nowrap ${item.tagColor}`}>
+                    <span className="text-[10px] font-semibold px-2 py-1 rounded-full whitespace-nowrap bg-teal-100 text-teal-800">
                       {item.tag}
                     </span>
-                    <span className="text-[11px] font-bold text-[#1C3A4A]">
-                      {item.detail.split('·')[1].trim()}
+                    <span className="text-[11px] font-semibold text-[#1C3A4A]">
+                      {item.cost}
                     </span>
                   </div>
                 </div>

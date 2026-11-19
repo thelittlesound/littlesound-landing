@@ -195,7 +195,7 @@ export default function FamilySignupPage() {
           <em className="italic text-[#0D5C6E]">Little Sound account.</em>
         </h1>
         <p className="text-[#3A5A6A] text-[16px] leading-relaxed max-w-[400px] mx-auto">
-          Save activities, track bookings, and get picks matched to your family. Free to join.
+          Save activities, plan your family&apos;s week, and see what fits each child. Free to join.
         </p>
       </div>
 

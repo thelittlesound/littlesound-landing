@@ -4,11 +4,11 @@ import Nav from './components/Nav';
 
 export const metadata: Metadata = {
   title: 'Little Sound | Family Activity Planning Platform',
-  description: 'Discover, plan, and book kids\' activities in one place. Less searching. More living. Families first.',
-  keywords: 'kids activities, camps, Seattle, family planning, activity booking',
+  description: 'Find and plan kids\' camps, classes and sports across Seattle, in one place. Less searching. More living. Families first.',
+  keywords: 'kids activities, camps, Seattle, family planning, activity planning',
   openGraph: {
     title: 'Little Sound',
-    description: 'Discover, plan, and book kids\' activities in one place.',
+    description: 'Find and plan kids\' camps, classes and sports across Seattle, in one place.',
     url: 'https://thelittlesound.com',
     siteName: 'Little Sound',
     images: [

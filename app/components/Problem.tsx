@@ -12,13 +12,13 @@ export default function Problem() {
       icon: 'inbox',
       title: 'The Booking Black Hole',
       body: 'Payment here. Schedule there. Confirmation buried in your inbox. Nothing talks to anything else.',
-      realTalk: '"One place. That\'s all it should take."',
+      realTalk: '"Your saved picks, dates and clashes, in one family plan."',
     },
     {
       icon: 'full',
       title: 'The Always-Full Problem',
       body: 'You found the perfect one. Great reviews. Right age group. Right price. Waitlist only. Try again next year.',
-      realTalk: '"Little Sound tracks signup dates, so you hear before spots go."',
+      realTalk: '"Save it, and we\'ll email you before registration opens."',
     },
   ];
 

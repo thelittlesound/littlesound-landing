@@ -6,6 +6,8 @@ export interface CatalogStats {
   programs: number;
   providers: number;
   categories: number;
+  /** Programs per catalog category (seed + approved provider listings). */
+  byCategory?: Record<string, number>;
 }
 
 /** Round down to a friendly figure: nearest 50 from 100 up, nearest 10 from 20 up. */
@@ -19,7 +21,9 @@ export function roundedCount(n: number): string {
 export function catalogStats(items: { provider?: string | null; category?: string | null }[]): CatalogStats {
   const providers = new Set(items.map((x) => (x.provider || '').toLowerCase().trim()).filter(Boolean));
   const categories = new Set(items.map((x) => x.category).filter(Boolean));
-  return { programs: items.length, providers: providers.size, categories: categories.size };
+  const byCategory: Record<string, number> = {};
+  for (const x of items) if (x.category) byCategory[x.category] = (byCategory[x.category] || 0) + 1;
+  return { programs: items.length, providers: providers.size, categories: categories.size, byCategory };
 }
 
 /** Shown until /api/stats answers (figures as of 2026-11-18). */

@@ -20,5 +20,7 @@ export function useCatalogStats() {
     programs: roundedCount(stats.programs),
     providers: roundedCount(stats.providers),
     categories: String(stats.categories),
+    /** Exact per-category counts once /api/stats answers; null until then. */
+    byCategory: stats.byCategory ?? null,
   };
 }

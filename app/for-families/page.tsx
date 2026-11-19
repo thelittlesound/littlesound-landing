@@ -18,8 +18,8 @@ const CATEGORY_TILES = [
 const BENEFITS = [
   {
     icon: 'search',
-    title: 'One search, every option',
-    body: 'Hundreds of Seattle programs, from sports to STEM, all searchable by age, neighborhood, and price. No more cross-referencing six different websites.',
+    title: 'One search, hundreds of options',
+    body: 'Hundreds of Seattle programs, from sports to STEM, all searchable by age, neighborhood and activity. No more cross-referencing six different websites.',
   },
   {
     icon: 'fit',
@@ -29,7 +29,7 @@ const BENEFITS = [
   {
     icon: 'fresh',
     title: 'Actually up to date',
-    body: 'Details come straight from each provider&apos;s own site, and we check for new dates every day.',
+    body: 'Details come straight from each provider\'s own site, and we check for new dates every day.',
   },
 ];
 
@@ -38,19 +38,19 @@ const STEPS = [
     num: '01',
     icon: 'search',
     title: 'Search by age and category',
-    body: "Tell us what your kid is into and how old they are. We'll show you exactly what's available in Seattle — sorted and filtered for your family.",
+    body: "Tell us what your kid is into and how old they are. We'll show you what fits, sorted and filtered for your family.",
   },
   {
     num: '02',
     icon: 'compare',
     title: 'Compare your options',
-    body: 'Browse providers side by side — prices, age ranges, neighborhoods, and descriptions all in one view. No more tab chaos.',
+    body: 'Every listing shows when, ages, where and cost the same way, all in one place. No more tab chaos.',
   },
   {
     num: '03',
     icon: 'connect',
     title: 'Connect with the right fit',
-    body: "Click through to providers directly. You'll have everything you need to make a confident choice before you reach out.",
+    body: "Every card links straight to the provider's own site for the full details and sign-up.",
   },
 ];
 
@@ -75,7 +75,7 @@ export default function ForFamilies() {
             </h1>
 
             <p className="text-white/70 text-lg leading-relaxed max-w-[480px] mb-10">
-              Little Sound is Seattle&apos;s family activity platform. Search camps, classes, and sports by age, neighborhood, and price — all in one place.
+              Little Sound is Seattle&apos;s family activity platform. Search camps, classes, and sports by age, neighborhood, and activity — all in one place.
             </p>
 
             <div className="flex flex-col sm:flex-row flex-wrap gap-4 mb-4">
@@ -197,7 +197,7 @@ export default function ForFamilies() {
               Activities for every interest.
             </h2>
             <p className="text-[17px] text-[#3A5A6A] max-w-xl mx-auto mt-4">
-              From swimming to coding to theater — if it exists in Seattle, you&apos;ll find it here.
+              From swimming to coding to theater, with more added every week.
             </p>
           </div>
 

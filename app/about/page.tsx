@@ -37,6 +37,7 @@ const ROADMAP = [
       'Search by age, neighborhood and activity',
       'Every kind of activity, from sports to STEM',
       'Family profiles, saved activities and a weekly planner',
+      'Calendar feed: add your plan to your phone\'s calendar',
     ],
   },
   {
@@ -58,7 +59,6 @@ const ROADMAP = [
     items: [
       'Expand to Portland, Denver, Austin',
       'National provider network',
-      'Calendar sync and scheduling tools',
       'Family membership program',
     ],
   },
@@ -116,7 +116,7 @@ export default function About() {
                 It&apos;s not that the activities aren&apos;t out there. Seattle has an incredible ecosystem of camps, studios, sports leagues, and programs. The problem is finding them. Every provider has their own website. Registration opens on different dates. Pricing is buried. Age ranges are unclear. And by the time you&apos;ve done the research, the session is full.
               </p>
               <p>
-                We built Little Sound to fix that — starting with the city we know best. One place to search, compare, and connect with Seattle&apos;s best activity providers. No more tab chaos.
+                We built Little Sound to fix that — starting with the city we know best. One place to search, save and plan, across Seattle&apos;s camps, studios and teams. No more tab chaos.
               </p>
               <p>
                 We&apos;re not a big tech company. We&apos;re not backed by people who&apos;ve never packed a camp bag at 7am. <strong className="text-[#1C3A4A] font-semibold">We&apos;re parents who got fed up and decided to fix it.</strong>

@@ -1,19 +1,19 @@
 'use client';
 
-import activities from '../data/activities.json';
 import Link from 'next/link';
 import { useState } from 'react';
 import { IconChip } from './LineIcon';
+import { useCatalogStats } from './useCatalogStats';
 
 const AGE_FILTERS = ['2–4', '5–7', '8–11', '12+'];
 
 export default function Categories() {
   const [selectedAge, setSelectedAge] = useState('');
 
-  const counts = activities.reduce((acc: Record<string, number>, a: { category: string }) => {
-    acc[a.category] = (acc[a.category] || 0) + 1;
-    return acc;
-  }, {});
+  // Live counts for the whole catalog (seed + approved listings).
+  const live = useCatalogStats().byCategory;
+  // Shown only once the live counts arrive, so the seed-only numbers never flash.
+  const counts: Record<string, number> = live ?? {};
 
   const categories = [
     { icon: 'Sports', name: 'Sports & Fitness', count: (counts['Sports'] || 0) + (counts['Martial Arts'] || 0), filter: 'Sports' },
@@ -84,14 +84,14 @@ export default function Categories() {
                 <IconChip name={cat.icon} />
               </div>
               <h3 className="text-heading-sm mb-2">{cat.name}</h3>
-              <p className="text-xs text-text-muted font-medium">{cat.count} activities</p>
+              <p className="text-xs text-text-muted font-medium min-h-[1rem]">{live ? `${cat.count} ${cat.count === 1 ? 'program' : 'programs'}` : ''}</p>
             </Link>
           ))}
         </div>
 
         <div className="mt-16 text-center">
           <p className="text-body-lg text-text-mid mb-8">
-            Explore hundreds of activities right in your neighborhood.
+            Explore hundreds of programs across Seattle, from sports to STEM.
           </p>
           <Link
             href={selectedAge ? `/discover?age=${encodeURIComponent(selectedAge)}` : '/discover'}

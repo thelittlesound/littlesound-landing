@@ -567,7 +567,7 @@ function SuccessScreen({ businessName }: { businessName: string }) {
           You&apos;re submitted!
         </h2>
         <p className="text-[15px] text-[#3A5A6A] leading-relaxed mb-8">
-          <strong className="text-[#1C3A4A]">{businessName}</strong> is in review. We&apos;ll have your listing live within 24 hours — and notify the Seattle families already waiting.
+          <strong className="text-[#1C3A4A]">{businessName}</strong> is in review. We&apos;ll have your listing live within 24 hours.
         </p>
         <div className="flex flex-col gap-3">
           {/* Plain <a>, not next/link — a full navigation guarantees the

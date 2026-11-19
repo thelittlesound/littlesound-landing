@@ -10,7 +10,7 @@ const BENEFITS = [
   {
     icon: 'search',
     title: 'Get discovered organically',
-    body: 'Families searching by age, neighborhood, and category find you directly — no ad budget, no algorithm to beat. Just parents looking for exactly what you offer.',
+    body: 'Families searching by age, neighborhood, and category find you directly — no ad budget, no paying for placement. Just parents looking for exactly what you offer.',
   },
   {
     icon: 'clipboard',
@@ -34,13 +34,13 @@ const STEPS = [
     num: '01',
     icon: 'mail',
     title: 'Claim or submit your listing',
-    body: 'Email us at hello@thelittlesound.com. If you\'re already catalogued, we\'ll get you verified in 24 hours. New to the platform? We\'ll set you up.',
+    body: 'Find your listing and claim it from a free provider account, or add a new one. We verify claims within 24 hours.',
   },
   {
     num: '02',
     icon: 'pencil',
     title: 'Keep your details current',
-    body: 'Update your age ranges, pricing, availability windows, and descriptions any time. Accurate listings get more clicks — and more families in the door.',
+    body: 'Update your ages, prices and description any time. Accurate listings help families choose you with confidence.',
   },
   {
     num: '03',

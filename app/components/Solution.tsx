@@ -13,14 +13,14 @@ export default function Solution() {
       num: '02',
       icon: 'sparkle',
       title: 'We Find the Best Options',
-      body: 'Picks matched to your kids, with details straight from each provider\'s own site.',
+      body: 'Results matched to each child\'s age and interests, with details straight from each provider\'s own site.',
       honest: 'We read their sites so you don\'t have to.',
     },
     {
       num: '03',
       icon: 'go',
-      title: 'Compare and Get Going',
-      body: 'Compare your top picks side by side, save them to your family plan, and sign up directly with the provider.',
+      title: 'Save and Get Going',
+      body: 'Every card shows when, ages, where and cost the same way, so you can weigh options at a glance. Save your favorites to your family plan, then sign up on the provider\'s own site.',
       honest: 'Go make some coffee. You\'ve earned it.',
     },
   ];
