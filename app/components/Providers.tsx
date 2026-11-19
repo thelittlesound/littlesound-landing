@@ -8,12 +8,12 @@ export default function Providers() {
     {
       emoji: '📋',
       title: 'We do the work',
-      body: "We've already catalogued 70+ Seattle providers. Your listing may already be live. Just claim it and keep the details accurate.",
+      body: "We've already catalogued hundreds of Seattle providers. Your listing may already be live. Just claim it and keep the details accurate.",
     },
     {
       emoji: '🤝',
       title: 'Free to start',
-      body: 'List for free during the Seattle beta. We grow together — paid features come only after families are booking.',
+      body: 'Listing on Little Sound is free. Claim yours, keep it accurate, and let families find you.',
     },
   ];
 
@@ -29,7 +29,7 @@ export default function Providers() {
             Families are already<br />looking for you.
           </h2>
           <p className="text-[17px] text-[#3A5A6A] leading-relaxed">
-            Seattle families spend 6+ hours a month researching kids' activities across a dozen different websites. Little Sound is where they start. Be there when they search.
+            Seattle parents spend way too many hours hunting for kids' activities across a dozen different websites. Little Sound is where they start. Be there when they search.
           </p>
         </div>
 
@@ -37,7 +37,7 @@ export default function Providers() {
           {perks.map((p) => (
             <div key={p.title} className="bg-white/60 rounded-[20px] p-8">
               <span className="text-3xl mb-4 block">{p.emoji}</span>
-              <h3 className="font-['Cormorant_Garamond'] text-[22px] font-semibold text-[#1C3A4A] mb-3">
+              <h3 className="font-['Cormorant_Garamond'] text-[22px] font-medium text-[#1C3A4A] mb-3">
                 {p.title}
               </h3>
               <p className="text-[15px] text-[#3A5A6A] leading-relaxed">

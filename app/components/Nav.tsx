@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
 
 const LINKS = [
   { label: 'Browse Activities', href: '/discover' },
@@ -13,6 +14,21 @@ const LINKS = [
 export default function Nav() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  // Signed-in visitors see "My dashboard" instead of Sign in / Create account
+  // (2026-11-18 brand sweep). A provider_profiles row means a provider;
+  // anyone else signed in is treated as a family.
+  const [dashboard, setDashboard] = useState<string | null>(null);
+
+  useEffect(() => {
+    const supabase = createSupabaseBrowserClient();
+    let alive = true;
+    supabase.auth.getUser().then(async ({ data: { user } }: { data: { user: { id: string } | null } }) => {
+      if (!user || !alive) return;
+      const { data } = await supabase.from('provider_profiles').select('id').eq('id', user.id).maybeSingle();
+      if (alive) setDashboard(data ? '/providers/dashboard' : '/families/dashboard');
+    });
+    return () => { alive = false; };
+  }, [pathname]);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0D5C6E]/95 backdrop-blur-sm border-b border-white/10 h-16">
@@ -53,6 +69,15 @@ export default function Nav() {
 
         {/* Desktop CTA */}
         <div className="hidden md:flex items-center gap-4 shrink-0">
+          {dashboard ? (
+            <Link
+              href={dashboard}
+              className="inline-flex bg-[#C4A882] hover:bg-[#A8865A] text-white text-sm font-semibold rounded-full px-5 py-2.5 transition-colors"
+            >
+              My dashboard
+            </Link>
+          ) : (
+          <>
           <Link
             href="/families/login"
             className="text-sm font-medium text-white/65 hover:text-white transition-colors"
@@ -65,6 +90,8 @@ export default function Nav() {
           >
             Create Account
           </Link>
+          </>
+          )}
         </div>
 
         {/* Mobile hamburger */}
@@ -94,6 +121,16 @@ export default function Nav() {
               {link.label}
             </Link>
           ))}
+          {dashboard ? (
+            <Link
+              href={dashboard}
+              onClick={() => setOpen(false)}
+              className="block mt-4 text-center bg-[#C4A882] hover:bg-[#A8865A] text-white font-semibold rounded-full px-5 py-3 text-[15px] transition-colors"
+            >
+              My dashboard
+            </Link>
+          ) : (
+          <>
           <Link
             href="/families/login"
             onClick={() => setOpen(false)}
@@ -108,6 +145,8 @@ export default function Nav() {
           >
             Create Account
           </Link>
+          </>
+          )}
         </div>
       )}
     </nav>

@@ -49,11 +49,11 @@ export default function Solution() {
               key={step.num}
               className="bg-white/5 border border-white/10 rounded-[20px] p-9"
             >
-              <p className="font-['Cormorant_Garamond'] text-[52px] font-semibold text-white/8 leading-none mb-4">
+              <p className="font-['Cormorant_Garamond'] text-[52px] font-medium text-white/8 leading-none mb-4">
                 {step.num}
               </p>
               <span className="text-[26px] mb-4 block">{step.icon}</span>
-              <h3 className="font-['Cormorant_Garamond'] text-[20px] font-semibold text-white/90 mb-3">
+              <h3 className="font-['Cormorant_Garamond'] text-[20px] font-medium text-white/90 mb-3">
                 {step.title}
               </h3>
               <p className="text-[14px] leading-[1.8] text-white/45 mb-4">

@@ -575,7 +575,7 @@ export default function DashboardClient({
                       For {forKidOf(s)!.label}
                     </p>
                   )}
-                  <h3 className="font-['Cormorant_Garamond'] text-[20px] font-semibold text-[#1C3A4A] leading-snug">
+                  <h3 className="font-['Cormorant_Garamond'] text-[20px] font-medium text-[#1C3A4A] leading-snug">
                     {s.title}
                   </h3>
                   {s.provider && (

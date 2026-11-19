@@ -16,7 +16,7 @@ const VALUES = [
   {
     emoji: '🤝',
     title: 'Honest about what we are',
-    body: "We're in beta. We're a small team. We don't have everything figured out. We'd rather be upfront about that than overpromise and underdeliver.",
+    body: "We're a small team. We don't have everything figured out. We'd rather be upfront about that than overpromise and underdeliver.",
   },
   {
     emoji: '🌱',
@@ -28,14 +28,14 @@ const VALUES = [
 const ROADMAP = [
   {
     phase: 'Phase 1',
-    label: 'Seattle Beta',
-    timeframe: 'Q3 2026',
+    label: 'Seattle',
+    timeframe: 'Now',
     status: 'now',
     items: [
-      'Launch with 80+ Seattle activity providers',
-      'Family search and discovery platform',
-      '10 activity categories',
-      'Founding family waitlist open',
+      'Hundreds of programs from Seattle providers',
+      'Search by age, neighborhood and activity',
+      'Every kind of activity, from sports to STEM',
+      'Family profiles, saved activities and a weekly planner',
     ],
   },
   {
@@ -46,7 +46,6 @@ const ROADMAP = [
     items: [
       'In-app booking and payments',
       'Provider CRM and enrollment tools',
-      'Family profiles and saved favorites',
       'Reviews and ratings',
     ],
   },
@@ -153,7 +152,7 @@ export default function About() {
             {VALUES.map((v) => (
               <div key={v.title} className="bg-white rounded-[20px] p-9 border border-[#E8DFC8]">
                 <span className="text-4xl mb-5 block">{v.emoji}</span>
-                <h3 className="font-['Cormorant_Garamond'] text-[22px] font-semibold text-[#1C3A4A] mb-3">
+                <h3 className="font-['Cormorant_Garamond'] text-[22px] font-medium text-[#1C3A4A] mb-3">
                   {v.title}
                 </h3>
                 <p className="text-[15px] text-[#3A5A6A] leading-relaxed">{v.body}</p>
@@ -195,7 +194,7 @@ export default function About() {
                     </span>
                   )}
                 </div>
-                <h3 className={`font-['Cormorant_Garamond'] text-[24px] font-semibold mb-1 ${phase.status === 'now' ? 'text-white' : 'text-[#1C3A4A]'}`}>
+                <h3 className={`font-['Cormorant_Garamond'] text-[24px] font-medium mb-1 ${phase.status === 'now' ? 'text-white' : 'text-[#1C3A4A]'}`}>
                   {phase.label}
                 </h3>
                 <p className={`text-[13px] mb-6 ${phase.status === 'now' ? 'text-white/50' : 'text-[#7A9AAA]'}`}>
@@ -226,14 +225,14 @@ export default function About() {
             <em className="italic text-[#C4A882]">Let&apos;s fix it together.</em>
           </h2>
           <p className="text-[17px] text-white/55 leading-relaxed mb-10">
-            Join 100+ families already on the waitlist, or reach out directly — we&apos;d love to hear from you.
+            Create a free account and start searching, or reach out directly — we&apos;d love to hear from you.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/for-families"
+              href="/families/signup"
               className="inline-flex items-center justify-center bg-[#C4A882] hover:bg-[#A8865A] text-white font-semibold rounded-full px-8 py-4 text-[15px] transition-all duration-200 hover:-translate-y-0.5"
             >
-              Join the Waitlist →
+              Create your free account →
             </Link>
             <a
               href="mailto:hello@thelittlesound.com"

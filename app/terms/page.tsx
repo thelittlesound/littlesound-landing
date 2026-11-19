@@ -7,7 +7,7 @@ export default function TermsOfService() {
       <p>By joining the Little Sound waitlist, creating a family or provider account, or otherwise using our website at thelittlesound.com, you agree to these terms. Please read them — they're short and written in plain English.</p>
  
       <h2 style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: "1.25rem", marginTop: "2.5rem", marginBottom: "0.75rem" }}>Who We Are</h2>
-      <p>Little Sound is a family activity discovery and booking platform based in Seattle, Washington. We're currently in pre-launch and building toward a beta in Q3 2026.</p>
+      <p>Little Sound is a family activity discovery and booking platform based in Seattle, Washington.</p>
  
       <h2 style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: "1.25rem", marginTop: "2.5rem", marginBottom: "0.75rem" }}>The Waitlist</h2>
       <p>By joining our waitlist, you're expressing interest in early access to Little Sound. This is not a purchase or a binding commitment on either side. We'll contact you when we're ready to onboard beta users. You can remove yourself at any time by unsubscribing from our emails.</p>

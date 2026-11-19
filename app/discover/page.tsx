@@ -139,7 +139,7 @@ function ActivityCard({
         </div>
         <div className="flex flex-col gap-[3px] min-w-0">
           <span className="text-[11px] font-semibold uppercase tracking-[0.07em] text-[#1A7A8A]">{kindLine}</span>
-          <h3 className="font-['Cormorant_Garamond'] text-[21px] font-semibold leading-[1.15] text-[#1C3A4A]">{a.title}</h3>
+          <h3 className="font-['Cormorant_Garamond'] text-[21px] font-medium leading-[1.15] text-[#1C3A4A]">{a.title}</h3>
           <span className="text-[13px] text-[#4E6B78]">{a.provider}</span>
         </div>
       </div>

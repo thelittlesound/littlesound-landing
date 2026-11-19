@@ -371,7 +371,7 @@ export default function FamilyRhythm({
           {week.map((d, i) => (
             <div key={d} className={`py-3 text-center ${d === today ? 'bg-[#F5EFE0]' : ''}`}>
               <p className="text-[11px] font-semibold uppercase tracking-wider text-[#7A9AAA]">{d === today ? 'Today' : dow(d)}</p>
-              <p className={`font-['Cormorant_Garamond'] text-[22px] leading-none mt-0.5 ${d === today ? 'text-[#0D5C6E] font-semibold' : d < today ? 'text-[#B5C4CC]' : 'text-[#1C3A4A]'}`}>{Number(d.slice(8))}</p>
+              <p className={`font-['Cormorant_Garamond'] text-[22px] leading-none mt-0.5 ${d === today ? 'text-[#0D5C6E] font-medium' : d < today ? 'text-[#B5C4CC]' : 'text-[#1C3A4A]'}`}>{Number(d.slice(8))}</p>
             </div>
           ))}
         </div>

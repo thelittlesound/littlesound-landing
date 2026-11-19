@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import Footer from '../components/Footer';
+import CTA from '../components/CTA';
+import { useCatalogStats } from '../components/useCatalogStats';
 
 const CATEGORY_TILES = [
   { emoji: '⚽', name: 'Sports & Fitness',  filter: 'Sports' },
@@ -17,7 +18,7 @@ const BENEFITS = [
   {
     emoji: '🔍',
     title: 'One search, every option',
-    body: '81+ Seattle activities across 10 categories, all searchable by age, neighborhood, and price. No more cross-referencing six different websites.',
+    body: 'Hundreds of Seattle programs, from sports to STEM, all searchable by age, neighborhood, and price. No more cross-referencing six different websites.',
   },
   {
     emoji: '🎯',
@@ -27,7 +28,7 @@ const BENEFITS = [
   {
     emoji: '✅',
     title: 'Actually up to date',
-    body: 'Provider info, age ranges, and pricing are verified regularly. What you see is what you get — no outdated listings.',
+    body: 'Details come straight from each provider&apos;s own site, and we check for new dates every day.',
   },
 ];
 
@@ -52,40 +53,8 @@ const STEPS = [
   },
 ];
 
-const PLAN_FEATURES = [
-  'Full access to all Seattle activity listings',
-  'Filter by age, category, neighborhood, and price',
-  'Verified provider details and direct links',
-  'Early access to new features as we launch',
-  'Priority support from the Little Sound team',
-  'Price locked in at founding rate — forever',
-];
-
 export default function ForFamilies() {
-  const [email, setEmail] = useState('');
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email) return;
-    setStatus('loading');
-    try {
-      const res = await fetch('/api/waitlist', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-      if (res.ok) {
-        setStatus('success');
-        setEmail('');
-      } else {
-        setStatus('error');
-      }
-    } catch {
-      setStatus('error');
-    }
-  };
-
+  const stats = useCatalogStats();
   return (
     <main>
 
@@ -123,16 +92,10 @@ export default function ForFamilies() {
               </Link>
             </div>
 
-            <p className="text-white/50 text-[13px] mb-10">
-              Not ready yet?{' '}
-              <a href="#waitlist" className="text-white/75 underline underline-offset-2 hover:text-white">
-                Join the waitlist
-              </a>{' '}
-              instead.
-            </p>
+            <div className="mb-10" />
 
             <div className="flex flex-wrap gap-5">
-              {['Free to join', 'Seattle beta — Q3 2026', '$29/yr founding family pricing'].map((item) => (
+              {['Free to join', 'Hundreds of programs', 'No spam, ever'].map((item) => (
                 <span key={item} className="flex items-center gap-1.5 text-white/55 text-[13px]">
                   <span className="text-[#C4A882] font-bold">✓</span>
                   {item}
@@ -144,10 +107,10 @@ export default function ForFamilies() {
           {/* Right — stat cards */}
           <div className="hidden lg:grid grid-cols-2 gap-4">
             {[
-              { value: '81+', label: 'Activities listed', sub: 'across Seattle' },
-              { value: '10', label: 'Categories', sub: 'from sports to STEM' },
-              { value: '57+', label: 'Providers', sub: 'verified and active' },
-              { value: '100+', label: 'Families', sub: 'already on the waitlist' },
+              { value: stats.programs, label: 'Programs listed', sub: 'and counting' },
+              { value: stats.categories, label: 'Categories', sub: 'from sports to STEM' },
+              { value: stats.providers, label: 'Providers', sub: 'and counting' },
+              { value: 'Daily', label: 'Date checks', sub: 'from each provider’s site' },
             ].map((stat) => (
               <div
                 key={stat.label}
@@ -183,7 +146,7 @@ export default function ForFamilies() {
                 className="bg-[#F5EFE0] rounded-[20px] p-8 border border-[#E8DFC8]"
               >
                 <span className="text-4xl mb-5 block">{b.emoji}</span>
-                <h3 className="font-['Cormorant_Garamond'] text-[22px] font-semibold text-[#1C3A4A] mb-3">
+                <h3 className="font-['Cormorant_Garamond'] text-[22px] font-medium text-[#1C3A4A] mb-3">
                   {b.title}
                 </h3>
                 <p className="text-[15px] text-[#3A5A6A] leading-relaxed">{b.body}</p>
@@ -210,11 +173,11 @@ export default function ForFamilies() {
                 key={step.num}
                 className="bg-white rounded-[20px] p-9 border border-[#E8DFC8]"
               >
-                <p className="font-['Cormorant_Garamond'] text-[52px] font-semibold text-[#1C3A4A]/8 leading-none mb-4">
+                <p className="font-['Cormorant_Garamond'] text-[52px] font-medium text-[#1C3A4A]/8 leading-none mb-4">
                   {step.num}
                 </p>
                 <span className="text-3xl mb-5 block">{step.icon}</span>
-                <h3 className="font-['Cormorant_Garamond'] text-[20px] font-semibold text-[#1C3A4A] mb-3">
+                <h3 className="font-['Cormorant_Garamond'] text-[20px] font-medium text-[#1C3A4A] mb-3">
                   {step.title}
                 </h3>
                 <p className="text-[14px] leading-[1.8] text-[#3A5A6A]">{step.body}</p>
@@ -258,108 +221,14 @@ export default function ForFamilies() {
               className="inline-flex items-center gap-2 text-[#0D5C6E] hover:text-[#1A7A8A] font-semibold text-[15px] transition-colors group"
             >
               <span className="border-b border-[#0D5C6E]/40 group-hover:border-[#1A7A8A] pb-0.5">
-                Browse all 10 categories →
+                Browse every category →
               </span>
             </Link>
           </div>
         </div>
       </section>
 
-      {/* ── PRICING ── */}
-      <section className="bg-[#C5D8E8] py-24 px-6 md:px-10 lg:px-16">
-        <div className="max-w-[860px] mx-auto">
-          <div className="text-center mb-12">
-            <p className="text-xs font-bold uppercase tracking-widest text-[#0D5C6E] mb-4">Founding Family Pricing</p>
-            <h2 className="font-['Cormorant_Garamond'] text-[clamp(32px,4vw,50px)] font-light leading-[1.15] tracking-tight text-[#1C3A4A] mb-4">
-              Lock in your rate before we launch.
-            </h2>
-            <p className="text-[17px] text-[#3A5A6A] max-w-xl mx-auto">
-              Founding families get full access at $29/yr — and that price is locked in forever. When Little Sound opens to the public, the rate goes up.
-            </p>
-          </div>
-
-          <div className="bg-white rounded-[28px] p-10 md:p-14 border border-[#C4A882]/30 shadow-sm max-w-[580px] mx-auto">
-            {/* Price */}
-            <div className="flex items-end gap-2 mb-2">
-              <span className="font-['Cormorant_Garamond'] text-[72px] font-light text-[#0D5C6E] leading-none">$29</span>
-              <div className="mb-3">
-                <p className="text-[#3A5A6A] text-[15px] font-medium">/year</p>
-                <p className="text-[#C4A882] text-[13px] font-semibold">Founding family rate</p>
-              </div>
-            </div>
-            <p className="text-[13px] text-[#7A9AAA] mb-8 line-through">Regular price: $49+/yr</p>
-
-            {/* Features */}
-            <ul className="space-y-3 mb-10">
-              {PLAN_FEATURES.map((f) => (
-                <li key={f} className="flex items-start gap-3 text-[14px] text-[#1C3A4A]">
-                  <span className="text-[#0D5C6E] font-bold mt-0.5 flex-shrink-0">✓</span>
-                  {f}
-                </li>
-              ))}
-            </ul>
-
-            <a
-              href="#waitlist"
-              className="block w-full text-center bg-[#0D5C6E] hover:bg-[#1A7A8A] text-white font-semibold rounded-full py-4 text-[15px] transition-colors"
-            >
-              Join Free — Lock in $29/yr →
-            </a>
-            <p className="text-center text-[12px] text-[#7A9AAA] mt-3">
-              Free to join the waitlist. Pricing applies at launch.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* ── WAITLIST ── */}
-      <section id="waitlist" className="bg-[#0A4A5A] py-24 px-6 md:px-10 lg:px-16 text-center">
-        <div className="max-w-[640px] mx-auto">
-          <p className="text-xs font-bold uppercase tracking-widest text-[#C4A882] mb-6">
-            Join the Waitlist
-          </p>
-          <h2 className="font-['Cormorant_Garamond'] text-[clamp(34px,4vw,54px)] font-light leading-[1.15] tracking-tight text-white mb-5">
-            Your Sunday nights<br />
-            <em className="italic text-[#C4A882]">deserve better.</em>
-          </h2>
-          <p className="text-[17px] text-white/55 leading-relaxed font-['Cormorant_Garamond'] italic mb-10">
-            Join 100+ Seattle families already on the list. Early access. Founding pricing. No spam.
-          </p>
-
-          {status === 'success' ? (
-            <div className="bg-white/10 border border-white/20 rounded-2xl px-8 py-7 mb-8">
-              <p className="text-white font-semibold text-lg mb-1">You&apos;re on the list! 🎉</p>
-              <p className="text-white/60 text-sm">We&apos;ll be in touch before the Seattle beta opens this summer.</p>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="flex gap-3 max-w-[460px] mx-auto mb-4">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Your email address"
-                required
-                className="flex-1 bg-white text-[#1C3A4A] placeholder-[#7A9AAA] rounded-full px-5 py-4 text-[15px] outline-none focus:ring-2 focus:ring-[#C4A882]/50"
-              />
-              <button
-                type="submit"
-                disabled={status === 'loading'}
-                className="bg-white text-[#0A4A5A] hover:bg-[#F5EFE0] font-semibold rounded-full px-6 py-4 text-[15px] whitespace-nowrap transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-60"
-              >
-                {status === 'loading' ? 'Joining…' : 'Get Early Access →'}
-              </button>
-            </form>
-          )}
-
-          {status === 'error' && (
-            <p className="text-red-300 text-sm mb-4">Something went wrong — please try again.</p>
-          )}
-
-          <p className="text-white/30 text-[12px]">
-            We&apos;re Seattle parents. We hate spam as much as you do.
-          </p>
-        </div>
-      </section>
+      <CTA />
 
       <Footer />
     </main>

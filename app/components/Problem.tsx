@@ -51,7 +51,7 @@ export default function Problem() {
 
               <span className="text-3xl mb-4 block">{p.icon}</span>
 
-              <h3 className="font-['Cormorant_Garamond'] text-[19px] font-semibold text-[#1C3A4A] mb-3">
+              <h3 className="font-['Cormorant_Garamond'] text-[19px] font-medium text-[#1C3A4A] mb-3">
                 {p.title}
               </h3>
 

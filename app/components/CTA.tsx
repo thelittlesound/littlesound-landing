@@ -1,112 +1,52 @@
-'use client';
-
-import { useState } from 'react';
 import Link from 'next/link';
 
+// Closing "get started" section, shared by the home page and /for-families.
+// Replaced the waitlist form (2026-11-18): Little Sound is live, so every
+// waitlist ask is now "Create your free account". id="get-started" is the
+// anchor for in-page links.
 export default function CTA() {
-  const [email, setEmail] = useState('');
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email) return;
-    setStatus('loading');
-    try {
-      const res = await fetch('/api/waitlist', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-      if (res.ok) {
-        setStatus('success');
-        setEmail('');
-      } else {
-        setStatus('error');
-      }
-    } catch {
-      setStatus('error');
-    }
-  };
-
   return (
-    // id="waitlist" is the target for every "/#waitlist" link on the site
-    // (nav, hero fallback). Before this, the homepage had no such anchor, so
-    // those links just landed at the top of the page. scroll-mt clears the
-    // fixed nav.
-    <section id="waitlist" className="scroll-mt-16 bg-[#0A4A5A] py-24 px-6 md:px-10 lg:px-16 text-center">
+    <section id="get-started" className="scroll-mt-16 bg-teal-900 py-24 px-6 md:px-10 lg:px-16 text-center">
       <div className="max-w-[640px] mx-auto">
 
-        {/* Eyebrow */}
-        <p className="text-xs font-bold uppercase tracking-widest text-[#C4A882] mb-6">
-          Join the Waitlist
-        </p>
+        <p className="text-label text-gold mb-6">Get started</p>
 
-        {/* Headline */}
-        <h2 className="font-['Cormorant_Garamond'] text-[clamp(36px,4.5vw,56px)] font-light leading-[1.15] tracking-tight text-white mb-5">
-          Your Sunday nights<br />deserve better.
+        <h2 className="font-display text-[clamp(36px,4.5vw,56px)] font-light leading-[1.15] tracking-tight text-white mb-5">
+          Your Sunday nights<br />
+          <em className="italic text-gold">deserve better.</em>
         </h2>
 
-        <p className="text-[17px] text-white/55 leading-relaxed italic font-['Cormorant_Garamond'] mb-10">
-          Join 100+ Seattle families who are done spending evenings on five different websites. Early access. Founding pricing. No spam.
+        <p className="text-[17px] text-white/70 leading-relaxed mb-10">
+          Parents spend way too many hours hunting for kids&apos; activities. Little Sound gives that time back.
         </p>
 
-        {/* Form */}
-        {status === 'success' ? (
-          <div className="bg-white/10 border border-white/20 rounded-2xl px-8 py-7 mb-8">
-            <p className="text-white font-semibold text-lg mb-1">You're on the list! 🎉</p>
-            <p className="text-white/60 text-sm">We'll be in touch before the Seattle beta opens this summer.</p>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-[460px] mx-auto mb-4">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Your email address"
-              required
-              className="flex-1 bg-white text-[#1C3A4A] placeholder-[#7A9AAA] rounded-full px-5 py-4 text-[15px] outline-none focus:ring-2 focus:ring-[#C4A882]/50"
-            />
-            <button
-              type="submit"
-              disabled={status === 'loading'}
-              className="bg-white text-[#0A4A5A] hover:bg-[#F5EFE0] font-semibold rounded-full px-6 py-4 text-[15px] whitespace-nowrap transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-60"
-            >
-              {status === 'loading' ? 'Joining…' : 'Get Early Access →'}
-            </button>
-          </form>
-        )}
-
-        {status === 'error' && (
-          <p className="text-red-300 text-sm mb-4">Something went wrong — please try again.</p>
-        )}
-
-        <p className="text-white/60 text-[14px] mb-4">
-          Ready now?{' '}
+        <div className="flex flex-col sm:flex-row justify-center gap-3 mb-8">
           <Link
             href="/families/signup"
-            className="text-[#C4A882] font-semibold hover:text-white underline-offset-2 hover:underline transition-colors"
+            className="inline-flex items-center justify-center gap-2 bg-gold hover:bg-gold-dark text-white font-semibold rounded-pill px-7 py-4 text-[15px] transition-all duration-200 hover:-translate-y-0.5"
           >
-            Create your account &rarr;
+            Create your free account &rarr;
           </Link>
-        </p>
+          <Link
+            href="/discover"
+            className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-pill px-7 py-4 text-[15px] transition-all duration-200 border border-white/20"
+          >
+            Browse activities
+          </Link>
+        </div>
 
-        <p className="text-white/30 text-[12px] mb-8">
-          We're Seattle parents. We hate spam as much as you do.
-        </p>
-
-        {/* Perks */}
-        <div className="flex justify-center flex-wrap gap-7">
-          {[
-            'Free to join',
-            'Seattle beta — Q3 2026',
-            'Lock in founding family pricing',
-          ].map((perk) => (
+        <div className="flex justify-center flex-wrap gap-x-7 gap-y-2 mb-10">
+          {['Free to join', 'Hundreds of programs', 'No spam, ever'].map((perk) => (
             <span key={perk} className="flex items-center gap-1.5 text-white/55 text-[13px]">
-              <span className="text-[#C4A882] font-bold">✓</span>
+              <span className="text-gold font-semibold">✓</span>
               {perk}
             </span>
           ))}
         </div>
+
+        <p className="font-display italic text-[22px] font-light text-gold/90">
+          Less searching. More living.
+        </p>
 
       </div>
     </section>

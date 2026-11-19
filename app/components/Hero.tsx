@@ -1,8 +1,7 @@
 import Link from 'next/link';
 
 // Hero CTAs mirror /for-families: account creation is the primary action,
-// browsing is secondary, and the waitlist is a fallback that scrolls to the
-// form in the closing CTA section (#waitlist, in CTA.tsx).
+// browsing is secondary. (The waitlist fallback was removed 2026-11-18.)
 export default function Hero() {
   const activities = [
     {
@@ -61,7 +60,7 @@ export default function Hero() {
           <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 mb-8">
             <span className="w-2 h-2 rounded-full bg-[#C4A882] animate-pulse" />
             <span className="text-xs font-semibold tracking-widest uppercase text-white/70">
-              Seattle Beta · Q3 2026
+              For Seattle families
             </span>
           </div>
 
@@ -79,7 +78,7 @@ export default function Hero() {
           {/* Emotional stat hook */}
           <div className="border-l-2 border-[#C4A882]/50 pl-4 mb-10 max-w-[420px]">
             <p className="text-white/80 text-[15px] leading-relaxed font-['Cormorant_Garamond'] italic">
-              &ldquo;Parents spend 8+ hours every season searching for activities across dozens of sites. That time belongs to your family.&rdquo;
+              &ldquo;Parents spend way too many hours hunting for kids&apos; activities across dozens of sites. That time belongs to your family.&rdquo;
             </p>
             <p className="text-[#C4A882] text-[12px] mt-2 font-semibold">&mdash; Kelly Sherman, Co-founder &amp; Seattle mom of two</p>
           </div>
@@ -100,18 +99,11 @@ export default function Hero() {
             </Link>
           </div>
 
-          {/* Waitlist fallback — scrolls to the form in CTA.tsx */}
-          <p className="text-white/50 text-[13px] mb-8">
-            Not ready yet?{' '}
-            <a href="#waitlist" className="text-white/75 underline underline-offset-2 hover:text-white">
-              Join the waitlist
-            </a>{' '}
-            instead.
-          </p>
+          <div className="mb-8" />
 
           {/* Trust pills */}
           <div className="flex flex-wrap gap-5">
-            {['Free to join', 'Founding family pricing', 'No spam, ever'].map((item) => (
+            {['Free to join', 'Hundreds of programs', 'No spam, ever'].map((item) => (
               <span key={item} className="flex items-center gap-1.5 text-white/55 text-[13px]">
                 <span className="text-[#C4A882] font-bold">✓</span>
                 {item}
@@ -180,7 +172,7 @@ export default function Hero() {
                     <p className="text-[12px] font-semibold text-[#1C3A4A] truncate">{item.name}</p>
                     <p className="text-[10px] text-[#7A9AAA] truncate">{item.provider}</p>
                     <div className="flex items-center gap-2 mt-1">
-                      <span className="text-[10px] text-[#C4A882] font-semibold">★ {item.rating}</span>
+                      
                       <span className="text-[10px] text-[#7A9AAA]">({item.reviews})</span>
                       <span className="text-[10px] text-[#7A9AAA]">· {item.detail.split('·')[2]}</span>
                     </div>

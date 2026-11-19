@@ -182,7 +182,7 @@ function ProviderSignupForm() {
         <p className="text-[#3A5A6A] text-[16px] leading-relaxed max-w-[400px] mx-auto">
           {isClaiming
             ? 'Create your free provider account, then confirm the listing is yours. Using your business email speeds up verification.'
-            : 'Reach Seattle families already searching for what you offer. Free during our beta launch.'}
+            : 'Reach Seattle families already searching for what you offer. Free to list.'}
         </p>
       </div>
 
@@ -338,7 +338,7 @@ function ProviderSignupForm() {
 
       {/* Trust bar */}
       <div className="flex flex-wrap gap-6 justify-center mt-8">
-        {['Free to list', 'No upfront fees', '100+ Seattle families on waitlist'].map((item) => (
+        {['Free to list', 'No upfront fees', 'Hundreds of programs listed'].map((item) => (
           <span key={item} className="flex items-center gap-1.5 text-[12px] text-[#1A7A8A] font-medium">
             <span className="text-[#C4A882] font-bold">✓</span>
             {item}

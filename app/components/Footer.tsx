@@ -16,8 +16,11 @@ export default function Footer() {
               />
               <span className="relative">Little Sound</span>
             </h3>
+            <p className="font-display italic text-lg font-light text-gold mb-1">
+              One platform. Zero friction.
+            </p>
             <p className="text-sm text-blue-grey-300">
-              The Family OS. Discover, plan, and book kids' activities in one place.
+              Kids&apos; camps, classes and sports across Seattle, in one place.
             </p>
           </div>
 
