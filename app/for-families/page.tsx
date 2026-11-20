@@ -115,7 +115,7 @@ export default function ForFamilies() {
             ].map((stat) => (
               <div
                 key={stat.label}
-                className="bg-white/8 border border-white/10 rounded-[20px] p-8"
+                className="bg-white/[0.08] border border-white/10 rounded-[20px] p-8"
               >
                 <p className="font-display text-[52px] font-light text-white leading-none mb-2">
                   {stat.value}
@@ -174,7 +174,7 @@ export default function ForFamilies() {
                 key={step.num}
                 className="bg-white rounded-[20px] p-9 border border-cream-700"
               >
-                <p className="font-display text-[52px] font-medium text-text-dark/8 leading-none mb-4">
+                <p className="font-display text-[52px] font-medium text-text-dark/[0.08] leading-none mb-4">
                   {step.num}
                 </p>
                 <IconChip name={step.icon} className="mb-5" />

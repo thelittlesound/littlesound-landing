@@ -161,7 +161,7 @@ export default function FamilySignupPage() {
     return (
       <main className="min-h-screen bg-cream-500 flex flex-col items-center px-4 py-16 pt-28">
         <div className="bg-white rounded-[24px] shadow-[0_4px_32px_rgba(10,74,90,0.09)] w-full max-w-[480px] p-8 md:p-10 text-center">
-          <div className="w-14 h-14 rounded-full bg-teal-800/8 flex items-center justify-center mx-auto mb-5">
+          <div className="w-14 h-14 rounded-full bg-teal-800/[0.08] flex items-center justify-center mx-auto mb-5">
             <LineIcon name="mail" size={26} color="#A8865A" />
           </div>
           <h1 className="font-display text-[28px] font-light text-text-dark mb-3">
@@ -187,7 +187,7 @@ export default function FamilySignupPage() {
 
       {/* Header */}
       <div className="text-center mb-8">
-        <div className="inline-flex items-center gap-2 bg-teal-800/8 border border-teal-800/15 rounded-full px-4 py-1.5 mb-6">
+        <div className="inline-flex items-center gap-2 bg-teal-800/[0.08] border border-teal-800/15 rounded-full px-4 py-1.5 mb-6">
           <span className="text-xs font-bold uppercase tracking-widest text-teal-800">Family Portal</span>
         </div>
         <h1 className="font-display text-[clamp(32px,5vw,52px)] font-light leading-[1.1] tracking-tight text-text-dark mb-4">
@@ -357,7 +357,7 @@ export default function FamilySignupPage() {
             </div>
 
             {submitError && (
-              <p className="text-[13px] text-error bg-error/8 border border-error/20 rounded-[10px] px-4 py-3">
+              <p className="text-[13px] text-error bg-error/[0.08] border border-error/20 rounded-[10px] px-4 py-3">
                 {submitError}
               </p>
             )}

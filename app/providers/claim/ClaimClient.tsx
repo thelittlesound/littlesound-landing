@@ -290,7 +290,7 @@ export default function ClaimClient({
           </div>
 
           {error && (
-            <p className="mb-4 text-[13px] text-error bg-error/8 border border-error/20 rounded-[10px] px-4 py-3">
+            <p className="mb-4 text-[13px] text-error bg-error/[0.08] border border-error/20 rounded-[10px] px-4 py-3">
               {error}
             </p>
           )}
@@ -338,7 +338,7 @@ function Notice({ kind, title }: { kind: 'not_found' | 'yours' | 'taken'; title:
       ? `${title ? `“${title}”` : 'That listing'} has already been claimed by another provider. If you think that's a mistake, email hello@thelittlesound.com and we'll sort it out.`
       : "We couldn't find that listing — it may have been removed. Search for yours below.";
   return (
-    <div className="bg-teal-800/8 border border-teal-800/15 rounded-[16px] px-5 py-4 mb-5">
+    <div className="bg-teal-800/[0.08] border border-teal-800/15 rounded-[16px] px-5 py-4 mb-5">
       <p className="text-[14px] text-teal-800 font-medium leading-relaxed">{text}</p>
     </div>
   );

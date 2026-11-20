@@ -76,7 +76,7 @@ export default function ProviderDashboardClient({
         {/* Header */}
         <div className="flex items-start justify-between mb-8">
           <div>
-            <div className="inline-flex items-center gap-2 bg-teal-800/8 border border-teal-800/15 rounded-full px-4 py-1.5 mb-4">
+            <div className="inline-flex items-center gap-2 bg-teal-800/[0.08] border border-teal-800/15 rounded-full px-4 py-1.5 mb-4">
               <span className="text-xs font-bold uppercase tracking-widest text-teal-800">Provider Dashboard</span>
             </div>
             <h1 className="font-display text-[clamp(28px,4vw,40px)] font-light leading-[1.1] tracking-tight text-text-dark">
@@ -199,7 +199,7 @@ export default function ProviderDashboardClient({
                     </p>
                   )}
                   {listing.status === 'rejected' && listing.admin_notes && (
-                    <div className="bg-error/8 border border-error/20 rounded-[10px] px-4 py-3 mt-3">
+                    <div className="bg-error/[0.08] border border-error/20 rounded-[10px] px-4 py-3 mt-3">
                       <p className="text-[12px] font-semibold text-error uppercase tracking-wide mb-1">
                         Note from Little Sound
                       </p>

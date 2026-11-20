@@ -257,7 +257,7 @@ export default function ListingForm({
         </div>
 
         {errors.submit && (
-          <p className="mt-4 text-[13px] text-error bg-error/8 border border-error/20 rounded-[10px] px-4 py-3">
+          <p className="mt-4 text-[13px] text-error bg-error/[0.08] border border-error/20 rounded-[10px] px-4 py-3">
             {errors.submit}
           </p>
         )}

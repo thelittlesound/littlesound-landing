@@ -263,7 +263,7 @@ export default function DashboardClient({
         {/* Header */}
         <div className="flex items-start justify-between gap-3 mb-8">
           <div>
-            <div className="inline-flex items-center gap-2 bg-teal-800/8 border border-teal-800/15 rounded-full px-4 py-1.5 mb-4">
+            <div className="inline-flex items-center gap-2 bg-teal-800/[0.08] border border-teal-800/15 rounded-full px-4 py-1.5 mb-4">
               <span className="text-xs font-bold uppercase tracking-widest text-teal-800 whitespace-nowrap">Family Dashboard</span>
             </div>
             {!calendar && (
@@ -295,7 +295,7 @@ export default function DashboardClient({
         </div>
 
         {isProfileEmpty && !editing && (
-          <div className="max-w-[760px] mx-auto bg-teal-800/8 border border-teal-800/15 rounded-[16px] px-5 py-4 mb-6">
+          <div className="max-w-[760px] mx-auto bg-teal-800/[0.08] border border-teal-800/15 rounded-[16px] px-5 py-4 mb-6">
             <p className="text-[14px] text-teal-800 font-medium">
               Complete your family profile to get activity picks matched to your kids.
             </p>
@@ -511,7 +511,7 @@ export default function DashboardClient({
               </div>
 
               {saveError && (
-                <p className="text-[13px] text-error bg-error/8 border border-error/20 rounded-[10px] px-4 py-3">
+                <p className="text-[13px] text-error bg-error/[0.08] border border-error/20 rounded-[10px] px-4 py-3">
                   {saveError}
                 </p>
               )}

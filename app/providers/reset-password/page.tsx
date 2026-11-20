@@ -116,7 +116,7 @@ export default function ProviderResetPasswordPage() {
   return (
     <main className="min-h-screen bg-cream-500 flex flex-col items-center px-4 py-16 pt-28">
       <div className="text-center mb-10">
-        <div className="inline-flex items-center gap-2 bg-teal-800/8 border border-teal-800/15 rounded-full px-4 py-1.5 mb-6">
+        <div className="inline-flex items-center gap-2 bg-teal-800/[0.08] border border-teal-800/15 rounded-full px-4 py-1.5 mb-6">
           <span className="text-xs font-bold uppercase tracking-widest text-teal-800">Provider Portal</span>
         </div>
         <h1 className="font-display text-[clamp(32px,5vw,44px)] font-light leading-[1.1] tracking-tight text-text-dark mb-4">
@@ -151,7 +151,7 @@ export default function ProviderResetPasswordPage() {
           </div>
 
           {error && (
-            <p className="text-[13px] text-error bg-error/8 border border-error/20 rounded-[10px] px-4 py-3">
+            <p className="text-[13px] text-error bg-error/[0.08] border border-error/20 rounded-[10px] px-4 py-3">
               {error}
             </p>
           )}

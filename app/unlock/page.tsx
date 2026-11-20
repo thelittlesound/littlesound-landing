@@ -60,7 +60,7 @@ function UnlockForm() {
           />
 
           {error && (
-            <p className="text-[13px] text-error bg-error/8 border border-error/20 rounded-[10px] px-4 py-3">
+            <p className="text-[13px] text-error bg-error/[0.08] border border-error/20 rounded-[10px] px-4 py-3">
               {error}
             </p>
           )}
