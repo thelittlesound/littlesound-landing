@@ -18,7 +18,7 @@ export interface AgesInput {
   description?: string | null;
 }
 export type AgesResult =
-  | { found: true; ageMin: number; ageMax: number; evidence: string; sourceUrl: string; note: string }
+  | { found: true; ageMin: number; ageMax: number; openEnded: boolean; scope: 'program' | 'provider'; evidence: string; sourceUrl: string; note: string }
   | { found: false; note: string; sourceUrl?: string }
   | { error: string };
 
@@ -33,6 +33,8 @@ const RECORD_TOOL = {
       age_max: { type: ['integer', 'null'] },
       evidence: { type: 'string', description: 'The exact words on the site that state the ages or grades (under 25 words).' },
       source_url: { type: 'string', description: 'The page those words are on.' },
+      open_ended: { type: 'boolean', description: 'true when the site gives only a lower age ("5 and up", "7+"); then age_max = 18' },
+      scope: { type: 'string', enum: ['program', 'provider'], description: 'program = stated for this program; provider = one age line the provider gives for all its kids programs' },
       note: { type: 'string', description: 'One short line: how you got the range (e.g. "Grades 1–12 → 6–18"), or why not found.' },
     },
     required: ['found', 'note'],
@@ -47,7 +49,9 @@ Rules:
 - Only use what the provider's site states. Never guess from the type of program, and never use directories, reviews or news.
 - Ages for THIS program. If the site lists several sessions or levels for it, give the overall range they cover.
 - Grades → ages: Pre-K = 4, K = 5, grade N = age N+5 at the low end and N+6 at the high end (Grades 1–12 → 6–18; K–5 → 5–11; middle school → 11–14; high school → 14–18).
-- "Teens", "youth" or "kids" alone are not enough: found = false.
+- Open-ended ages count: "5 and up", "ages 7+", "5 and older" → age_min 5, age_max 18, open_ended true.
+- If this program's pages give no ages but the provider states one age range for all its kids programs (home page, FAQ), use it with scope "provider". Otherwise scope "program".
+- "Teens", "tweens", "youth" or "kids" alone are not enough: found = false.
 - Adults-and-kids programs: give the youth range only.
 - Quote the exact words in evidence.
 Always finish by calling record_ages exactly once.`;
@@ -101,14 +105,16 @@ export async function findAges(input: AgesInput): Promise<AgesResult> {
   }
 
   const use = (body?.content ?? []).find((c: { type: string; name?: string }) => c.type === 'tool_use' && c.name === RECORD_TOOL.name);
-  const r = use?.input as { found?: boolean; age_min?: number | null; age_max?: number | null; evidence?: string; source_url?: string; note?: string } | undefined;
+  const r = use?.input as { found?: boolean; age_min?: number | null; age_max?: number | null; open_ended?: boolean; scope?: string; evidence?: string; source_url?: string; note?: string } | undefined;
   if (!r) return { error: body?.stop_reason === 'pause_turn' ? 'Ran out of time; try again.' : 'Finished without an answer; try again.' };
   const ok = (n: unknown) => typeof n === 'number' && Number.isInteger(n) && n >= 0 && n <= 21;
   if (r.found && ok(r.age_min) && ok(r.age_max) && (r.age_min as number) <= (r.age_max as number)) {
     return {
       found: true,
       ageMin: r.age_min as number,
-      ageMax: Math.min(18, r.age_max as number),
+      ageMax: r.open_ended ? 18 : Math.min(18, r.age_max as number),
+      openEnded: !!r.open_ended,
+      scope: r.scope === 'provider' ? 'provider' : 'program',
       evidence: String(r.evidence ?? '').slice(0, 300),
       sourceUrl: String(r.source_url ?? input.website),
       note: String(r.note ?? '').slice(0, 200),

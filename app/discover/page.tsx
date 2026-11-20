@@ -125,7 +125,8 @@ function ActivityCard({
   const unknown = agesUnknown(a);
   const facts = [
     { k: 'When', v: dateLine || 'Schedule on their site', muted: !dateLine },
-    { k: 'Ages', v: unknown ? 'Check their site' : `${a.ageMin}–${a.ageMax}`, warn: unknown },
+    // "5+" when only a lower age is known (stored as 5–18), matching how providers say it.
+    { k: 'Ages', v: unknown ? 'Check their site' : a.ageMax >= 18 && a.ageMin > 0 ? `${a.ageMin}+` : `${a.ageMin}–${a.ageMax}`, warn: unknown },
     { k: 'Where', v: where },
     { k: 'Cost', v: costText(a), muted: a.price == null },
   ];
