@@ -30,6 +30,8 @@ export interface ProviderActivity {
   neighborhood: string;
   ageMin: number;
   ageMax: number;
+  /** false when the listing has no ages on file (shown as 0–18 for matching only). */
+  agesKnown?: boolean;
   /** null when no fee was given (shown as "Fees on their site", not $0). */
   price: number | null;
   priceUnit: string;
@@ -86,6 +88,7 @@ export async function getProviderActivities(): Promise<{ activities: ProviderAct
     category,
     subcategory: s.subcategory ?? null,
     neighborhood: s.neighborhood ?? 'Seattle',
+    agesKnown: s.age_min != null && s.age_max != null,
     ageMin: s.age_min ?? 0,
     ageMax: s.age_max ?? 18,
     price: s.price ?? null,

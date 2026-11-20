@@ -85,8 +85,8 @@ const SORTS = [
   { key: 'price', label: 'Price, low to high' },
 ];
 
-/** A provider listing with 0–18 almost always means the ages weren't found. */
-const agesUnknown = (a: Activity) => a.source === 'provider' && a.ageMin === 0 && a.ageMax === 18;
+/** A provider listing with no ages on file (the catalog sends agesKnown: false). */
+const agesUnknown = (a: Activity) => a.source === 'provider' && (a as { agesKnown?: boolean }).agesKnown === false;
 
 function costText(a: Activity) {
   if (a.price == null) return 'Fees on their site';
@@ -126,7 +126,7 @@ function ActivityCard({
   const facts = [
     { k: 'When', v: dateLine || 'Schedule on their site', muted: !dateLine },
     // "5+" when only a lower age is known (stored as 5–18), matching how providers say it.
-    { k: 'Ages', v: unknown ? 'Check their site' : a.ageMax >= 18 && a.ageMin > 0 ? `${a.ageMin}+` : `${a.ageMin}–${a.ageMax}`, warn: unknown },
+    { k: 'Ages', v: unknown ? 'Check their site' : a.ageMax >= 18 ? (a.ageMin > 0 ? `${a.ageMin}+` : 'All ages') : `${a.ageMin}–${a.ageMax}`, warn: unknown },
     { k: 'Where', v: where },
     { k: 'Cost', v: costText(a), muted: a.price == null },
   ];
