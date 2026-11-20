@@ -2,104 +2,105 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { IconChip } from './LineIcon';
+import { LineIcon } from './LineIcon';
 import { useCatalogStats } from './useCatalogStats';
 
-const AGE_FILTERS = ['2–4', '5–7', '8–11', '12+'];
+// Home "Explore" section (approved 2026-11-19, canvas
+// https://claude.ai/artifact/9226rxPE8rPpGGU14ZbT8g): Discover's 14
+// categories, icons and tile style, with live counts from /api/stats.
+// Same order as Discover's tile row. Each tile opens Discover on that
+// category, carrying the chosen age.
+const CATEGORIES = [
+  'Sports', 'Camps', 'Swimming', 'Arts', 'Martial Arts', 'Music', 'Outdoor',
+  'Theater', 'Dance', 'Early Childhood', 'Language', 'STEM', 'Cooking', 'Academic',
+];
+
+const AGE_FILTERS = [
+  { label: '2–4', key: '2-4' },
+  { label: '5–7', key: '5-7' },
+  { label: '8–11', key: '8-11' },
+  { label: '12+', key: '12+' },
+];
 
 export default function Categories() {
   const [selectedAge, setSelectedAge] = useState('');
-
-  // Live counts for the whole catalog (seed + approved listings).
+  // Exact counts once /api/stats answers; nothing shown until then, so the
+  // seed-only numbers never flash.
   const live = useCatalogStats().byCategory;
-  // Shown only once the live counts arrive, so the seed-only numbers never flash.
-  const counts: Record<string, number> = live ?? {};
+  const total = live ? Object.values(live).reduce((a, b) => a + b, 0) : 0;
 
-  const categories = [
-    { icon: 'Sports', name: 'Sports & Fitness', count: (counts['Sports'] || 0) + (counts['Martial Arts'] || 0), filter: 'Sports' },
-    { icon: 'Arts', name: 'Arts & Crafts',    count: counts['Arts'] || 0,                                     filter: 'Arts' },
-    { icon: 'Music', name: 'Music & Dance',    count: (counts['Music'] || 0) + (counts['Dance'] || 0),         filter: 'Music' },
-    { icon: 'Camps', name: 'Camps & Outdoors', count: (counts['Camps'] || 0) + (counts['Outdoor'] || 0),      filter: 'Outdoor' },
-    { icon: 'STEM', name: 'STEM & Academics', count: (counts['STEM'] || 0) + (counts['Academic'] || 0),       filter: 'STEM' },
-    { icon: 'Theater', name: 'Theater & Drama',  count: counts['Theater'] || 0,                                  filter: 'Theater' },
-    { icon: 'Early Childhood', name: 'Early Childhood',  count: counts['Early Childhood'] || 0,                          filter: 'Early Childhood' },
-    { icon: 'Swimming', name: 'Swimming',         count: counts['Swimming'] || 0,                                 filter: 'Swimming' },
-    { icon: 'Cooking', name: 'Cooking',          count: counts['Cooking'] || 0,                                  filter: 'Cooking' },
-    { icon: 'Language', name: 'Language',         count: counts['Language'] || 0,                                 filter: 'Language' },
-  ];
-
-  const buildHref = (filter: string) => {
-    const params = new URLSearchParams({ category: filter });
+  const href = (category?: string) => {
+    const params = new URLSearchParams();
+    if (category) params.set('category', category);
     if (selectedAge) params.set('age', selectedAge);
-    return `/discover?${params.toString()}`;
+    const qs = params.toString();
+    return qs ? `/discover?${qs}` : '/discover';
   };
 
   return (
-    <section className="py-24 bg-white">
-      <div className="container">
-        <div className="text-center mb-10">
-          <span className="text-label text-teal-700 mb-4 block">Explore</span>
-          <h2 className="text-heading-lg mb-6">
-            Activities for every interest.
+    <section className="py-20 md:py-24 px-5 md:px-10 lg:px-16 bg-white">
+      <div className="max-w-[1136px] mx-auto flex flex-col items-center gap-7">
+        <div className="text-center flex flex-col items-center gap-3.5">
+          <p className="text-label text-teal-700">Explore</p>
+          <h2 className="font-display text-[clamp(38px,4.5vw,52px)] font-light leading-[1.15] tracking-tight text-text-dark">
+            Activities for <em className="italic text-teal-700">every interest.</em>
           </h2>
-          <p className="text-body-lg text-text-mid max-w-2xl mx-auto mb-8">
-            From sports and arts to camps and academics, find exactly what your family is looking for.
+          <p className="text-[17px] leading-relaxed text-text-mid max-w-[560px]">
+            From sports and arts to camps and academics. Pick a category, or tell us your child&apos;s age first.
           </p>
+        </div>
 
-          {/* Age chips */}
-          <div className="flex items-center justify-center gap-3 flex-wrap">
-            <span className="text-sm text-text-muted font-medium">My child is</span>
-            {AGE_FILTERS.map((age) => (
+        {/* Age chips */}
+        <div className="flex items-center justify-center flex-wrap gap-2">
+          <span className="text-sm text-text-mid mr-1">My child is</span>
+          {AGE_FILTERS.map((a) => {
+            const on = selectedAge === a.key;
+            return (
               <button
-                key={age}
-                onClick={() => setSelectedAge(selectedAge === age ? '' : age)}
-                className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-all ${
-                  selectedAge === age
-                    ? 'bg-teal-700 text-white border-teal-700'
-                    : 'bg-white text-text-mid border-cream-700 hover:border-teal-700'
+                key={a.key}
+                type="button"
+                aria-pressed={on}
+                onClick={() => setSelectedAge(on ? '' : a.key)}
+                className={`min-h-[36px] px-4 rounded-pill text-sm font-medium border-[1.5px] transition-colors ${
+                  on ? 'bg-teal-700 text-white border-teal-700' : 'bg-white text-text-dark border-[#E3DAC5] hover:border-teal-700'
                 }`}
               >
-                {age}
+                {a.label}
               </button>
-            ))}
-            {selectedAge && (
-              <button
-                onClick={() => setSelectedAge('')}
-                className="text-sm text-text-muted hover:text-text-dark transition-colors"
+            );
+          })}
+          {selectedAge && (
+            <button type="button" onClick={() => setSelectedAge('')} className="min-h-[36px] px-2 text-sm text-text-mid hover:text-text-dark">
+              Clear
+            </button>
+          )}
+        </div>
+
+        {/* Category tiles: Discover's style */}
+        <div className="w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-2.5">
+          {CATEGORIES.map((c) => {
+            const n = live?.[c] ?? 0;
+            return (
+              <Link
+                key={c}
+                href={href(c)}
+                className="min-h-[60px] px-3.5 py-2 rounded-[16px] border-[1.5px] border-[#E3DAC5] bg-white text-text-dark flex items-center gap-2.5 no-underline transition-colors hover:border-teal-700"
               >
-                Clear
-              </button>
-            )}
-          </div>
+                <LineIcon name={c} size={26} color="#A8865A" className="shrink-0" />
+                <span className="flex flex-col gap-px min-w-0">
+                  <span className="text-[14px] font-semibold leading-tight">{c}</span>
+                  <span className="text-[12px] leading-tight text-text-mid min-h-[15px]">
+                    {live ? `${n} ${n === 1 ? 'program' : 'programs'}` : ''}
+                  </span>
+                </span>
+              </Link>
+            );
+          })}
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
-          {categories.map((cat, index) => (
-            <Link
-              key={index}
-              href={buildHref(cat.filter)}
-              className="card text-center hover:bg-cream-300 transition-colors duration-base cursor-pointer group no-underline"
-            >
-              <div className="mb-4 flex justify-center group-hover:scale-110 transition-transform duration-base">
-                <IconChip name={cat.icon} />
-              </div>
-              <h3 className="text-heading-sm mb-2">{cat.name}</h3>
-              <p className="text-xs text-text-muted font-medium min-h-[1rem]">{live ? `${cat.count} ${cat.count === 1 ? 'program' : 'programs'}` : ''}</p>
-            </Link>
-          ))}
-        </div>
-
-        <div className="mt-16 text-center">
-          <p className="text-body-lg text-text-mid mb-8">
-            Explore hundreds of programs across Seattle, from sports to STEM.
-          </p>
-          <Link
-            href={selectedAge ? `/discover?age=${encodeURIComponent(selectedAge)}` : '/discover'}
-            className="btn btn-primary"
-          >
-            Browse All Activities
-          </Link>
-        </div>
+        <Link href={href()} className="btn btn-primary no-underline">
+          {live ? `Browse all ${total} programs` : 'Browse all programs'} &rarr;
+        </Link>
       </div>
     </section>
   );
