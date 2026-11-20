@@ -1,4 +1,4 @@
-import { picksFor, fitsGoal, whyItFits } from '@/lib/picks';
+import { picksFor, fitsGoal, whyItFits, singleGender } from '@/lib/picks';
 import { categoriesFor } from '@/lib/kid-match';
 
 let pass = 0, fail = 0;
@@ -46,6 +46,15 @@ const w = whyItFits(L('z', { level: 'rec' }), jack, 'team', categoriesFor(jack),
 ok(w.split('. ').length <= 2 && !/review|rating|spots|popular/i.test(w), 'two facts at most, no invented claims');
 const plain = whyItFits(L('q', { category: 'Arts', ageMin: 6, ageMax: 18 }), jack, 'new', new Set(), null);
 ok(plain === 'Ages 6+, so Jack (9) fits.', 'fallback: the age fit');
+
+// Single-gender programs never become picks; mixed ones do.
+ok(singleGender({ title: 'Girls Youth & High School Lacrosse' }) && singleGender({ title: 'Let Me Run Boys’ Running' }), 'girls-only / boys-only detected');
+ok(!singleGender({ title: 'Travel Lacrosse Teams, Boys & Girls' }) && !singleGender({ title: 'Select AAU Basketball, Youth Boys and Girls' }) && !singleGender({ title: 'Rec Soccer League' }), 'mixed programs are fine');
+const g = picksFor(jack, 'team', [L('g1', { level: 'rec', title: 'Girls Lacrosse League' }), L('g2', { level: 'rec', title: 'Rec Soccer League' })], { place: home });
+ok(g.picks.length === 1 && g.picks[0].a.id === 'g2', 'girls-only league not picked');
+// Only dated lines are reasons.
+ok(!whyItFits(L('w1', {}), jack, 'new', new Set(), null, 'Weekly · Tue 3pm').includes('Weekly'), 'weekly schedule is not a reason');
+ok(whyItFits(L('w2', {}), jack, 'new', new Set(), null, 'Registration opens Dec 1').includes('Registration opens Dec 1.'), 'a registration date is');
 
 console.log(`picks: ${pass} passed, ${fail} failed`);
 if (fail) process.exitCode = 1;

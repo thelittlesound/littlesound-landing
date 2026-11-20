@@ -27,6 +27,7 @@ export interface PickInput {
   level?: string | null;
   price?: number | null;
   theme?: string | null;
+  serves?: string | null;
 }
 export interface KidPick<A extends PickInput = PickInput> {
   a: A;
@@ -41,6 +42,14 @@ const INTEREST_WORD: Record<string, string> = {
 };
 
 const TEAM_WORDS = /\b(league|team|teams|club|select|premier|aau|travel)\b/i;
+/** Girls- or boys-only: we don't know a child's gender, so these never become picks (they stay in "Everything"). */
+const ONE_GENDER = /\b(girls?|boys?)\b/i;
+export function singleGender(a: Pick<PickInput, 'title' | 'serves'>): boolean {
+  const t = `${a.title} ${a.serves ?? ''}`;
+  return ONE_GENDER.test(t) && !/\b(girls?|boys?)\s*(&|and|\+)\s*(girls?|boys?)\b/i.test(t);
+}
+/** Only dated lines make a reason ("Registration opens Dec 1"), not "Weekly · Tue 3pm". */
+const DATED = /^(registration|next session|registration opens|starts|begins)/i;
 
 /** Does this listing answer the goal for this child? */
 export function fitsGoal(a: PickInput, goal: Goal, interestCats: Set<string>): boolean {
@@ -69,14 +78,15 @@ export function picksFor<A extends PickInput>(
   const cats = categoriesFor(kid as MatchKid);
 
   const fitsAge = list.filter((a) => ageOk(a, age) && (!place || closeness(a.neighborhood, place).tier !== 3));
-  const scored = fitsAge
+  const usable = fitsAge.filter((a) => !singleGender(a));
+  const scored = usable
     .filter((a) => fitsGoal(a, goal, cats))
     .map((a, i) => {
       const near = closeness(a.neighborhood, place);
       let s = 0;
       if (goal !== 'new' && matchesInterest(a, cats)) s += 4;
       if (place) s += near.tier === 0 ? 3 : near.tier === 1 ? 2 : near.tier === 2 ? 1 : 0;
-      if (dates[a.id]) s += 2;
+      if (dates[a.id] && DATED.test(dates[a.id])) s += 2;
       if (goal === 'team' && a.level === 'rec') s += 1;
       if (a.price != null) s += 1;
       if (a.ageMax - a.ageMin <= 8) s += 1; // made for kids about this age, not "everyone"
@@ -123,7 +133,7 @@ export function whyItFits(
     if (near.tier === 0) reasons.push(place.profile ? `In ${a.neighborhood}, close to home.` : `In ${a.neighborhood}.`);
     else if (near.miles != null && near.miles <= 5) reasons.push(`About ${Math.max(1, Math.round(near.miles))} mi ${place.profile ? 'from home' : `from ${place.area}`}.`);
   }
-  if (dateLine) reasons.push(`${dateLine}.`);
+  if (dateLine && DATED.test(dateLine)) reasons.push(`${dateLine}.`);
   if (reasons.length < 2) reasons.push(`Ages ${a.ageMin}${a.ageMax >= 18 ? '+' : `–${a.ageMax}`}, so ${kid.name} (${kid.age}) fits.`);
   return reasons.slice(0, 2).join(' ');
 }
