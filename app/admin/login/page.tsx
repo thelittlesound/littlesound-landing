@@ -34,15 +34,15 @@ function AdminLoginForm() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F5EFE0] flex items-center justify-center px-4">
-      <div className="bg-white rounded-2xl shadow-sm border border-[#E8DFC8] p-8 w-full max-w-sm">
-        <h1 className="font-['Cormorant_Garamond'] text-3xl font-light text-[#0D5C6E] mb-1">
+    <div className="min-h-screen bg-cream-500 flex items-center justify-center px-4">
+      <div className="bg-white rounded-2xl shadow-sm border border-cream-700 p-8 w-full max-w-sm">
+        <h1 className="font-display text-3xl font-light text-teal-800 mb-1">
           Admin
         </h1>
-        <p className="text-[#5A7A8A] text-sm font-['DM_Sans'] mb-6">Little Sound internal</p>
+        <p className="text-text-mid text-sm font-body mb-6">Little Sound internal</p>
 
         {notAdmin && (
-          <p className="text-red-500 text-xs font-['DM_Sans'] bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-4">
+          <p className="text-error-dark text-xs font-body bg-error-light border border-error/30 rounded-lg px-3 py-2 mb-4">
             That account isn&apos;t authorized for admin access.
           </p>
         )}
@@ -54,7 +54,7 @@ function AdminLoginForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             autoComplete="email"
-            className="w-full border border-[#C5D8E8] rounded-xl px-4 py-3 text-sm font-['DM_Sans'] outline-none focus:border-[#0D5C6E]"
+            className="w-full border border-blue-grey-300 rounded-xl px-4 py-3 text-sm font-body outline-none focus:border-teal-800"
           />
           <input
             type="password"
@@ -62,15 +62,15 @@ function AdminLoginForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoComplete="current-password"
-            className="w-full border border-[#C5D8E8] rounded-xl px-4 py-3 text-sm font-['DM_Sans'] outline-none focus:border-[#0D5C6E]"
+            className="w-full border border-blue-grey-300 rounded-xl px-4 py-3 text-sm font-body outline-none focus:border-teal-800"
           />
 
-          {error && <p className="text-red-500 text-xs font-['DM_Sans']">{error}</p>}
+          {error && <p className="text-error-dark text-xs font-body">{error}</p>}
 
           <button
             type="submit"
             disabled={submitting}
-            className="w-full bg-[#0D5C6E] text-white rounded-full py-3 text-sm font-['DM_Sans'] font-semibold hover:bg-[#1A7A8A] transition-colors disabled:opacity-60 mt-1"
+            className="w-full bg-teal-800 text-white rounded-full py-3 text-sm font-body font-semibold hover:bg-teal-700 transition-colors disabled:opacity-60 mt-1"
           >
             {submitting ? 'Signing in…' : 'Sign in'}
           </button>

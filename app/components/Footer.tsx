@@ -7,7 +7,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
           {/* Brand */}
           <div>
-            <h3 className="relative inline-block font-['Cormorant_Garamond'] text-xl font-semibold mb-4">
+            <h3 className="relative inline-block font-display text-xl font-semibold mb-4">
               <img
                 src="/images/logo-waves.svg"
                 alt=""

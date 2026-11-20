@@ -168,14 +168,14 @@ export default function ListingForm({
   }
 
   return (
-    <main className="min-h-screen bg-[#F5EFE0] flex flex-col items-center px-4 py-16 pt-28">
+    <main className="min-h-screen bg-cream-500 flex flex-col items-center px-4 py-16 pt-28">
 
       {/* Header */}
       <div className="text-center mb-8">
-        <Link href="/providers/dashboard" className="inline-flex items-center gap-1.5 text-[13px] text-[#1A7A8A] font-medium mb-5 hover:underline">
+        <Link href="/providers/dashboard" className="inline-flex items-center gap-1.5 text-[13px] text-teal-700 font-medium mb-5 hover:underline">
           ← Back to dashboard
         </Link>
-        <h1 className="font-['Cormorant_Garamond'] text-[clamp(28px,4vw,44px)] font-light leading-[1.15] tracking-tight text-[#1C3A4A]">
+        <h1 className="font-display text-[clamp(28px,4vw,44px)] font-light leading-[1.15] tracking-tight text-text-dark">
           {isEdit ? 'Edit your listing' : 'Create your listing'}
         </h1>
       </div>
@@ -186,19 +186,19 @@ export default function ListingForm({
           {STEPS.map((label, i) => (
             <div key={i} className="flex-1 flex flex-col items-center gap-2 relative">
               {i < STEPS.length - 1 && (
-                <div className={`absolute top-[13px] left-1/2 w-full h-[2px] ${i < step ? 'bg-[#0D5C6E]' : 'bg-[#E8DFC8]'}`} />
+                <div className={`absolute top-[13px] left-1/2 w-full h-[2px] ${i < step ? 'bg-teal-800' : 'bg-cream-700'}`} />
               )}
               <div className={`relative z-10 w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-bold transition-all duration-200 ${
                 i < step
-                  ? 'bg-[#1A7A8A] text-white'
+                  ? 'bg-teal-700 text-white'
                   : i === step
-                  ? 'bg-[#0D5C6E] text-white shadow-[0_0_0_4px_rgba(13,92,110,0.15)]'
-                  : 'bg-[#E8DFC8] text-[#7A9AAA]'
+                  ? 'bg-teal-800 text-white shadow-[0_0_0_4px_rgba(13,92,110,0.15)]'
+                  : 'bg-cream-700 text-text-muted'
               }`}>
                 {i < step ? '✓' : i + 1}
               </div>
               <span className={`text-[11px] text-center leading-tight max-w-[64px] font-medium ${
-                i === step ? 'text-[#0D5C6E]' : 'text-[#7A9AAA]'
+                i === step ? 'text-teal-800' : 'text-text-muted'
               }`}>
                 {label}
               </span>
@@ -225,11 +225,11 @@ export default function ListingForm({
         {step === 3 && <StepReview form={form} contactName={contactName} contactEmail={contactEmail} isEdit={isEdit} currentStatus={currentStatus} />}
 
         {/* Nav */}
-        <div className={`flex items-center mt-8 pt-6 border-t border-[#E8DFC8] ${step > 0 ? 'justify-between' : 'justify-end'}`}>
+        <div className={`flex items-center mt-8 pt-6 border-t border-cream-700 ${step > 0 ? 'justify-between' : 'justify-end'}`}>
           {step > 0 && (
             <button
               onClick={back}
-              className="h-11 px-6 rounded-full border-2 border-[#E8DFC8] text-[#0D5C6E] font-semibold text-[14px] hover:border-[#C5D8E8] transition-colors"
+              className="h-11 px-6 rounded-full border-2 border-cream-700 text-teal-800 font-semibold text-[14px] hover:border-blue-grey-300 transition-colors"
             >
               ← Back
             </button>
@@ -237,7 +237,7 @@ export default function ListingForm({
           {step < STEPS.length - 1 ? (
             <button
               onClick={next}
-              className="h-11 px-8 rounded-full bg-[#0D5C6E] text-white font-semibold text-[14px] hover:bg-[#1A7A8A] hover:-translate-y-0.5 transition-all duration-200"
+              className="h-11 px-8 rounded-full bg-teal-800 text-white font-semibold text-[14px] hover:bg-teal-700 hover:-translate-y-0.5 transition-all duration-200"
             >
               Continue →
             </button>
@@ -245,8 +245,8 @@ export default function ListingForm({
             <button
               onClick={submit}
               disabled={submitting}
-              className={`h-11 px-8 rounded-full bg-[#0D5C6E] text-white font-semibold text-[14px] transition-all duration-200 ${
-                submitting ? 'opacity-60 cursor-not-allowed' : 'hover:bg-[#1A7A8A] hover:-translate-y-0.5'
+              className={`h-11 px-8 rounded-full bg-teal-800 text-white font-semibold text-[14px] transition-all duration-200 ${
+                submitting ? 'opacity-60 cursor-not-allowed' : 'hover:bg-teal-700 hover:-translate-y-0.5'
               }`}
             >
               {submitting
@@ -257,15 +257,15 @@ export default function ListingForm({
         </div>
 
         {errors.submit && (
-          <p className="mt-4 text-[13px] text-[#C0544A] bg-[#C0544A]/8 border border-[#C0544A]/20 rounded-[10px] px-4 py-3">
+          <p className="mt-4 text-[13px] text-error bg-error/8 border border-error/20 rounded-[10px] px-4 py-3">
             {errors.submit}
           </p>
         )}
       </div>
 
-      <p className="mt-5 text-[13px] text-[#7A9AAA]">
+      <p className="mt-5 text-[13px] text-text-muted">
         Need help?{' '}
-        <a href="mailto:hello@thelittlesound.com" className="text-[#1A7A8A] underline underline-offset-2">
+        <a href="mailto:hello@thelittlesound.com" className="text-teal-700 underline underline-offset-2">
           Email us
         </a>
       </p>
@@ -279,10 +279,10 @@ function StepDetails({ form, set, errors }: { form: ListingFormState; set: (f: k
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <h2 className="font-['Cormorant_Garamond'] text-[26px] font-light text-[#1C3A4A] mb-1">
+        <h2 className="font-display text-[26px] font-light text-text-dark mb-1">
           Tell us about your activity
         </h2>
-        <p className="text-[14px] text-[#3A5A6A]">This is what families will see on your listing.</p>
+        <p className="text-[14px] text-text-mid">This is what families will see on your listing.</p>
       </div>
 
       <Field
@@ -310,22 +310,22 @@ function StepDetails({ form, set, errors }: { form: ListingFormState; set: (f: k
       />
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-[13px] font-medium text-[#0D5C6E]">Description</label>
+        <label className="text-[13px] font-medium text-teal-800">Description</label>
         <textarea
           value={form.description}
           onChange={(e) => set('description', e.target.value)}
           placeholder="What will kids do? What makes this special? What should families know before signing up?"
           rows={5}
-          className={`rounded-[12px] border-2 px-4 py-3 text-[15px] font-['DM_Sans'] text-[#1C3A4A] bg-white w-full resize-y leading-relaxed transition-colors focus:outline-none focus:border-[#0D5C6E] ${
-            errors.description ? 'border-[#C0544A]' : 'border-[#E8DFC8]'
+          className={`rounded-[12px] border-2 px-4 py-3 text-[15px] font-body text-text-dark bg-white w-full resize-y leading-relaxed transition-colors focus:outline-none focus:border-teal-800 ${
+            errors.description ? 'border-error' : 'border-cream-700'
           }`}
         />
         <div className="flex items-center justify-between">
-          <p className={`text-[12px] ${errors.description ? 'text-[#C0544A]' : 'text-[#7A9AAA]'}`}>
+          <p className={`text-[12px] ${errors.description ? 'text-error' : 'text-text-muted'}`}>
             {errors.description || `${form.description.length} characters`}
           </p>
           {form.description.length > 0 && form.description.length < 20 && (
-            <p className="text-[12px] text-[#C0544A]">{20 - form.description.length} more needed</p>
+            <p className="text-[12px] text-error">{20 - form.description.length} more needed</p>
           )}
         </div>
       </div>
@@ -339,15 +339,15 @@ function StepPricing({ form, set, errors }: { form: ListingFormState; set: (f: k
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <h2 className="font-['Cormorant_Garamond'] text-[26px] font-light text-[#1C3A4A] mb-1">Age range & pricing</h2>
-        <p className="text-[14px] text-[#3A5A6A]">Helps families filter to the right fit for their kids.</p>
+        <h2 className="font-display text-[26px] font-light text-text-dark mb-1">Age range & pricing</h2>
+        <p className="text-[14px] text-text-mid">Helps families filter to the right fit for their kids.</p>
       </div>
 
       <div>
-        <p className="text-[13px] font-medium text-[#0D5C6E] mb-2">Age range (years)</p>
+        <p className="text-[13px] font-medium text-teal-800 mb-2">Age range (years)</p>
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1.5">
-            <label className="text-[12px] text-[#7A9AAA]">Minimum age</label>
+            <label className="text-[12px] text-text-muted">Minimum age</label>
             <input
               type="number"
               min={0}
@@ -355,14 +355,14 @@ function StepPricing({ form, set, errors }: { form: ListingFormState; set: (f: k
               value={form.ageMin}
               onChange={(e) => set('ageMin', e.target.value)}
               placeholder="e.g. 5"
-              className={`h-12 rounded-[12px] border-2 px-4 text-[15px] font-['DM_Sans'] text-[#1C3A4A] bg-white w-full transition-colors focus:outline-none focus:border-[#0D5C6E] ${
-                errors.ageMin ? 'border-[#C0544A]' : 'border-[#E8DFC8]'
+              className={`h-12 rounded-[12px] border-2 px-4 text-[15px] font-body text-text-dark bg-white w-full transition-colors focus:outline-none focus:border-teal-800 ${
+                errors.ageMin ? 'border-error' : 'border-cream-700'
               }`}
             />
-            {errors.ageMin && <p className="text-[12px] text-[#C0544A]">{errors.ageMin}</p>}
+            {errors.ageMin && <p className="text-[12px] text-error">{errors.ageMin}</p>}
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-[12px] text-[#7A9AAA]">Maximum age</label>
+            <label className="text-[12px] text-text-muted">Maximum age</label>
             <input
               type="number"
               min={0}
@@ -370,22 +370,22 @@ function StepPricing({ form, set, errors }: { form: ListingFormState; set: (f: k
               value={form.ageMax}
               onChange={(e) => set('ageMax', e.target.value)}
               placeholder="e.g. 12"
-              className={`h-12 rounded-[12px] border-2 px-4 text-[15px] font-['DM_Sans'] text-[#1C3A4A] bg-white w-full transition-colors focus:outline-none focus:border-[#0D5C6E] ${
-                errors.ageMax ? 'border-[#C0544A]' : 'border-[#E8DFC8]'
+              className={`h-12 rounded-[12px] border-2 px-4 text-[15px] font-body text-text-dark bg-white w-full transition-colors focus:outline-none focus:border-teal-800 ${
+                errors.ageMax ? 'border-error' : 'border-cream-700'
               }`}
             />
-            {errors.ageMax && <p className="text-[12px] text-[#C0544A]">{errors.ageMax}</p>}
+            {errors.ageMax && <p className="text-[12px] text-error">{errors.ageMax}</p>}
           </div>
         </div>
       </div>
 
       <div>
-        <p className="text-[13px] font-medium text-[#0D5C6E] mb-2">Pricing</p>
+        <p className="text-[13px] font-medium text-teal-800 mb-2">Pricing</p>
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1.5">
-            <label className="text-[12px] text-[#7A9AAA]">Price ($)</label>
+            <label className="text-[12px] text-text-muted">Price ($)</label>
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#7A9AAA] text-[15px] pointer-events-none">$</span>
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted text-[15px] pointer-events-none">$</span>
               <input
                 type="number"
                 min={0}
@@ -393,34 +393,34 @@ function StepPricing({ form, set, errors }: { form: ListingFormState; set: (f: k
                 value={form.price}
                 onChange={(e) => set('price', e.target.value)}
                 placeholder="0"
-                className={`h-12 rounded-[12px] border-2 pl-8 pr-4 text-[15px] font-['DM_Sans'] text-[#1C3A4A] bg-white w-full transition-colors focus:outline-none focus:border-[#0D5C6E] ${
-                  errors.price ? 'border-[#C0544A]' : 'border-[#E8DFC8]'
+                className={`h-12 rounded-[12px] border-2 pl-8 pr-4 text-[15px] font-body text-text-dark bg-white w-full transition-colors focus:outline-none focus:border-teal-800 ${
+                  errors.price ? 'border-error' : 'border-cream-700'
                 }`}
               />
             </div>
-            {errors.price && <p className="text-[12px] text-[#C0544A]">{errors.price}</p>}
+            {errors.price && <p className="text-[12px] text-error">{errors.price}</p>}
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-[12px] text-[#7A9AAA]">Per</label>
+            <label className="text-[12px] text-text-muted">Per</label>
             <div className="relative">
               <select
                 value={form.priceUnit}
                 onChange={(e) => set('priceUnit', e.target.value)}
-                className="h-12 rounded-[12px] border-2 border-[#E8DFC8] px-4 pr-8 text-[15px] font-['DM_Sans'] text-[#1C3A4A] bg-white w-full appearance-none transition-colors focus:outline-none focus:border-[#0D5C6E]"
+                className="h-12 rounded-[12px] border-2 border-cream-700 px-4 pr-8 text-[15px] font-body text-text-dark bg-white w-full appearance-none transition-colors focus:outline-none focus:border-teal-800"
               >
                 {withCurrent(PRICE_UNITS, form.priceUnit).map((u) => (
                   <option key={u} value={u}>{u}</option>
                 ))}
               </select>
-              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#0D5C6E] text-xs">▾</span>
+              <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-teal-800 text-xs">▾</span>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="bg-[#F5EFE0] border border-[#E8DFC8] rounded-[14px] px-5 py-4">
-        <p className="text-[13px] text-[#3A5A6A] leading-relaxed">
-          <strong className="text-[#0D5C6E]">Not sure on pricing?</strong> You can update this any time. Families see pricing as a range, so approximate is fine for now.
+      <div className="bg-cream-500 border border-cream-700 rounded-[14px] px-5 py-4">
+        <p className="text-[13px] text-text-mid leading-relaxed">
+          <strong className="text-teal-800">Not sure on pricing?</strong> You can update this any time. Families see pricing as a range, so approximate is fine for now.
         </p>
       </div>
     </div>
@@ -442,8 +442,8 @@ function StepLocation({
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <h2 className="font-['Cormorant_Garamond'] text-[26px] font-light text-[#1C3A4A] mb-1">Location & contact</h2>
-        <p className="text-[14px] text-[#3A5A6A]">Where do families find you?</p>
+        <h2 className="font-display text-[26px] font-light text-text-dark mb-1">Location & contact</h2>
+        <p className="text-[14px] text-text-mid">Where do families find you?</p>
       </div>
 
       <SelectField
@@ -473,12 +473,12 @@ function StepLocation({
         autoComplete="tel"
       />
 
-      <div className="border-t border-[#E8DFC8] pt-4 flex flex-col gap-1.5">
-        <p className="text-[13px] font-medium text-[#0D5C6E]">Your account</p>
-        <p className="text-[13px] text-[#7A9AAA] mb-3">From your provider account — only visible to the Little Sound team.</p>
-        <div className="bg-[#F5EFE0] border border-[#E8DFC8] rounded-[12px] px-5 py-4 flex flex-col gap-1">
-          <p className="text-[14px] text-[#1C3A4A] font-medium">{businessName || '—'}</p>
-          <p className="text-[13px] text-[#3A5A6A]">{contactName || '—'} · {contactEmail || '—'}</p>
+      <div className="border-t border-cream-700 pt-4 flex flex-col gap-1.5">
+        <p className="text-[13px] font-medium text-teal-800">Your account</p>
+        <p className="text-[13px] text-text-muted mb-3">From your provider account — only visible to the Little Sound team.</p>
+        <div className="bg-cream-500 border border-cream-700 rounded-[12px] px-5 py-4 flex flex-col gap-1">
+          <p className="text-[14px] text-text-dark font-medium">{businessName || '—'}</p>
+          <p className="text-[13px] text-text-mid">{contactName || '—'} · {contactEmail || '—'}</p>
         </div>
       </div>
     </div>
@@ -525,30 +525,30 @@ function StepReview({
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <h2 className="font-['Cormorant_Garamond'] text-[26px] font-light text-[#1C3A4A] mb-1">
+        <h2 className="font-display text-[26px] font-light text-text-dark mb-1">
           {isEdit ? 'Review your changes' : 'Review your listing'}
         </h2>
-        <p className="text-[14px] text-[#3A5A6A]">{subhead}</p>
+        <p className="text-[14px] text-text-mid">{subhead}</p>
       </div>
 
-      <div className="bg-[#F5EFE0] border border-[#E8DFC8] rounded-[16px] overflow-hidden">
+      <div className="bg-cream-500 border border-cream-700 rounded-[16px] overflow-hidden">
         {rows.map((row, i) => (
-          <div key={row.label} className={`flex gap-4 px-5 py-3.5 ${i !== rows.length - 1 ? 'border-b border-[#E8DFC8]' : ''}`}>
-            <span className="text-[12px] font-semibold text-[#7A9AAA] uppercase tracking-wide w-20 flex-shrink-0 pt-0.5">{row.label}</span>
-            <span className="text-[14px] text-[#1C3A4A] leading-relaxed">{row.value}</span>
+          <div key={row.label} className={`flex gap-4 px-5 py-3.5 ${i !== rows.length - 1 ? 'border-b border-cream-700' : ''}`}>
+            <span className="text-[12px] font-semibold text-text-muted uppercase tracking-wide w-20 flex-shrink-0 pt-0.5">{row.label}</span>
+            <span className="text-[14px] text-text-dark leading-relaxed">{row.value}</span>
           </div>
         ))}
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <span className="text-[12px] font-semibold text-[#7A9AAA] uppercase tracking-wide">Description</span>
-        <p className="text-[14px] text-[#3A5A6A] leading-relaxed bg-[#F5EFE0] border border-[#E8DFC8] rounded-[12px] px-5 py-4">
+        <span className="text-[12px] font-semibold text-text-muted uppercase tracking-wide">Description</span>
+        <p className="text-[14px] text-text-mid leading-relaxed bg-cream-500 border border-cream-700 rounded-[12px] px-5 py-4">
           {form.description}
         </p>
       </div>
 
-      <div className="bg-[#0D5C6E]/5 border border-[#0D5C6E]/15 rounded-[14px] px-5 py-4">
-        <p className="text-[13px] text-[#0D5C6E] leading-relaxed font-medium">
+      <div className="bg-teal-800/5 border border-teal-800/15 rounded-[14px] px-5 py-4">
+        <p className="text-[13px] text-teal-800 leading-relaxed font-medium">
           {note}
         </p>
       </div>
@@ -560,14 +560,14 @@ function StepReview({
 
 function SuccessScreen({ businessName }: { businessName: string }) {
   return (
-    <main className="min-h-screen bg-[#F5EFE0] flex items-center justify-center px-4 py-16">
+    <main className="min-h-screen bg-cream-500 flex items-center justify-center px-4 py-16">
       <div className="bg-white rounded-[24px] shadow-[0_4px_32px_rgba(10,74,90,0.09)] w-full max-w-[480px] p-10 text-center">
         <IconChip name="sparkle" className="mx-auto mb-5" />
-        <h2 className="font-['Cormorant_Garamond'] text-[32px] font-light text-[#1C3A4A] mb-3">
+        <h2 className="font-display text-[32px] font-light text-text-dark mb-3">
           You&apos;re submitted!
         </h2>
-        <p className="text-[15px] text-[#3A5A6A] leading-relaxed mb-8">
-          <strong className="text-[#1C3A4A]">{businessName}</strong> is in review. We&apos;ll have your listing live within 24 hours.
+        <p className="text-[15px] text-text-mid leading-relaxed mb-8">
+          <strong className="text-text-dark">{businessName}</strong> is in review. We&apos;ll have your listing live within 24 hours.
         </p>
         <div className="flex flex-col gap-3">
           {/* Plain <a>, not next/link — a full navigation guarantees the
@@ -576,19 +576,19 @@ function SuccessScreen({ businessName }: { businessName: string }) {
               listing was submitted, showing a stale empty state. */}
           <a
             href="/providers/dashboard"
-            className="inline-flex items-center justify-center h-12 rounded-full bg-[#0D5C6E] text-white font-semibold text-[15px] hover:bg-[#1A7A8A] transition-colors"
+            className="inline-flex items-center justify-center h-12 rounded-full bg-teal-800 text-white font-semibold text-[15px] hover:bg-teal-700 transition-colors"
           >
             Go to your dashboard →
           </a>
           <Link
             href="/discover"
-            className="inline-flex items-center justify-center h-12 rounded-full border-2 border-[#E8DFC8] text-[#0D5C6E] font-semibold text-[14px] hover:border-[#C5D8E8] transition-colors"
+            className="inline-flex items-center justify-center h-12 rounded-full border-2 border-cream-700 text-teal-800 font-semibold text-[14px] hover:border-blue-grey-300 transition-colors"
           >
             See the directory
           </Link>
         </div>
-        <p className="text-[12px] text-[#7A9AAA] mt-6">
-          Questions? <a href="mailto:hello@thelittlesound.com" className="underline underline-offset-2 text-[#1A7A8A]">hello@thelittlesound.com</a>
+        <p className="text-[12px] text-text-muted mt-6">
+          Questions? <a href="mailto:hello@thelittlesound.com" className="underline underline-offset-2 text-teal-700">hello@thelittlesound.com</a>
         </p>
       </div>
     </main>
@@ -619,18 +619,18 @@ function EditSuccessScreen({
     : 'Your listing has been updated.';
 
   return (
-    <main className="min-h-screen bg-[#F5EFE0] flex items-center justify-center px-4 py-16">
+    <main className="min-h-screen bg-cream-500 flex items-center justify-center px-4 py-16">
       <div className="bg-white rounded-[24px] shadow-[0_4px_32px_rgba(10,74,90,0.09)] w-full max-w-[480px] p-10 text-center">
-        <div className="w-14 h-14 rounded-full bg-[#0D5C6E]/10 flex items-center justify-center mx-auto mb-5">
-          <span className="text-[#0D5C6E] text-2xl">✓</span>
+        <div className="w-14 h-14 rounded-full bg-teal-800/10 flex items-center justify-center mx-auto mb-5">
+          <span className="text-teal-800 text-2xl">✓</span>
         </div>
-        <h2 className="font-['Cormorant_Garamond'] text-[30px] font-light text-[#1C3A4A] mb-2">
+        <h2 className="font-display text-[30px] font-light text-text-dark mb-2">
           {heading}
         </h2>
-        <p className="text-[15px] text-[#1C3A4A] font-semibold leading-relaxed mb-1">
+        <p className="text-[15px] text-text-dark font-semibold leading-relaxed mb-1">
           {title}
         </p>
-        <p className="text-[15px] text-[#3A5A6A] leading-relaxed mb-8">
+        <p className="text-[15px] text-text-mid leading-relaxed mb-8">
           {body}
         </p>
         <div className="flex flex-col gap-3">
@@ -639,13 +639,13 @@ function EditSuccessScreen({
               router-cached snapshot from before this edit. */}
           <a
             href="/providers/dashboard"
-            className="inline-flex items-center justify-center h-12 rounded-full bg-[#0D5C6E] text-white font-semibold text-[15px] hover:bg-[#1A7A8A] transition-colors"
+            className="inline-flex items-center justify-center h-12 rounded-full bg-teal-800 text-white font-semibold text-[15px] hover:bg-teal-700 transition-colors"
           >
             Back to your dashboard →
           </a>
           <Link
             href="/discover"
-            className="inline-flex items-center justify-center h-12 rounded-full border-2 border-[#E8DFC8] text-[#0D5C6E] font-semibold text-[14px] hover:border-[#C5D8E8] transition-colors"
+            className="inline-flex items-center justify-center h-12 rounded-full border-2 border-cream-700 text-teal-800 font-semibold text-[14px] hover:border-blue-grey-300 transition-colors"
           >
             See the directory
           </Link>
@@ -670,18 +670,18 @@ interface FieldProps {
 function Field({ label, type = 'text', value, onChange, error, placeholder, autoComplete }: FieldProps) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="text-[13px] font-medium text-[#0D5C6E]">{label}</label>
+      <label className="text-[13px] font-medium text-teal-800">{label}</label>
       <input
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         autoComplete={autoComplete}
-        className={`h-12 rounded-[12px] border-2 px-4 text-[15px] font-['DM_Sans'] text-[#1C3A4A] bg-white w-full transition-colors focus:outline-none focus:border-[#0D5C6E] ${
-          error ? 'border-[#C0544A]' : 'border-[#E8DFC8]'
+        className={`h-12 rounded-[12px] border-2 px-4 text-[15px] font-body text-text-dark bg-white w-full transition-colors focus:outline-none focus:border-teal-800 ${
+          error ? 'border-error' : 'border-cream-700'
         }`}
       />
-      {error && <p className="text-[12px] text-[#C0544A]">{error}</p>}
+      {error && <p className="text-[12px] text-error">{error}</p>}
     </div>
   );
 }
@@ -698,13 +698,13 @@ interface SelectFieldProps {
 function SelectField({ label, value, onChange, options, placeholder, error }: SelectFieldProps) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="text-[13px] font-medium text-[#0D5C6E]">{label}</label>
+      <label className="text-[13px] font-medium text-teal-800">{label}</label>
       <div className="relative">
         <select
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className={`w-full h-12 rounded-[12px] border-2 px-4 pr-10 text-[15px] font-['DM_Sans'] text-[#1C3A4A] bg-white appearance-none transition-colors focus:outline-none focus:border-[#0D5C6E] ${
-            error ? 'border-[#C0544A]' : 'border-[#E8DFC8]'
+          className={`w-full h-12 rounded-[12px] border-2 px-4 pr-10 text-[15px] font-body text-text-dark bg-white appearance-none transition-colors focus:outline-none focus:border-teal-800 ${
+            error ? 'border-error' : 'border-cream-700'
           }`}
         >
           <option value="">{placeholder}</option>
@@ -712,9 +712,9 @@ function SelectField({ label, value, onChange, options, placeholder, error }: Se
             <option key={o} value={o}>{o}</option>
           ))}
         </select>
-        <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#0D5C6E] text-xs">▾</span>
+        <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-teal-800 text-xs">▾</span>
       </div>
-      {error && <p className="text-[12px] text-[#C0544A]">{error}</p>}
+      {error && <p className="text-[12px] text-error">{error}</p>}
     </div>
   );
 }

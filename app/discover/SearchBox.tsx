@@ -157,7 +157,7 @@ export default function SearchBox({
 
   return (
     <div className="flex flex-col gap-2 w-full">
-      <label htmlFor="ls-search" className="font-['Cormorant_Garamond'] text-[22px] font-medium text-white">
+      <label htmlFor="ls-search" className="font-display text-[22px] font-medium text-white">
         What are you looking for?
       </label>
       <div className="relative">
@@ -183,12 +183,12 @@ export default function SearchBox({
             aria-autocomplete="list"
             aria-activedescendant={active >= 0 && flat[active] ? `ls-opt-${flat[active].id}` : undefined}
             aria-describedby="ls-search-hint"
-            className="flex-1 min-w-0 bg-transparent outline-none text-[16px] text-[#1C3A4A] placeholder:text-[#6A8794]"
+            className="flex-1 min-w-0 bg-transparent outline-none text-[16px] text-text-dark placeholder:text-text-mid"
           />
           <button
             type="button"
             onClick={() => (typed ? apply(parse(typed, kids)) : ref.current?.focus())}
-            className="shrink-0 min-h-[44px] px-5 rounded-full bg-[#0D5C6E] text-white text-[15px] font-semibold hover:bg-[#1A7A8A] transition-colors"
+            className="shrink-0 min-h-[44px] px-5 rounded-full bg-teal-800 text-white text-[15px] font-semibold hover:bg-teal-700 transition-colors"
           >
             Search
           </button>
@@ -201,15 +201,15 @@ export default function SearchBox({
             className="absolute top-[64px] left-0 right-0 z-30 bg-white rounded-[20px] shadow-[0_16px_48px_rgba(10,40,50,0.22)] p-2.5 flex flex-col gap-1 max-h-[440px] overflow-y-auto"
           >
             {typed && (
-              <p className="px-3 pt-1 pb-2 text-[13px] text-[#4E6B78]">
-                {preview.length ? <>Reads as: <span className="font-semibold text-[#1C3A4A]">{preview.join(' · ')}</span></> : 'Keep typing: an activity, a place, an age…'}
+              <p className="px-3 pt-1 pb-2 text-[13px] text-text-mid">
+                {preview.length ? <>Reads as: <span className="font-semibold text-text-dark">{preview.join(' · ')}</span></> : 'Keep typing: an activity, a place, an age…'}
               </p>
             )}
-            {locNote && <p className="px-3 py-2 text-[13px] text-[#8A5A1F]">{locNote}</p>}
+            {locNote && <p className="px-3 py-2 text-[13px] text-gold-deep">{locNote}</p>}
             {sections.map((s, si) => (
               <div key={si} className="flex flex-col">
                 {s.title && (
-                  <span className="px-3 pt-2.5 pb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#5F7A86]">{s.title}</span>
+                  <span className="px-3 pt-2.5 pb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-text-mid">{s.title}</span>
                 )}
                 {s.options.map((o) => {
                   const idx = flat.indexOf(o);
@@ -225,11 +225,11 @@ export default function SearchBox({
                       onMouseDown={(e) => { e.preventDefault(); o.run(); }}
                       onMouseEnter={() => setActive(idx)}
                       className={`min-h-[44px] px-3 py-1.5 rounded-[12px] text-left flex items-baseline justify-between gap-3 transition-colors ${
-                        isActive ? 'bg-[#E4ECF3]' : strong ? 'bg-[#F5EFE0]' : 'bg-transparent'
+                        isActive ? 'bg-blue-grey-100' : strong ? 'bg-cream-500' : 'bg-transparent'
                       }`}
                     >
-                      <span className={`text-[15px] ${strong ? 'font-semibold text-[#0D5C6E]' : 'text-[#1C3A4A]'}`}>{o.label}</span>
-                      {o.hint && <span className="shrink-0 text-[12.5px] text-[#5F7A86]">{o.hint}</span>}
+                      <span className={`text-[15px] ${strong ? 'font-semibold text-teal-800' : 'text-text-dark'}`}>{o.label}</span>
+                      {o.hint && <span className="shrink-0 text-[12.5px] text-text-mid">{o.hint}</span>}
                     </button>
                   );
                 })}
@@ -240,7 +240,7 @@ export default function SearchBox({
       </div>
 
       {chips.length === 0 ? (
-        <p id="ls-search-hint" className="text-[13px] leading-snug text-[#C5D8E8]">
+        <p id="ls-search-hint" className="text-[13px] leading-snug text-blue-grey-300">
           An activity, a neighborhood or ZIP, an age, or “free”. Say it however you like.
         </p>
       ) : (
@@ -251,7 +251,7 @@ export default function SearchBox({
               type="button"
               onClick={c.remove}
               aria-label={`Remove ${c.label}`}
-              className="min-h-[36px] pl-3.5 pr-2 rounded-full bg-white text-[#0D5C6E] text-[14px] font-semibold inline-flex items-center gap-1.5 hover:bg-[#F5EFE0] transition-colors"
+              className="min-h-[36px] pl-3.5 pr-2 rounded-full bg-white text-teal-800 text-[14px] font-semibold inline-flex items-center gap-1.5 hover:bg-cream-500 transition-colors"
             >
               {c.label}
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4E6B78" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
@@ -259,7 +259,7 @@ export default function SearchBox({
               </svg>
             </button>
           ))}
-          <button type="button" onClick={onClear} className="min-h-[36px] px-2 text-[13px] font-semibold text-[#C5D8E8] underline underline-offset-2 hover:text-white">
+          <button type="button" onClick={onClear} className="min-h-[36px] px-2 text-[13px] font-semibold text-blue-grey-300 underline underline-offset-2 hover:text-white">
             Clear all
           </button>
         </div>

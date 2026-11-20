@@ -31,7 +31,7 @@ export default function Nav() {
   }, [pathname]);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0D5C6E]/95 backdrop-blur-sm border-b border-white/10 h-16">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-teal-800/95 backdrop-blur-sm border-b border-white/10 h-16">
       <div className="max-w-[1280px] mx-auto px-6 md:px-10 lg:px-16 h-full flex items-center justify-between">
 
         {/* Logo */}
@@ -39,7 +39,7 @@ export default function Nav() {
           href="/"
           className="h-full flex items-center shrink-0 [clip-path:inset(0_-48px)]"
         >
-          <span className="relative font-['Cormorant_Garamond'] text-xl font-semibold text-white tracking-tight">
+          <span className="relative font-display text-xl font-semibold text-white tracking-tight">
             <img
               src="/images/logo-waves.svg"
               alt=""
@@ -72,7 +72,7 @@ export default function Nav() {
           {dashboard ? (
             <Link
               href={dashboard}
-              className="inline-flex bg-[#C4A882] hover:bg-[#A8865A] text-white text-sm font-semibold rounded-full px-5 py-2.5 transition-colors"
+              className="inline-flex bg-gold hover:bg-gold-dark text-white text-sm font-semibold rounded-full px-5 py-2.5 transition-colors"
             >
               My dashboard
             </Link>
@@ -86,7 +86,7 @@ export default function Nav() {
           </Link>
           <Link
             href="/families/signup"
-            className="inline-flex bg-[#C4A882] hover:bg-[#A8865A] text-white text-sm font-semibold rounded-full px-5 py-2.5 transition-colors"
+            className="inline-flex bg-gold hover:bg-gold-dark text-white text-sm font-semibold rounded-full px-5 py-2.5 transition-colors"
           >
             Create Account
           </Link>
@@ -108,7 +108,7 @@ export default function Nav() {
 
       {/* Mobile menu */}
       {open && (
-        <div className="md:hidden bg-[#0A4A5A] border-t border-white/10 px-6 py-5 space-y-1">
+        <div className="md:hidden bg-teal-900 border-t border-white/10 px-6 py-5 space-y-1">
           {LINKS.map((link) => (
             <Link
               key={link.href}
@@ -125,7 +125,7 @@ export default function Nav() {
             <Link
               href={dashboard}
               onClick={() => setOpen(false)}
-              className="block mt-4 text-center bg-[#C4A882] hover:bg-[#A8865A] text-white font-semibold rounded-full px-5 py-3 text-[15px] transition-colors"
+              className="block mt-4 text-center bg-gold hover:bg-gold-dark text-white font-semibold rounded-full px-5 py-3 text-[15px] transition-colors"
             >
               My dashboard
             </Link>
@@ -141,7 +141,7 @@ export default function Nav() {
           <Link
             href="/families/signup"
             onClick={() => setOpen(false)}
-            className="block mt-4 text-center bg-[#C4A882] hover:bg-[#A8865A] text-white font-semibold rounded-full px-5 py-3 text-[15px] transition-colors"
+            className="block mt-4 text-center bg-gold hover:bg-gold-dark text-white font-semibold rounded-full px-5 py-3 text-[15px] transition-colors"
           >
             Create Account
           </Link>

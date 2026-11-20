@@ -29,9 +29,9 @@ interface Claim {
 }
 
 const STATUS_COLORS = {
-  pending: 'bg-amber-100 text-amber-800',
-  approved: 'bg-emerald-100 text-emerald-800',
-  rejected: 'bg-red-100 text-red-700',
+  pending: 'bg-warning-light text-gold-deep',
+  approved: 'bg-success-light text-success-dark',
+  rejected: 'bg-error-light text-error-dark',
 };
 
 // Review queue for listing claims (provider asks to own an existing listing).
@@ -109,7 +109,7 @@ export default function ClaimsPanel({
               key={f}
               onClick={() => { setFilter(f); setSelectedId(null); }}
               className={`px-4 py-1.5 rounded-full text-sm capitalize transition-colors ${
-                filter === f ? 'bg-[#0D5C6E] text-white' : 'bg-white text-[#0D5C6E] border border-[#C5D8E8] hover:bg-[#C5D8E8]/20'
+                filter === f ? 'bg-teal-800 text-white' : 'bg-white text-teal-800 border border-blue-grey-300 hover:bg-blue-grey-300/20'
               }`}
             >
               {f}
@@ -118,10 +118,10 @@ export default function ClaimsPanel({
         </div>
 
         {loading ? (
-          <p className="text-[#7A9AAA] text-sm py-8 text-center">Loading…</p>
+          <p className="text-text-muted text-sm py-8 text-center">Loading…</p>
         ) : claims.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-[#E8DFC8] p-8 text-center">
-            <p className="text-[#7A9AAA] text-sm">No {filter !== 'all' ? filter : ''} claims</p>
+          <div className="bg-white rounded-2xl border border-cream-700 p-8 text-center">
+            <p className="text-text-muted text-sm">No {filter !== 'all' ? filter : ''} claims</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -130,23 +130,23 @@ export default function ClaimsPanel({
                 key={c.id}
                 onClick={() => setSelectedId(selectedId === c.id ? null : c.id)}
                 className={`w-full text-left bg-white rounded-2xl border transition-all px-5 py-4 ${
-                  selectedId === c.id ? 'border-[#0D5C6E] shadow-md' : 'border-[#E8DFC8] hover:border-[#C5D8E8] hover:shadow-sm'
+                  selectedId === c.id ? 'border-teal-800 shadow-md' : 'border-cream-700 hover:border-blue-grey-300 hover:shadow-sm'
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="font-semibold text-[#1C3A4A] text-sm truncate">{c.business_name ?? 'Listing claim'}</p>
-                    <p className="text-[#7A9AAA] text-xs mt-0.5 truncate">
+                    <p className="font-semibold text-text-dark text-sm truncate">{c.business_name ?? 'Listing claim'}</p>
+                    <p className="text-text-muted text-xs mt-0.5 truncate">
                       {c.claimant ? `${c.claimant.name} · ${c.claimant.email}` : 'Claimant profile missing'}
                     </p>
-                    <p className="text-[#7A9AAA] text-xs mt-0.5">
+                    <p className="text-text-muted text-xs mt-0.5">
                       {c.listings.length} listing{c.listings.length === 1 ? '' : 's'}
                       {c.verification.emailMatchesWebsite ? ' · ✓ email domain matches' : ''}
                     </p>
                   </div>
                   <div className="flex flex-col items-end gap-1 shrink-0">
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLORS[c.status]}`}>{c.status}</span>
-                    <span className="text-[#B0C8D0] text-xs">{new Date(c.created_at).toLocaleDateString()}</span>
+                    <span className="text-blue-grey-300 text-xs">{new Date(c.created_at).toLocaleDateString()}</span>
                   </div>
                 </div>
               </button>
@@ -158,9 +158,9 @@ export default function ClaimsPanel({
       {/* Detail */}
       {selected && (
         <div className="w-full md:w-96 shrink-0">
-          <div className="bg-white rounded-2xl border border-[#E8DFC8] p-5 md:sticky md:top-6">
+          <div className="bg-white rounded-2xl border border-cream-700 p-5 md:sticky md:top-6">
             <div className="flex items-start justify-between mb-4">
-              <h2 className="font-['Cormorant_Garamond'] text-xl font-light text-[#0D5C6E] leading-tight">
+              <h2 className="font-display text-xl font-light text-teal-800 leading-tight">
                 {selected.business_name ?? 'Listing claim'}
               </h2>
               <span className={`text-xs px-2 py-0.5 rounded-full font-medium shrink-0 ml-2 ${STATUS_COLORS[selected.status]}`}>
@@ -169,7 +169,7 @@ export default function ClaimsPanel({
             </div>
 
             {/* Who is asking */}
-            <p className="text-xs text-[#7A9AAA] uppercase tracking-wider mb-1.5">Claimant</p>
+            <p className="text-xs text-text-muted uppercase tracking-wider mb-1.5">Claimant</p>
             {selected.claimant ? (
               <dl className="space-y-1.5 text-sm mb-4">
                 <Row label="Name" value={selected.claimant.name} />
@@ -180,50 +180,50 @@ export default function ClaimsPanel({
                 <Row label="Phone" value={selected.claimant.phone} />
               </dl>
             ) : (
-              <p className="text-sm text-red-600 mb-4">This account has no provider profile — it can't be approved.</p>
+              <p className="text-sm text-error-dark mb-4">This account has no provider profile — it can't be approved.</p>
             )}
 
             {/* Verification hints */}
-            <div className="bg-[#F5EFE0] rounded-xl p-3 mb-4 space-y-1">
-              <p className="text-xs text-[#7A9AAA] uppercase tracking-wider mb-1">Verification hints</p>
+            <div className="bg-cream-500 rounded-xl p-3 mb-4 space-y-1">
+              <p className="text-xs text-text-muted uppercase tracking-wider mb-1">Verification hints</p>
               <Hint ok={selected.verification.emailMatchesWebsite} yes="Email domain matches the listing's website" no="Email domain doesn't match the listing's website" />
               <Hint ok={selected.verification.profileWebsiteMatches} yes="Profile website matches the listing" no="Profile website doesn't match the listing" />
-              <p className="text-[11px] text-[#7A9AAA] pt-1">Hints, not proof. When unsure, call the number on the business's own website.</p>
+              <p className="text-[11px] text-text-muted pt-1">Hints, not proof. When unsure, call the number on the business's own website.</p>
             </div>
 
             {selected.message && (
-              <div className="bg-[#F5EFE0] rounded-xl p-3 mb-4">
-                <p className="text-xs text-[#7A9AAA] uppercase tracking-wider mb-1">Their note</p>
-                <p className="text-sm text-[#1C3A4A] leading-relaxed">{selected.message}</p>
+              <div className="bg-cream-500 rounded-xl p-3 mb-4">
+                <p className="text-xs text-text-muted uppercase tracking-wider mb-1">Their note</p>
+                <p className="text-sm text-text-dark leading-relaxed">{selected.message}</p>
               </div>
             )}
 
             {/* Listings requested */}
-            <p className="text-xs text-[#7A9AAA] uppercase tracking-wider mb-1.5">Listings requested</p>
+            <p className="text-xs text-text-muted uppercase tracking-wider mb-1.5">Listings requested</p>
             <ul className="space-y-1.5 mb-4">
               {selected.listings.map((l) => (
                 <li key={l.activityId} className="text-sm">
-                  <span className="text-[#1C3A4A]">{l.title}</span>
+                  <span className="text-text-dark">{l.title}</span>
                   {l.website && (
                     <a
                       href={l.website.startsWith('http') ? l.website : `https://${l.website}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="block text-xs text-[#1A7A8A] underline break-all"
+                      className="block text-xs text-teal-700 underline break-all"
                     >
                       {l.website}
                     </a>
                   )}
-                  {l.ownedBySomeoneElse && <span className="block text-xs text-red-600">Already owned by another provider</span>}
-                  {l.ownedByClaimant && <span className="block text-xs text-emerald-700">Already transferred to this claimant</span>}
-                  {!l.exists && <span className="block text-xs text-red-600">No longer exists</span>}
+                  {l.ownedBySomeoneElse && <span className="block text-xs text-error-dark">Already owned by another provider</span>}
+                  {l.ownedByClaimant && <span className="block text-xs text-success-dark">Already transferred to this claimant</span>}
+                  {!l.exists && <span className="block text-xs text-error-dark">No longer exists</span>}
                 </li>
               ))}
             </ul>
 
             {selected.status === 'pending' ? (
               <>
-                <label className="text-xs text-[#7A9AAA] uppercase tracking-wider block mb-1.5">
+                <label className="text-xs text-text-muted uppercase tracking-wider block mb-1.5">
                   Note to the provider (optional, included in the email)
                 </label>
                 <textarea
@@ -231,27 +231,27 @@ export default function ClaimsPanel({
                   value={notes[selected.id] ?? ''}
                   onChange={(e) => setNotes((prev) => ({ ...prev, [selected.id]: e.target.value }))}
                   placeholder="e.g. Could you reply from your business email so we can confirm?"
-                  className="w-full border border-[#E8DFC8] rounded-xl px-3 py-2 text-sm outline-none focus:border-[#0D5C6E] resize-none mb-4"
+                  className="w-full border border-cream-700 rounded-xl px-3 py-2 text-sm outline-none focus:border-teal-800 resize-none mb-4"
                 />
                 <div className="flex gap-2">
                   <button
                     onClick={() => act(selected.id, 'approve')}
                     disabled={!!acting || !selected.claimant}
-                    className="flex-1 bg-[#0D5C6E] text-white rounded-full py-2.5 text-sm font-semibold hover:bg-[#1A7A8A] transition-colors disabled:opacity-50"
+                    className="flex-1 bg-teal-800 text-white rounded-full py-2.5 text-sm font-semibold hover:bg-teal-700 transition-colors disabled:opacity-50"
                   >
                     {acting === selected.id + 'approve' ? '…' : 'Approve & transfer'}
                   </button>
                   <button
                     onClick={() => act(selected.id, 'reject')}
                     disabled={!!acting}
-                    className="flex-1 bg-red-50 text-red-600 border border-red-200 rounded-full py-2.5 text-sm font-semibold hover:bg-red-100 transition-colors disabled:opacity-50"
+                    className="flex-1 bg-error-light text-error-dark border border-error/30 rounded-full py-2.5 text-sm font-semibold hover:bg-error-light transition-colors disabled:opacity-50"
                   >
                     {acting === selected.id + 'reject' ? '…' : 'Reject'}
                   </button>
                 </div>
               </>
             ) : (
-              <p className="text-xs text-[#B0C8D0] text-center">
+              <p className="text-xs text-blue-grey-300 text-center">
                 {selected.status === 'approved' ? 'Approved' : 'Rejected'}
                 {selected.reviewed_at ? ` ${new Date(selected.reviewed_at).toLocaleDateString()}` : ''}
                 {selected.reviewed_by ? ` by ${selected.reviewed_by}` : ''}
@@ -267,7 +267,7 @@ export default function ClaimsPanel({
 
 function Hint({ ok, yes, no }: { ok: boolean; yes: string; no: string }) {
   return (
-    <p className={`text-sm ${ok ? 'text-emerald-700' : 'text-[#7A9AAA]'}`}>
+    <p className={`text-sm ${ok ? 'text-success-dark' : 'text-text-muted'}`}>
       {ok ? '✓ ' : '– '}
       {ok ? yes : no}
     </p>
@@ -278,8 +278,8 @@ function Row({ label, value }: { label: string; value: string | null | undefined
   if (!value) return null;
   return (
     <div className="flex gap-2">
-      <dt className="text-[#7A9AAA] w-20 shrink-0">{label}</dt>
-      <dd className="text-[#1C3A4A] break-all">{value}</dd>
+      <dt className="text-text-muted w-20 shrink-0">{label}</dt>
+      <dd className="text-text-dark break-all">{value}</dd>
     </div>
   );
 }

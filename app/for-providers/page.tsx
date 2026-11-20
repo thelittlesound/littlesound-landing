@@ -77,18 +77,18 @@ export default function ForProviders() {
     <main>
 
       {/* ── HERO ── */}
-      <section className="min-h-screen bg-[#0D5C6E] pt-32 pb-20 px-6 md:px-10 lg:px-16 flex items-center">
+      <section className="min-h-screen bg-teal-800 pt-32 pb-20 px-6 md:px-10 lg:px-16 flex items-center">
         <div className="max-w-[1280px] mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 
           {/* Left — copy */}
           <div>
             <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 mb-8">
-              <span className="text-xs font-bold uppercase tracking-widest text-[#C4A882]">For Providers</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-gold">For Providers</span>
             </div>
 
-            <h1 className="font-['Cormorant_Garamond'] text-[clamp(40px,5vw,68px)] font-light leading-[1.1] tracking-tight text-white mb-6">
+            <h1 className="font-display text-[clamp(40px,5vw,68px)] font-light leading-[1.1] tracking-tight text-white mb-6">
               Families are searching.<br />
-              <em className="italic text-[#C4A882]">Be where they look.</em>
+              <em className="italic text-gold">Be where they look.</em>
             </h1>
 
             <p className="text-white/70 text-lg leading-relaxed max-w-[480px] mb-10">
@@ -98,7 +98,7 @@ export default function ForProviders() {
             <div className="flex flex-row flex-wrap gap-3 mb-10">
               <a
                 href="/providers/claim"
-                className="inline-flex items-center justify-center gap-2 bg-[#C4A882] hover:bg-[#A8865A] text-white font-semibold rounded-full px-5 py-3 text-[14px] transition-all duration-200 hover:-translate-y-0.5"
+                className="inline-flex items-center justify-center gap-2 bg-gold hover:bg-gold-dark text-white font-semibold rounded-full px-5 py-3 text-[14px] transition-all duration-200 hover:-translate-y-0.5"
               >
                 Claim Your Listing →
               </a>
@@ -113,7 +113,7 @@ export default function ForProviders() {
             <div className="flex flex-wrap gap-5">
               {['Free to list', 'No ad spend required', 'Hundreds of programs listed'].map((item) => (
                 <span key={item} className="flex items-center gap-1.5 text-white/55 text-[13px]">
-                  <span className="text-[#C4A882] font-bold">✓</span>
+                  <span className="text-gold font-bold">✓</span>
                   {item}
                 </span>
               ))}
@@ -132,7 +132,7 @@ export default function ForProviders() {
                 key={stat.label}
                 className="bg-white/8 border border-white/10 rounded-[20px] p-8"
               >
-                <p className="font-['Cormorant_Garamond'] text-[52px] font-light text-white leading-none mb-2">
+                <p className="font-display text-[52px] font-light text-white leading-none mb-2">
                   {stat.value}
                 </p>
                 <p className="text-white/80 text-[15px] font-semibold mb-1">{stat.label}</p>
@@ -148,10 +148,10 @@ export default function ForProviders() {
       <section className="bg-white py-24 px-6 md:px-10 lg:px-16">
         <div className="max-w-[1280px] mx-auto">
           <div className="text-center mb-14">
-            <p className="text-xs font-bold uppercase tracking-widest text-[#0D5C6E] mb-4">Why providers choose Little Sound</p>
-            <h2 className="font-['Cormorant_Garamond'] text-[clamp(32px,4vw,50px)] font-light leading-[1.15] tracking-tight text-[#1C3A4A]">
+            <p className="text-xs font-bold uppercase tracking-widest text-teal-800 mb-4">Why providers choose Little Sound</p>
+            <h2 className="font-display text-[clamp(32px,4vw,50px)] font-light leading-[1.15] tracking-tight text-text-dark">
               Less marketing work.<br />
-              <em className="italic text-[#0D5C6E]">More families through the door.</em>
+              <em className="italic text-teal-800">More families through the door.</em>
             </h2>
           </div>
 
@@ -159,13 +159,13 @@ export default function ForProviders() {
             {BENEFITS.map((b) => (
               <div
                 key={b.title}
-                className="bg-[#F5EFE0] rounded-[20px] p-8 border border-[#E8DFC8]"
+                className="bg-cream-500 rounded-[20px] p-8 border border-cream-700"
               >
                 <IconChip name={b.icon} className="mb-5" />
-                <h3 className="font-['Cormorant_Garamond'] text-[20px] font-medium text-[#1C3A4A] mb-3">
+                <h3 className="font-display text-[20px] font-medium text-text-dark mb-3">
                   {b.title}
                 </h3>
-                <p className="text-[14px] text-[#3A5A6A] leading-relaxed">{b.body}</p>
+                <p className="text-[14px] text-text-mid leading-relaxed">{b.body}</p>
               </div>
             ))}
           </div>
@@ -173,13 +173,13 @@ export default function ForProviders() {
       </section>
 
       {/* ── HOW IT WORKS ── */}
-      <section className="bg-[#F5EFE0] py-24 px-6 md:px-10 lg:px-16">
+      <section className="bg-cream-500 py-24 px-6 md:px-10 lg:px-16">
         <div className="max-w-[1280px] mx-auto">
           <div className="mb-14">
-            <p className="text-xs font-bold uppercase tracking-widest text-[#0D5C6E] mb-4">How it works</p>
-            <h2 className="font-['Cormorant_Garamond'] text-[clamp(32px,4vw,50px)] font-light leading-[1.15] tracking-tight text-[#1C3A4A] max-w-[520px]">
+            <p className="text-xs font-bold uppercase tracking-widest text-teal-800 mb-4">How it works</p>
+            <h2 className="font-display text-[clamp(32px,4vw,50px)] font-light leading-[1.15] tracking-tight text-text-dark max-w-[520px]">
               Claim your listing.<br />
-              <em className="italic text-[#0D5C6E]">Start getting found.</em>
+              <em className="italic text-teal-800">Start getting found.</em>
             </h2>
           </div>
 
@@ -187,16 +187,16 @@ export default function ForProviders() {
             {STEPS.map((step) => (
               <div
                 key={step.num}
-                className="bg-white rounded-[20px] p-9 border border-[#E8DFC8]"
+                className="bg-white rounded-[20px] p-9 border border-cream-700"
               >
-                <p className="font-['Cormorant_Garamond'] text-[52px] font-medium text-[#1C3A4A]/8 leading-none mb-4">
+                <p className="font-display text-[52px] font-medium text-text-dark/8 leading-none mb-4">
                   {step.num}
                 </p>
                 <IconChip name={step.icon} className="mb-5" />
-                <h3 className="font-['Cormorant_Garamond'] text-[20px] font-medium text-[#1C3A4A] mb-3">
+                <h3 className="font-display text-[20px] font-medium text-text-dark mb-3">
                   {step.title}
                 </h3>
-                <p className="text-[14px] leading-[1.8] text-[#3A5A6A]">{step.body}</p>
+                <p className="text-[14px] leading-[1.8] text-text-mid">{step.body}</p>
               </div>
             ))}
           </div>
@@ -207,8 +207,8 @@ export default function ForProviders() {
       <section className="bg-white py-24 px-6 md:px-10 lg:px-16">
         <div className="max-w-[720px] mx-auto">
           <div className="text-center mb-12">
-            <p className="text-xs font-bold uppercase tracking-widest text-[#0D5C6E] mb-4">FAQ</p>
-            <h2 className="font-['Cormorant_Garamond'] text-[clamp(30px,3.5vw,46px)] font-light leading-[1.15] tracking-tight text-[#1C3A4A]">
+            <p className="text-xs font-bold uppercase tracking-widest text-teal-800 mb-4">FAQ</p>
+            <h2 className="font-display text-[clamp(30px,3.5vw,46px)] font-light leading-[1.15] tracking-tight text-text-dark">
               Common questions.
             </h2>
           </div>
@@ -217,22 +217,22 @@ export default function ForProviders() {
             {FAQS.map((faq, i) => (
               <div
                 key={i}
-                className="bg-[#F5EFE0] border border-[#E8DFC8] rounded-[16px] overflow-hidden"
+                className="bg-cream-500 border border-cream-700 rounded-[16px] overflow-hidden"
               >
                 <button
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
                   className="w-full text-left px-7 py-5 flex items-center justify-between gap-4"
                 >
-                  <span className="font-['Cormorant_Garamond'] text-[18px] font-medium text-[#1C3A4A]">
+                  <span className="font-display text-[18px] font-medium text-text-dark">
                     {faq.q}
                   </span>
-                  <span className={`text-[#0D5C6E] text-xl font-light flex-shrink-0 transition-transform duration-200 ${openFaq === i ? 'rotate-45' : ''}`}>
+                  <span className={`text-teal-800 text-xl font-light flex-shrink-0 transition-transform duration-200 ${openFaq === i ? 'rotate-45' : ''}`}>
                     +
                   </span>
                 </button>
                 {openFaq === i && (
                   <div className="px-7 pb-6">
-                    <p className="text-[15px] text-[#3A5A6A] leading-relaxed">{faq.a}</p>
+                    <p className="text-[15px] text-text-mid leading-relaxed">{faq.a}</p>
                   </div>
                 )}
               </div>
@@ -242,23 +242,23 @@ export default function ForProviders() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="bg-[#0A4A5A] py-24 px-6 md:px-10 lg:px-16 text-center">
+      <section className="bg-teal-900 py-24 px-6 md:px-10 lg:px-16 text-center">
         <div className="max-w-[640px] mx-auto">
-          <p className="text-xs font-bold uppercase tracking-widest text-[#C4A882] mb-6">
+          <p className="text-xs font-bold uppercase tracking-widest text-gold mb-6">
             Ready to get listed?
           </p>
-          <h2 className="font-['Cormorant_Garamond'] text-[clamp(34px,4vw,54px)] font-light leading-[1.15] tracking-tight text-white mb-5">
+          <h2 className="font-display text-[clamp(34px,4vw,54px)] font-light leading-[1.15] tracking-tight text-white mb-5">
             Your next family<br />
-            <em className="italic text-[#C4A882]">is already searching.</em>
+            <em className="italic text-gold">is already searching.</em>
           </h2>
-          <p className="text-[17px] text-white/55 leading-relaxed font-['Cormorant_Garamond'] italic mb-10">
+          <p className="text-[17px] text-white/55 leading-relaxed font-display italic mb-10">
             Reach out and we&apos;ll get your listing verified and live — usually within 24 hours. Free to list.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
               href="/providers/claim"
-              className="inline-flex items-center justify-center gap-2 bg-[#C4A882] hover:bg-[#A8865A] text-white font-semibold rounded-full px-8 py-4 text-[15px] transition-all duration-200 hover:-translate-y-0.5"
+              className="inline-flex items-center justify-center gap-2 bg-gold hover:bg-gold-dark text-white font-semibold rounded-full px-8 py-4 text-[15px] transition-all duration-200 hover:-translate-y-0.5"
             >
               Claim Your Listing →
             </a>

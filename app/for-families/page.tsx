@@ -60,18 +60,18 @@ export default function ForFamilies() {
     <main>
 
       {/* ── HERO ── */}
-      <section className="min-h-screen bg-[#0D5C6E] pt-32 pb-20 px-6 md:px-10 lg:px-16 flex items-center">
+      <section className="min-h-screen bg-teal-800 pt-32 pb-20 px-6 md:px-10 lg:px-16 flex items-center">
         <div className="max-w-[1280px] mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 
           {/* Left — copy */}
           <div>
             <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 mb-8">
-              <span className="text-xs font-bold uppercase tracking-widest text-[#C4A882]">For Families</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-gold">For Families</span>
             </div>
 
-            <h1 className="font-['Cormorant_Garamond'] text-[clamp(40px,5vw,68px)] font-light leading-[1.1] tracking-tight text-white mb-6">
+            <h1 className="font-display text-[clamp(40px,5vw,68px)] font-light leading-[1.1] tracking-tight text-white mb-6">
               Everything your kid<br />
-              <em className="italic text-[#C4A882]">could want to do.</em>
+              <em className="italic text-gold">could want to do.</em>
             </h1>
 
             <p className="text-white/70 text-lg leading-relaxed max-w-[480px] mb-10">
@@ -81,7 +81,7 @@ export default function ForFamilies() {
             <div className="flex flex-col sm:flex-row flex-wrap gap-4 mb-4">
               <Link
                 href="/families/signup"
-                className="inline-flex items-center justify-center gap-2 bg-[#C4A882] hover:bg-[#A8865A] text-white font-semibold rounded-full px-7 py-4 text-[15px] transition-all duration-200 hover:-translate-y-0.5"
+                className="inline-flex items-center justify-center gap-2 bg-gold hover:bg-gold-dark text-white font-semibold rounded-full px-7 py-4 text-[15px] transition-all duration-200 hover:-translate-y-0.5"
               >
                 Create Your Account →
               </Link>
@@ -98,7 +98,7 @@ export default function ForFamilies() {
             <div className="flex flex-wrap gap-5">
               {['Free to join', 'Hundreds of programs', 'No spam, ever'].map((item) => (
                 <span key={item} className="flex items-center gap-1.5 text-white/55 text-[13px]">
-                  <span className="text-[#C4A882] font-bold">✓</span>
+                  <span className="text-gold font-bold">✓</span>
                   {item}
                 </span>
               ))}
@@ -117,7 +117,7 @@ export default function ForFamilies() {
                 key={stat.label}
                 className="bg-white/8 border border-white/10 rounded-[20px] p-8"
               >
-                <p className="font-['Cormorant_Garamond'] text-[52px] font-light text-white leading-none mb-2">
+                <p className="font-display text-[52px] font-light text-white leading-none mb-2">
                   {stat.value}
                 </p>
                 <p className="text-white/80 text-[15px] font-semibold mb-1">{stat.label}</p>
@@ -133,10 +133,10 @@ export default function ForFamilies() {
       <section className="bg-white py-24 px-6 md:px-10 lg:px-16">
         <div className="max-w-[1280px] mx-auto">
           <div className="text-center mb-14">
-            <p className="text-xs font-bold uppercase tracking-widest text-[#0D5C6E] mb-4">Why families love it</p>
-            <h2 className="font-['Cormorant_Garamond'] text-[clamp(32px,4vw,50px)] font-light leading-[1.15] tracking-tight text-[#1C3A4A]">
+            <p className="text-xs font-bold uppercase tracking-widest text-teal-800 mb-4">Why families love it</p>
+            <h2 className="font-display text-[clamp(32px,4vw,50px)] font-light leading-[1.15] tracking-tight text-text-dark">
               Everything in one place.<br />
-              <em className="italic text-[#0D5C6E]">Finally.</em>
+              <em className="italic text-teal-800">Finally.</em>
             </h2>
           </div>
 
@@ -144,13 +144,13 @@ export default function ForFamilies() {
             {BENEFITS.map((b) => (
               <div
                 key={b.title}
-                className="bg-[#F5EFE0] rounded-[20px] p-8 border border-[#E8DFC8]"
+                className="bg-cream-500 rounded-[20px] p-8 border border-cream-700"
               >
                 <IconChip name={b.icon} className="mb-5" />
-                <h3 className="font-['Cormorant_Garamond'] text-[22px] font-medium text-[#1C3A4A] mb-3">
+                <h3 className="font-display text-[22px] font-medium text-text-dark mb-3">
                   {b.title}
                 </h3>
-                <p className="text-[15px] text-[#3A5A6A] leading-relaxed">{b.body}</p>
+                <p className="text-[15px] text-text-mid leading-relaxed">{b.body}</p>
               </div>
             ))}
           </div>
@@ -158,13 +158,13 @@ export default function ForFamilies() {
       </section>
 
       {/* ── HOW IT WORKS ── */}
-      <section className="bg-[#F5EFE0] py-24 px-6 md:px-10 lg:px-16">
+      <section className="bg-cream-500 py-24 px-6 md:px-10 lg:px-16">
         <div className="max-w-[1280px] mx-auto">
           <div className="mb-14">
-            <p className="text-xs font-bold uppercase tracking-widest text-[#0D5C6E] mb-4">How it works</p>
-            <h2 className="font-['Cormorant_Garamond'] text-[clamp(32px,4vw,50px)] font-light leading-[1.15] tracking-tight text-[#1C3A4A] max-w-[480px]">
+            <p className="text-xs font-bold uppercase tracking-widest text-teal-800 mb-4">How it works</p>
+            <h2 className="font-display text-[clamp(32px,4vw,50px)] font-light leading-[1.15] tracking-tight text-text-dark max-w-[480px]">
               From search to sign-up<br />
-              <em className="italic text-[#0D5C6E]">in minutes.</em>
+              <em className="italic text-teal-800">in minutes.</em>
             </h2>
           </div>
 
@@ -172,16 +172,16 @@ export default function ForFamilies() {
             {STEPS.map((step) => (
               <div
                 key={step.num}
-                className="bg-white rounded-[20px] p-9 border border-[#E8DFC8]"
+                className="bg-white rounded-[20px] p-9 border border-cream-700"
               >
-                <p className="font-['Cormorant_Garamond'] text-[52px] font-medium text-[#1C3A4A]/8 leading-none mb-4">
+                <p className="font-display text-[52px] font-medium text-text-dark/8 leading-none mb-4">
                   {step.num}
                 </p>
                 <IconChip name={step.icon} className="mb-5" />
-                <h3 className="font-['Cormorant_Garamond'] text-[20px] font-medium text-[#1C3A4A] mb-3">
+                <h3 className="font-display text-[20px] font-medium text-text-dark mb-3">
                   {step.title}
                 </h3>
-                <p className="text-[14px] leading-[1.8] text-[#3A5A6A]">{step.body}</p>
+                <p className="text-[14px] leading-[1.8] text-text-mid">{step.body}</p>
               </div>
             ))}
           </div>
@@ -192,11 +192,11 @@ export default function ForFamilies() {
       <section className="bg-white py-24 px-6 md:px-10 lg:px-16">
         <div className="max-w-[1280px] mx-auto">
           <div className="text-center mb-12">
-            <p className="text-xs font-bold uppercase tracking-widest text-[#0D5C6E] mb-4">What you can find</p>
-            <h2 className="font-['Cormorant_Garamond'] text-[clamp(32px,4vw,50px)] font-light leading-[1.15] tracking-tight text-[#1C3A4A]">
+            <p className="text-xs font-bold uppercase tracking-widest text-teal-800 mb-4">What you can find</p>
+            <h2 className="font-display text-[clamp(32px,4vw,50px)] font-light leading-[1.15] tracking-tight text-text-dark">
               Activities for every interest.
             </h2>
-            <p className="text-[17px] text-[#3A5A6A] max-w-xl mx-auto mt-4">
+            <p className="text-[17px] text-text-mid max-w-xl mx-auto mt-4">
               From swimming to coding to theater, with more added every week.
             </p>
           </div>
@@ -206,12 +206,12 @@ export default function ForFamilies() {
               <Link
                 key={cat.name}
                 href={`/discover?category=${encodeURIComponent(cat.filter)}`}
-                className="bg-[#F5EFE0] border border-[#E8DFC8] rounded-[20px] p-6 text-center hover:bg-[#EDE5D4] hover:border-[#0D5C6E]/20 transition-all duration-200 group no-underline"
+                className="bg-cream-500 border border-cream-700 rounded-[20px] p-6 text-center hover:bg-cream-700 hover:border-teal-800/20 transition-all duration-200 group no-underline"
               >
                 <div className="mb-3 flex justify-center group-hover:scale-110 transition-transform duration-200">
                   <IconChip name={cat.icon} />
                 </div>
-                <p className="text-[13px] font-semibold text-[#1C3A4A]">{cat.name}</p>
+                <p className="text-[13px] font-semibold text-text-dark">{cat.name}</p>
               </Link>
             ))}
           </div>
@@ -219,9 +219,9 @@ export default function ForFamilies() {
           <div className="text-center">
             <Link
               href="/discover"
-              className="inline-flex items-center gap-2 text-[#0D5C6E] hover:text-[#1A7A8A] font-semibold text-[15px] transition-colors group"
+              className="inline-flex items-center gap-2 text-teal-800 hover:text-teal-700 font-semibold text-[15px] transition-colors group"
             >
-              <span className="border-b border-[#0D5C6E]/40 group-hover:border-[#1A7A8A] pb-0.5">
+              <span className="border-b border-teal-800/40 group-hover:border-teal-700 pb-0.5">
                 Browse every category →
               </span>
             </Link>

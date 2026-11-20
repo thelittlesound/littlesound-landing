@@ -2,7 +2,7 @@ import Image from 'next/image';
 
 export default function Founders() {
   return (
-    <section className="bg-[#0D5C6E] py-24 px-6 md:px-10 lg:px-16">
+    <section className="bg-teal-800 py-24 px-6 md:px-10 lg:px-16">
       <div className="max-w-[1280px] mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 
@@ -22,12 +22,12 @@ export default function Founders() {
 
           {/* Content */}
           <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-[#C4A882] mb-6">
+            <p className="text-xs font-bold uppercase tracking-widest text-gold mb-6">
               Built by Seattle Parents
             </p>
 
             {/* Pull quote */}
-            <blockquote className="font-['Cormorant_Garamond'] text-[22px] font-light italic text-white/90 leading-[1.55] mb-8 border-l-2 border-[#C4A882]/50 pl-6">
+            <blockquote className="font-display text-[22px] font-light italic text-white/90 leading-[1.55] mb-8 border-l-2 border-gold/50 pl-6">
               "One Sunday, I spent four hours on six different websites trying to find a soccer camp that didn't conflict with spring break. That was the last time."
             </blockquote>
 

@@ -62,7 +62,7 @@ export default function Categories() {
                 aria-pressed={on}
                 onClick={() => setSelectedAge(on ? '' : a.key)}
                 className={`min-h-[36px] px-4 rounded-pill text-sm font-medium border-[1.5px] transition-colors ${
-                  on ? 'bg-teal-700 text-white border-teal-700' : 'bg-white text-text-dark border-[#E3DAC5] hover:border-teal-700'
+                  on ? 'bg-teal-700 text-white border-teal-700' : 'bg-white text-text-dark border-cream-700 hover:border-teal-700'
                 }`}
               >
                 {a.label}
@@ -84,7 +84,7 @@ export default function Categories() {
               <Link
                 key={c}
                 href={href(c)}
-                className="min-h-[60px] px-3.5 py-2 rounded-[16px] border-[1.5px] border-[#E3DAC5] bg-white text-text-dark flex items-center gap-2.5 no-underline transition-colors hover:border-teal-700"
+                className="min-h-[60px] px-3.5 py-2 rounded-[16px] border-[1.5px] border-cream-700 bg-white text-text-dark flex items-center gap-2.5 no-underline transition-colors hover:border-teal-700"
               >
                 <LineIcon name={c} size={26} color="#A8865A" className="shrink-0" />
                 <span className="flex flex-col gap-px min-w-0">

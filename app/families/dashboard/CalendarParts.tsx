@@ -77,11 +77,11 @@ export function CalendarPanel({ feedUrl, emailAlerts }: { feedUrl: string; email
   }
 
   const pill =
-    'inline-flex items-center justify-center h-10 rounded-full px-4 text-[13px] font-semibold border border-[#C5D8E8] text-[#0D5C6E] bg-white hover:bg-[#C5D8E8]/20 transition-colors';
+    'inline-flex items-center justify-center h-10 rounded-full px-4 text-[13px] font-semibold border border-blue-grey-300 text-teal-800 bg-white hover:bg-blue-grey-300/20 transition-colors';
 
   return (
-    <div className="bg-[#F5EFE0] rounded-[18px] p-5 mb-5">
-      <p className="text-[14px] text-[#3A5A6A] mb-4">
+    <div className="bg-cream-500 rounded-[18px] p-5 mb-5">
+      <p className="text-[14px] text-text-mid mb-4">
         Everything in your Little Sound calendar (sessions you added, with your kids&apos; names, plus registration
         dates) can also show up in the calendar app you already use, and stays up to date when providers change
         their schedules.
@@ -92,13 +92,13 @@ export function CalendarPanel({ feedUrl, emailAlerts }: { feedUrl: string; email
         <a href={outlook} target="_blank" rel="noopener noreferrer" className={pill}>Outlook</a>
         <button type="button" onClick={copy} className={pill}>{copied ? 'Copied ✓' : 'Copy link'}</button>
       </div>
-      <p className="text-[12px] text-[#7A9AAA] mb-4">
+      <p className="text-[12px] text-text-muted mb-4">
         Calendar apps check for changes on their own schedule; Google can take up to a day. This link is private to
         your family.{' '}
         {confirmReset ? (
           <span>
             Make a new link? The old one stops working.{' '}
-            <button type="button" onClick={reset} disabled={busy} className="font-semibold text-[#C0544A] underline disabled:opacity-50">
+            <button type="button" onClick={reset} disabled={busy} className="font-semibold text-error underline disabled:opacity-50">
               {busy ? 'Resetting…' : 'Yes, reset'}
             </button>{' '}
             <button type="button" onClick={() => setConfirmReset(false)} className="underline">Cancel</button>
@@ -112,21 +112,21 @@ export function CalendarPanel({ feedUrl, emailAlerts }: { feedUrl: string; email
         value={url}
         onFocus={(e) => e.currentTarget.select()}
         aria-label="Your private calendar link"
-        className="w-full text-[12px] text-[#5A7A8A] bg-white/70 border border-[#E8DFC8] rounded-lg px-3 py-2 mb-4"
+        className="w-full text-[12px] text-text-mid bg-white/70 border border-cream-700 rounded-lg px-3 py-2 mb-4"
       />
       <label className="flex items-start gap-3 cursor-pointer select-none">
         <input
           type="checkbox"
           checked={alerts}
           onChange={(e) => toggleAlerts(e.target.checked)}
-          className="mt-1 h-4 w-4 accent-[#0D5C6E]"
+          className="mt-1 h-4 w-4 accent-teal-800"
         />
-        <span className="text-[14px] text-[#1C3A4A]">
+        <span className="text-[14px] text-text-dark">
           Email me when registration is about to open for anything I&apos;ve saved, and if a session I added changes.
-          <span className="block text-[12px] text-[#7A9AAA] mt-0.5">&ldquo;Remind me&rdquo; on the Signup radar adds an email the day before and the morning it opens.</span>
+          <span className="block text-[12px] text-text-muted mt-0.5">&ldquo;Remind me&rdquo; on the Signup radar adds an email the day before and the morning it opens.</span>
         </span>
       </label>
-      {msg && <p className="text-[13px] text-[#7A5A2E] mt-3">{msg}</p>}
+      {msg && <p className="text-[13px] text-gold-deep mt-3">{msg}</p>}
     </div>
   );
 }
@@ -195,7 +195,7 @@ export function SessionPicker({
           onClick={() => setOpen((o) => !o)}
           aria-expanded={open}
           className={`inline-flex items-center gap-1.5 h-9 rounded-full px-4 text-[13px] font-semibold transition-colors ${
-            count ? 'bg-[#0D5C6E] text-white hover:bg-[#1A7A8A]' : 'border border-[#C5D8E8] text-[#0D5C6E] hover:bg-[#C5D8E8]/20'
+            count ? 'bg-teal-800 text-white hover:bg-teal-700' : 'border border-blue-grey-300 text-teal-800 hover:bg-blue-grey-300/20'
           }`}
         >
           {count ? `✓ ${count} in your calendar` : 'Add to my calendar'}
@@ -204,8 +204,8 @@ export function SessionPicker({
       )}
 
       {open && sessions.length > 0 && (
-        <div className="mt-3 border border-[#E8DFC8] rounded-[14px] divide-y divide-[#E8DFC8]">
-          <p className="px-4 py-2.5 text-[12px] text-[#7A9AAA]">
+        <div className="mt-3 border border-cream-700 rounded-[14px] divide-y divide-cream-700">
+          <p className="px-4 py-2.5 text-[12px] text-text-muted">
             {kidName
               ? `Pick the session ${kidName} is in. It goes on ${kidName}’s calendar.`
               : 'Pick the session your child is in. You can choose which child in the calendar above.'}
@@ -215,9 +215,9 @@ export function SessionPicker({
             return (
               <div key={s.key} className="flex items-center gap-3 px-4 py-3">
                 <div className="min-w-0 flex-1">
-                  <p className="text-[14px] text-[#1C3A4A]">{s.text}</p>
+                  <p className="text-[14px] text-text-dark">{s.text}</p>
                   {isPicked && changed.get(s.key) && (
-                    <p className="text-[12px] text-[#7A5A2E] mt-0.5">Updated by the provider · {changed.get(s.key)}</p>
+                    <p className="text-[12px] text-gold-deep mt-0.5">Updated by the provider · {changed.get(s.key)}</p>
                   )}
                 </div>
                 <button
@@ -225,7 +225,7 @@ export function SessionPicker({
                   onClick={() => download(s)}
                   title="Download this session for any calendar app"
                   aria-label={`Download ${s.text} as a calendar file`}
-                  className="text-[12px] font-medium text-[#7A9AAA] hover:text-[#0D5C6E] shrink-0"
+                  className="text-[12px] font-medium text-text-muted hover:text-teal-800 shrink-0"
                 >
                   .ics
                 </button>
@@ -235,7 +235,7 @@ export function SessionPicker({
                   disabled={isBusy(s.key)}
                   title={isPicked ? 'Remove from your calendar' : 'Add to your calendar'}
                   className={`shrink-0 h-8 rounded-full px-3.5 text-[12px] font-semibold transition-colors disabled:opacity-50 ${
-                    isPicked ? 'bg-[#0D5C6E] text-white hover:bg-[#C0544A]' : 'border border-[#C5D8E8] text-[#0D5C6E] hover:bg-[#C5D8E8]/20'
+                    isPicked ? 'bg-teal-800 text-white hover:bg-error' : 'border border-blue-grey-300 text-teal-800 hover:bg-blue-grey-300/20'
                   }`}
                 >
                   {isBusy(s.key) ? '…' : isPicked ? 'Added ✓' : 'Add'}
@@ -244,7 +244,7 @@ export function SessionPicker({
             );
           })}
           {sessions.length > SHOW_FIRST && (
-            <button type="button" onClick={() => setShowAll((v) => !v)} className="w-full px-4 py-2.5 text-[13px] font-semibold text-[#1A7A8A] text-left">
+            <button type="button" onClick={() => setShowAll((v) => !v)} className="w-full px-4 py-2.5 text-[13px] font-semibold text-teal-700 text-left">
               {showAll ? 'Show fewer' : `Show all ${sessions.length} sessions`}
             </button>
           )}
@@ -252,9 +252,9 @@ export function SessionPicker({
       )}
 
       {gone.map((p) => (
-        <div key={p.key} className="mt-2 flex items-center gap-3 text-[13px] bg-[#C0544A]/5 border border-[#C0544A]/20 rounded-[12px] px-3 py-2">
-          <span className="flex-1 text-[#7A3A30]">No longer on their schedule: {p.text}</span>
-          <button type="button" onClick={() => onToggle(p.key, true)} disabled={isBusy(p.key)} className="font-semibold text-[#7A3A30] underline disabled:opacity-50">
+        <div key={p.key} className="mt-2 flex items-center gap-3 text-[13px] bg-error/5 border border-error/20 rounded-[12px] px-3 py-2">
+          <span className="flex-1 text-error-dark">No longer on their schedule: {p.text}</span>
+          <button type="button" onClick={() => onToggle(p.key, true)} disabled={isBusy(p.key)} className="font-semibold text-error-dark underline disabled:opacity-50">
             Remove
           </button>
         </div>

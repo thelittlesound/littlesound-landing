@@ -169,13 +169,13 @@ export default function FamilyRhythm({
   return (
     <section aria-label="Family Rhythm">
       {/* Greeting + the week in one line */}
-      <p className="text-[12px] font-bold uppercase tracking-[0.18em] text-[#1A7A8A] mb-2">
+      <p className="text-[12px] font-bold uppercase tracking-[0.18em] text-teal-700 mb-2">
         Family Rhythm · {DAY_FULL[weekdayOf(today)]}, {md(today)}
       </p>
-      <h1 className="font-['Cormorant_Garamond'] font-light text-[34px] sm:text-[44px] leading-[1.05] tracking-tight text-[#1C3A4A] mb-2">
-        {greeting(hour)}{firstName ? `, ${firstName}` : ''}<span className="text-[#C4A882]">.</span>
+      <h1 className="font-display font-light text-[34px] sm:text-[44px] leading-[1.05] tracking-tight text-text-dark mb-2">
+        {greeting(hour)}{firstName ? `, ${firstName}` : ''}<span className="text-gold">.</span>
       </h1>
-      <p className="font-['Cormorant_Garamond'] italic text-[20px] sm:text-[23px] text-[#3A5A6A] leading-snug max-w-[620px] mb-7">{summary}</p>
+      <p className="font-display italic text-[20px] sm:text-[23px] text-text-mid leading-snug max-w-[620px] mb-7">{summary}</p>
 
       {/* Breathing room */}
       {kids.length > 0 ? (
@@ -186,21 +186,21 @@ export default function FamilyRhythm({
             const tone = b.word === 'Full' ? '#C0544A' : b.word === 'Balanced' ? '#2E7D5B' : '#A8865A';
             return (
               <div key={k.id} className="bg-white rounded-[20px] p-4 sm:p-5 shadow-[0_4px_24px_rgba(10,74,90,0.06)] flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full flex items-center justify-center text-white font-['Cormorant_Garamond'] text-[22px] shrink-0" style={{ background: t.color }}>
+                <div className="w-12 h-12 rounded-full flex items-center justify-center text-white font-display text-[22px] shrink-0" style={{ background: t.color }}>
                   {kidLabel(k, i)[0]}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-baseline justify-between gap-2">
-                    <p className="font-semibold text-[15px] text-[#1C3A4A]">
+                    <p className="font-semibold text-[15px] text-text-dark">
                       {kidLabel(k, i)}
-                      {k.age != null && k.name && <span className="text-[#7A9AAA] font-normal text-[13px]"> · {k.age}</span>}
+                      {k.age != null && k.name && <span className="text-text-muted font-normal text-[13px]"> · {k.age}</span>}
                     </p>
                     <p className="text-[13px] font-semibold" style={{ color: tone }}>{b.word} week</p>
                   </div>
-                  <div className="h-2 rounded-full bg-[#F0E9D8] mt-2 overflow-hidden">
+                  <div className="h-2 rounded-full bg-cream-500 mt-2 overflow-hidden">
                     <div className="h-full rounded-full transition-all duration-500" style={{ width: `${b.pct}%`, background: t.color }} />
                   </div>
-                  <p className="text-[12px] text-[#7A9AAA] mt-1.5">
+                  <p className="text-[12px] text-text-muted mt-1.5">
                     {b.hours ? `${b.hours} hr${b.hours === 1 ? '' : 's'} of activities` : 'Nothing added yet'} · {b.freeAfternoons} free after-school afternoon{b.freeAfternoons === 1 ? '' : 's'}
                   </p>
                   {k.name && (
@@ -220,8 +220,8 @@ export default function FamilyRhythm({
           })}
         </div>
       ) : (
-        <div className="bg-white rounded-[20px] p-5 mb-6 text-[14px] text-[#3A5A6A] shadow-[0_4px_24px_rgba(10,74,90,0.06)]">
-          Add your kids&apos; first names in <a href="#family-profile" className="font-semibold text-[#1A7A8A] underline">your profile</a> to see each child&apos;s week, color-coded.
+        <div className="bg-white rounded-[20px] p-5 mb-6 text-[14px] text-text-mid shadow-[0_4px_24px_rgba(10,74,90,0.06)]">
+          Add your kids&apos; first names in <a href="#family-profile" className="font-semibold text-teal-700 underline">your profile</a> to see each child&apos;s week, color-coded.
         </div>
       )}
 
@@ -230,13 +230,13 @@ export default function FamilyRhythm({
         const who = laneName(kids, c.lane);
         const busyFix = c.fix && isBusy(c.fix.move.activityId, c.fix.move.key);
         return (
-          <div key={c.key} className="relative overflow-hidden rounded-[22px] bg-[#FFF6E8] border border-[#E8C99A] p-5 sm:p-6 mb-6">
-            <div className="absolute -right-8 -top-10 w-28 h-28 rounded-full bg-[#F3D9AE]/40 pointer-events-none" aria-hidden="true" />
-            <p className="relative text-[12px] font-bold uppercase tracking-[0.16em] text-[#9A5B1E] mb-1">Heads up · {dayWord(c.date, today)}</p>
-            <p className="relative font-['Cormorant_Garamond'] text-[24px] sm:text-[28px] leading-tight text-[#1C3A4A] mb-1">
+          <div key={c.key} className="relative overflow-hidden rounded-[22px] bg-warning-light border border-warning p-5 sm:p-6 mb-6">
+            <div className="absolute -right-8 -top-10 w-28 h-28 rounded-full bg-warning-light/40 pointer-events-none" aria-hidden="true" />
+            <p className="relative text-[12px] font-bold uppercase tracking-[0.16em] text-gold-deep mb-1">Heads up · {dayWord(c.date, today)}</p>
+            <p className="relative font-display text-[24px] sm:text-[28px] leading-tight text-text-dark mb-1">
               {c.lane === UNASSIGNED ? 'Two activities overlap' : `${who} can’t be in two places`} at {c.b.start ? formatTime(c.b.start) : 'once'}.
             </p>
-            <p className="relative text-[14px] text-[#5A4A3A] mb-4">
+            <p className="relative text-[14px] text-gold-deep mb-4">
               {c.a.activity.title} runs {timeRange(c.a.start, c.a.end)}; {c.b.activity.title} runs {timeRange(c.b.start, c.b.end)}.
             </p>
             <div className="relative flex flex-wrap gap-2">
@@ -245,12 +245,12 @@ export default function FamilyRhythm({
                   type="button"
                   disabled={!!busyFix}
                   onClick={() => onSwitch(c.fix!.move.activityId, c.fix!.move.key, c.fix!.to.key, c.fix!.move.pick.kidId)}
-                  className="h-11 px-5 rounded-full bg-[#0D5C6E] text-white text-[14px] font-semibold hover:bg-[#1A7A8A] transition-colors disabled:opacity-60"
+                  className="h-11 px-5 rounded-full bg-teal-800 text-white text-[14px] font-semibold hover:bg-teal-700 transition-colors disabled:opacity-60"
                 >
                   {busyFix ? 'Switching…' : `Move ${c.fix.move.activity.title} to ${c.fix.label} (same class)`}
                 </button>
               )}
-              <button type="button" onClick={() => keepBoth(c)} className="h-11 px-5 rounded-full border border-[#D9B98A] text-[#7A5A2E] text-[14px] font-semibold hover:bg-white/60">
+              <button type="button" onClick={() => keepBoth(c)} className="h-11 px-5 rounded-full border border-warning text-gold-deep text-[14px] font-semibold hover:bg-white/60">
                 Keep both
               </button>
             </div>
@@ -262,8 +262,8 @@ export default function FamilyRhythm({
       {(radarItems.length > 0 || watching.length > 0) && (
         <div className="mb-8">
           <div className="flex items-baseline justify-between mb-3">
-            <h2 className="font-['Cormorant_Garamond'] text-[26px] font-light text-[#1C3A4A]">Signup radar</h2>
-            <p className="text-[12px] text-[#7A9AAA]">From what you’ve saved</p>
+            <h2 className="font-display text-[26px] font-light text-text-dark">Signup radar</h2>
+            <p className="text-[12px] text-text-muted">From what you’ve saved</p>
           </div>
           <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 snap-x">
             {radarItems.map((r, i) => {
@@ -276,7 +276,7 @@ export default function FamilyRhythm({
               return (
                 <div
                   key={r.id}
-                  className={`snap-start shrink-0 w-[260px] sm:w-[290px] rounded-[22px] p-5 flex flex-col ${hero ? 'bg-[#0D5C6E] text-white' : 'bg-white shadow-[0_4px_24px_rgba(10,74,90,0.06)] text-[#1C3A4A]'}`}
+                  className={`snap-start shrink-0 w-[260px] sm:w-[290px] rounded-[22px] p-5 flex flex-col ${hero ? 'bg-teal-800 text-white' : 'bg-white shadow-[0_4px_24px_rgba(10,74,90,0.06)] text-text-dark'}`}
                 >
                   <div className="flex items-center gap-3 mb-3">
                     <div className="relative w-14 h-14 shrink-0">
@@ -285,16 +285,16 @@ export default function FamilyRhythm({
                         <circle cx="18" cy="18" r="15.5" fill="none" stroke={hero ? '#C4A882' : r.kind === 'closes' ? '#C0544A' : '#1A7A8A'} strokeWidth="3" strokeLinecap="round" strokeDasharray={`${(1 - ring / 30) * 97.4} 97.4`} />
                       </svg>
                       <div className="absolute inset-0 flex flex-col items-center justify-center leading-none">
-                        <span className="font-['Cormorant_Garamond'] text-[22px]">{r.days}</span>
+                        <span className="font-display text-[22px]">{r.days}</span>
                         <span className="text-[9px] uppercase tracking-wider opacity-70">{r.days === 1 ? 'day' : 'days'}</span>
                       </div>
                     </div>
                     <div className="min-w-0">
-                      <p className={`text-[12px] font-semibold ${hero ? 'text-[#C4A882]' : r.kind === 'closes' ? 'text-[#C0544A]' : 'text-[#1A7A8A]'}`}>{when}</p>
+                      <p className={`text-[12px] font-semibold ${hero ? 'text-gold' : r.kind === 'closes' ? 'text-error' : 'text-teal-700'}`}>{when}</p>
                       <p className="font-semibold text-[15px] leading-snug">{r.activity.title}</p>
                     </div>
                   </div>
-                  <p className={`text-[13px] mb-4 flex-1 ${hero ? 'text-white/80' : 'text-[#5A7A8A]'}`}>
+                  <p className={`text-[13px] mb-4 flex-1 ${hero ? 'text-white/80' : 'text-text-mid'}`}>
                     {forWho}
                     {r.kind === 'opens' ? (reminded ? 'We’ll email you the day before and the morning it opens.' : 'Popular programs can fill quickly.') : 'Registration is open now.'}
                   </p>
@@ -306,15 +306,15 @@ export default function FamilyRhythm({
                         disabled={busy === `reminder|${remKey}`}
                         className={`h-9 px-4 rounded-full text-[13px] font-semibold whitespace-nowrap transition-colors disabled:opacity-60 ${
                           reminded
-                            ? hero ? 'bg-[#C4A882] text-[#1C3A4A]' : 'bg-[#0D5C6E] text-white'
-                            : hero ? 'border border-white/40 text-white hover:bg-white/10' : 'border border-[#C5D8E8] text-[#0D5C6E] hover:bg-[#C5D8E8]/20'
+                            ? hero ? 'bg-gold text-text-dark' : 'bg-teal-800 text-white'
+                            : hero ? 'border border-white/40 text-white hover:bg-white/10' : 'border border-blue-grey-300 text-teal-800 hover:bg-blue-grey-300/20'
                         }`}
                       >
                         {reminded ? '✓ Reminder set' : 'Remind me'}
                       </button>
                     )}
                     {r.activity.website && (
-                      <a href={r.activity.website} target="_blank" rel="noopener noreferrer" className={`text-[13px] font-semibold whitespace-nowrap ${hero ? 'text-white' : 'text-[#1A7A8A]'}`}>
+                      <a href={r.activity.website} target="_blank" rel="noopener noreferrer" className={`text-[13px] font-semibold whitespace-nowrap ${hero ? 'text-white' : 'text-teal-700'}`}>
                         Sign-up page →
                       </a>
                     )}
@@ -323,10 +323,10 @@ export default function FamilyRhythm({
               );
             })}
             {watching.length > 0 && (
-              <div className="snap-start shrink-0 w-[240px] rounded-[22px] p-5 border-2 border-dashed border-[#E3DAC5] flex flex-col justify-center">
-                <p className="font-['Cormorant_Garamond'] text-[32px] leading-none text-[#A8865A] [font-variant-numeric:lining-nums]">{watching.length}</p>
-                <p className="text-[14px] font-semibold text-[#1C3A4A] mt-1">saved {watching.length === 1 ? 'activity' : 'activities'} we’re watching</p>
-                <p className="text-[12px] text-[#7A9AAA] mt-1">We check their sites daily and add signup dates here as soon as they’re posted.</p>
+              <div className="snap-start shrink-0 w-[240px] rounded-[22px] p-5 border-2 border-dashed border-cream-700 flex flex-col justify-center">
+                <p className="font-display text-[32px] leading-none text-gold-dark [font-variant-numeric:lining-nums]">{watching.length}</p>
+                <p className="text-[14px] font-semibold text-text-dark mt-1">saved {watching.length === 1 ? 'activity' : 'activities'} we’re watching</p>
+                <p className="text-[12px] text-text-muted mt-1">We check their sites daily and add signup dates here as soon as they’re posted.</p>
               </div>
             )}
           </div>
@@ -343,7 +343,7 @@ export default function FamilyRhythm({
               role="tab"
               aria-selected={view === v}
               onClick={() => chooseView(v)}
-              className={`h-9 px-4 sm:px-5 rounded-full text-[14px] font-semibold transition-colors whitespace-nowrap ${view === v ? 'bg-[#0D5C6E] text-white' : 'text-[#3A5A6A] hover:text-[#0D5C6E]'}`}
+              className={`h-9 px-4 sm:px-5 rounded-full text-[14px] font-semibold transition-colors whitespace-nowrap ${view === v ? 'bg-teal-800 text-white' : 'text-text-mid hover:text-teal-800'}`}
             >
               {v === 'week' ? (weekOffset === 0 ? 'The week ahead' : weekOffset === 1 ? 'The week after' : `${md(week[0])} – ${md(week[6])}`) : `Summer ${summerYear}`}
             </button>
@@ -351,11 +351,11 @@ export default function FamilyRhythm({
         </div>
         {view === 'week' && (
           <div className="flex items-center gap-1">
-            <button type="button" onClick={() => setWeekOffset((w) => w - 1)} aria-label="Previous week" className="w-9 h-9 rounded-full hover:bg-white text-[#0D5C6E] text-lg">‹</button>
+            <button type="button" onClick={() => setWeekOffset((w) => w - 1)} aria-label="Previous week" className="w-9 h-9 rounded-full hover:bg-white text-teal-800 text-lg">‹</button>
             {weekOffset !== 0 && (
-              <button type="button" onClick={() => setWeekOffset(0)} className="h-9 px-3 rounded-full border border-[#C5D8E8] text-[13px] font-semibold text-[#0D5C6E] hover:bg-white">Today</button>
+              <button type="button" onClick={() => setWeekOffset(0)} className="h-9 px-3 rounded-full border border-blue-grey-300 text-[13px] font-semibold text-teal-800 hover:bg-white">Today</button>
             )}
-            <button type="button" onClick={() => setWeekOffset((w) => w + 1)} aria-label="Next week" className="w-9 h-9 rounded-full hover:bg-white text-[#0D5C6E] text-lg">›</button>
+            <button type="button" onClick={() => setWeekOffset((w) => w + 1)} aria-label="Next week" className="w-9 h-9 rounded-full hover:bg-white text-teal-800 text-lg">›</button>
           </div>
         )}
       </div>
@@ -366,23 +366,23 @@ export default function FamilyRhythm({
       <>
       {/* Lanes: tablet / desktop */}
       <div className="hidden md:block bg-white rounded-[24px] shadow-[0_4px_32px_rgba(10,74,90,0.08)] overflow-hidden">
-        <div className="grid grid-cols-[128px_repeat(7,1fr)] border-b border-[#EFE7D4]">
+        <div className="grid grid-cols-[128px_repeat(7,1fr)] border-b border-cream-700">
           <div />
           {week.map((d, i) => (
-            <div key={d} className={`py-3 text-center ${d === today ? 'bg-[#F5EFE0]' : ''}`}>
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-[#7A9AAA]">{d === today ? 'Today' : dow(d)}</p>
-              <p className={`font-['Cormorant_Garamond'] text-[22px] leading-none mt-0.5 ${d === today ? 'text-[#0D5C6E] font-medium' : d < today ? 'text-[#B5C4CC]' : 'text-[#1C3A4A]'}`}>{Number(d.slice(8))}</p>
+            <div key={d} className={`py-3 text-center ${d === today ? 'bg-cream-500' : ''}`}>
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted">{d === today ? 'Today' : dow(d)}</p>
+              <p className={`font-display text-[22px] leading-none mt-0.5 ${d === today ? 'text-teal-800 font-medium' : d < today ? 'text-text-muted' : 'text-text-dark'}`}>{Number(d.slice(8))}</p>
             </div>
           ))}
         </div>
         {/* Signups lane (only when a signup date is in view) */}
         {radarItems.some((r) => week.includes(r.date)) && (
-        <div className="grid grid-cols-[128px_repeat(7,1fr)] border-b border-[#EFE7D4] min-h-[52px]">
-          <div className="flex items-center gap-2 px-4"><span className="text-[#C4A882]">◆</span><span className="text-[13px] font-semibold text-[#7A5A2E]">Signups</span></div>
+        <div className="grid grid-cols-[128px_repeat(7,1fr)] border-b border-cream-700 min-h-[52px]">
+          <div className="flex items-center gap-2 px-4"><span className="text-gold">◆</span><span className="text-[13px] font-semibold text-gold-deep">Signups</span></div>
           {week.map((d) => (
-            <div key={d} className={`p-1.5 flex flex-col gap-1 ${d === today ? 'bg-[#F5EFE0]/60' : ''}`}>
+            <div key={d} className={`p-1.5 flex flex-col gap-1 ${d === today ? 'bg-cream-500/60' : ''}`}>
               {radarItems.filter((r) => r.date === d).map((r) => (
-                <div key={r.id} className="rounded-xl bg-[#C4A882]/20 text-[#7A5A2E] text-[11.5px] font-semibold px-2 py-1.5 leading-tight">
+                <div key={r.id} className="rounded-xl bg-gold/20 text-gold-deep text-[11.5px] font-semibold px-2 py-1.5 leading-tight">
                   {r.time ? `${formatTime(r.time)} · ` : ''}{r.activity.title} {r.kind === 'opens' ? 'opens' : 'closes'}
                 </div>
               ))}
@@ -393,24 +393,24 @@ export default function FamilyRhythm({
         {rows.map((lane) => {
           const t = theme(kids, lane);
           return (
-            <div key={lane} className="grid grid-cols-[128px_repeat(7,1fr)] border-b last:border-b-0 border-[#EFE7D4] min-h-[120px]">
+            <div key={lane} className="grid grid-cols-[128px_repeat(7,1fr)] border-b last:border-b-0 border-cream-700 min-h-[120px]">
               <div className="flex items-center gap-2.5 px-3 min-w-0">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center text-white font-['Cormorant_Garamond'] text-[16px] shrink-0" style={{ background: t.color }}>
+                <div className="w-8 h-8 rounded-full flex items-center justify-center text-white font-display text-[16px] shrink-0" style={{ background: t.color }}>
                   {laneName(kids, lane)[0]}
                 </div>
-                <span className="text-[13px] font-semibold text-[#1C3A4A] leading-tight min-w-0 break-words">{laneName(kids, lane)}</span>
+                <span className="text-[13px] font-semibold text-text-dark leading-tight min-w-0 break-words">{laneName(kids, lane)}</span>
               </div>
               {week.map((d) => {
                 const list = weekEvents.filter((e) => e.lane === lane && e.date === d);
                 const idea = d >= today && !list.length ? ideaFor(data, lane, d, weekEvents) : null;
                 return (
-                  <div key={d} className={`p-1.5 flex flex-col gap-1.5 ${d === today ? 'bg-[#F5EFE0]/60' : ''} ${d < today ? 'opacity-50' : ''}`}>
+                  <div key={d} className={`p-1.5 flex flex-col gap-1.5 ${d === today ? 'bg-cream-500/60' : ''} ${d < today ? 'opacity-50' : ''}`}>
                     {list.map((e) => (
                       <button
                         key={e.id}
                         type="button"
                         onClick={() => setSheet({ kind: 'event', ev: e })}
-                        className={`text-left rounded-[14px] px-2.5 py-2 transition-transform hover:-translate-y-0.5 ${clashDay.has(e.id) ? 'ring-2 ring-[#E0A458] ring-offset-1' : ''}`}
+                        className={`text-left rounded-[14px] px-2.5 py-2 transition-transform hover:-translate-y-0.5 ${clashDay.has(e.id) ? 'ring-2 ring-warning ring-offset-1' : ''}`}
                         style={{ background: t.soft, color: t.ink }}
                       >
                         <p className="text-[11px] font-semibold opacity-80">{e.start ? formatTime(e.start) : 'All day'}</p>
@@ -425,11 +425,11 @@ export default function FamilyRhythm({
                       <button
                         type="button"
                         onClick={() => setSheet({ kind: 'idea', idea, lane })}
-                        className="group text-left rounded-[14px] px-2.5 py-2 border border-dashed border-[#C5D8E8] hover:border-[#1A7A8A] hover:bg-[#F7FBFC] transition-colors"
+                        className="group text-left rounded-[14px] px-2.5 py-2 border border-dashed border-blue-grey-300 hover:border-teal-700 hover:bg-blue-grey-100 transition-colors"
                       >
-                        <p className="text-[11px] font-semibold text-[#7A9AAA]">Open · idea</p>
-                        <p className="text-[12px] font-semibold text-[#3A5A6A] leading-tight line-clamp-2">{idea.activity.title}</p>
-                        <p className="text-[11px] text-[#7A9AAA]">{idea.start ? formatTime(idea.start) : 'All day'}</p>
+                        <p className="text-[11px] font-semibold text-text-muted">Open · idea</p>
+                        <p className="text-[12px] font-semibold text-text-mid leading-tight line-clamp-2">{idea.activity.title}</p>
+                        <p className="text-[11px] text-text-muted">{idea.start ? formatTime(idea.start) : 'All day'}</p>
                       </button>
                     )}
                   </div>
@@ -454,10 +454,10 @@ export default function FamilyRhythm({
                 onClick={() => setMobileDay(d)}
                 aria-pressed={sel}
                 aria-label={`${dow(d)} ${md(d)}`}
-                className={`rounded-[16px] py-2 flex flex-col items-center ${sel ? 'bg-[#0D5C6E] text-white' : 'bg-white text-[#1C3A4A]'} ${d < today && !sel ? 'opacity-50' : ''}`}
+                className={`rounded-[16px] py-2 flex flex-col items-center ${sel ? 'bg-teal-800 text-white' : 'bg-white text-text-dark'} ${d < today && !sel ? 'opacity-50' : ''}`}
               >
-                <span className={`text-[10px] font-semibold uppercase ${sel ? 'text-white/70' : 'text-[#7A9AAA]'}`}>{dow(d)}</span>
-                <span className="font-['Cormorant_Garamond'] text-[20px] leading-tight">{Number(d.slice(8))}</span>
+                <span className={`text-[10px] font-semibold uppercase ${sel ? 'text-white/70' : 'text-text-muted'}`}>{dow(d)}</span>
+                <span className="font-display text-[20px] leading-tight">{Number(d.slice(8))}</span>
                 <span className="flex gap-0.5 h-1.5 mt-0.5">
                   {lanesOn.map((l) => <span key={l} className="w-1.5 h-1.5 rounded-full" style={{ background: sel ? '#fff' : theme(kids, l).color }} />)}
                   {signup && <span className="w-1.5 h-1.5 rotate-45" style={{ background: '#C4A882' }} />}
@@ -467,7 +467,7 @@ export default function FamilyRhythm({
           })}
         </div>
         {radarItems.filter((r) => r.date === mobileDay).map((r) => (
-          <div key={r.id} className="rounded-[16px] bg-[#C4A882]/20 text-[#7A5A2E] text-[14px] font-semibold px-4 py-3 mb-3">
+          <div key={r.id} className="rounded-[16px] bg-gold/20 text-gold-deep text-[14px] font-semibold px-4 py-3 mb-3">
             ◆ {r.time ? `${formatTime(r.time)} · ` : ''}{r.activity.title} registration {r.kind === 'opens' ? 'opens' : 'closes'}
           </div>
         ))}
@@ -478,8 +478,8 @@ export default function FamilyRhythm({
           return (
             <div key={lane} className="bg-white rounded-[20px] p-4 mb-3">
               <div className="flex items-center gap-2.5 mb-2">
-                <div className="w-7 h-7 rounded-full flex items-center justify-center text-white font-['Cormorant_Garamond'] text-[15px]" style={{ background: t.color }}>{laneName(kids, lane)[0]}</div>
-                <span className="text-[14px] font-semibold text-[#1C3A4A]">{laneName(kids, lane)}</span>
+                <div className="w-7 h-7 rounded-full flex items-center justify-center text-white font-display text-[15px]" style={{ background: t.color }}>{laneName(kids, lane)[0]}</div>
+                <span className="text-[14px] font-semibold text-text-dark">{laneName(kids, lane)}</span>
               </div>
               {list.length ? (
                 list.map((e) => (
@@ -487,7 +487,7 @@ export default function FamilyRhythm({
                     key={e.id}
                     type="button"
                     onClick={() => setSheet({ kind: 'event', ev: e })}
-                    className={`w-full text-left rounded-[14px] px-3 py-2.5 mb-1.5 ${clashDay.has(e.id) ? 'ring-2 ring-[#E0A458]' : ''}`}
+                    className={`w-full text-left rounded-[14px] px-3 py-2.5 mb-1.5 ${clashDay.has(e.id) ? 'ring-2 ring-warning' : ''}`}
                     style={{ background: t.soft, color: t.ink }}
                   >
                     <span className="text-[12px] font-semibold opacity-80">{timeRange(e.start, e.end)}</span>
@@ -496,13 +496,13 @@ export default function FamilyRhythm({
                   </button>
                 ))
               ) : idea ? (
-                <button type="button" onClick={() => setSheet({ kind: 'idea', idea, lane })} className="w-full text-left rounded-[14px] px-3 py-2.5 border border-dashed border-[#C5D8E8]">
-                  <span className="text-[12px] font-semibold text-[#7A9AAA]">Free · an idea from your saved list</span>
-                  <span className="block text-[15px] font-semibold text-[#3A5A6A]">{idea.activity.title} · {idea.start ? formatTime(idea.start) : 'all day'}</span>
-                  <span className="block text-[13px] font-semibold text-[#1A7A8A] mt-1">+ Add for {laneName(kids, lane)}</span>
+                <button type="button" onClick={() => setSheet({ kind: 'idea', idea, lane })} className="w-full text-left rounded-[14px] px-3 py-2.5 border border-dashed border-blue-grey-300">
+                  <span className="text-[12px] font-semibold text-text-muted">Free · an idea from your saved list</span>
+                  <span className="block text-[15px] font-semibold text-text-mid">{idea.activity.title} · {idea.start ? formatTime(idea.start) : 'all day'}</span>
+                  <span className="block text-[13px] font-semibold text-teal-700 mt-1">+ Add for {laneName(kids, lane)}</span>
                 </button>
               ) : (
-                <p className="italic font-['Cormorant_Garamond'] text-[17px] text-[#7A9AAA]">{mobileDay < today ? 'Nothing that day.' : 'Free day. Enjoy it.'}</p>
+                <p className="italic font-display text-[17px] text-text-muted">{mobileDay < today ? 'Nothing that day.' : 'Free day. Enjoy it.'}</p>
               )}
             </div>
           );
@@ -514,10 +514,10 @@ export default function FamilyRhythm({
       {/* Details sheet */}
       {sheet && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" role="dialog" aria-modal="true" aria-label="Details">
-          <div className="absolute inset-0 bg-[#1C3A4A]/35" onClick={() => setSheet(null)} />
+          <div className="absolute inset-0 bg-text-dark/35" onClick={() => setSheet(null)} />
           <div className="relative bg-white w-full sm:max-w-[480px] rounded-t-[28px] sm:rounded-[28px] p-6 pb-8 shadow-2xl max-h-[88vh] overflow-y-auto">
-            <div className="sm:hidden w-10 h-1 rounded-full bg-[#E3DAC5] mx-auto -mt-2 mb-4" />
-            <button type="button" onClick={() => setSheet(null)} aria-label="Close" className="absolute right-4 top-4 w-9 h-9 rounded-full hover:bg-[#F5EFE0] text-[#7A9AAA] text-[20px]">×</button>
+            <div className="sm:hidden w-10 h-1 rounded-full bg-cream-700 mx-auto -mt-2 mb-4" />
+            <button type="button" onClick={() => setSheet(null)} aria-label="Close" className="absolute right-4 top-4 w-9 h-9 rounded-full hover:bg-cream-500 text-text-muted text-[20px]">×</button>
             {sheet.kind === 'event' ? (
               <EventDetails
                 ev={sheet.ev}
@@ -568,27 +568,27 @@ function EventDetails({
           <p className="text-[12px] font-semibold" style={{ color: t.color }}>
             {laneName(kids, ev.lane)} · {dayWord(ev.date, today)} · {timeRange(ev.start, ev.end)}
           </p>
-          <p className="font-['Cormorant_Garamond'] text-[25px] leading-tight text-[#1C3A4A]">{ev.activity.title}</p>
+          <p className="font-display text-[25px] leading-tight text-text-dark">{ev.activity.title}</p>
         </div>
       </div>
-      <p className="text-[14px] text-[#3A5A6A] mb-1">{ev.session.item.label ? `${ev.session.item.label} · ` : ''}{ev.session.text.replace(/^.*?: /, '')}</p>
-      <p className="text-[13px] text-[#7A9AAA] mb-4">{[ev.activity.provider, ev.session.item.location ?? ev.activity.neighborhood].filter(Boolean).join(' · ')}</p>
+      <p className="text-[14px] text-text-mid mb-1">{ev.session.item.label ? `${ev.session.item.label} · ` : ''}{ev.session.text.replace(/^.*?: /, '')}</p>
+      <p className="text-[13px] text-text-muted mb-4">{[ev.activity.provider, ev.session.item.location ?? ev.activity.neighborhood].filter(Boolean).join(' · ')}</p>
       {current?.status === 'changed' && current.changeNote && (
-        <p className="text-[13px] text-[#7A5A2E] bg-[#C4A882]/15 rounded-lg px-3 py-2 mb-4">Updated by the provider · {current.changeNote}</p>
+        <p className="text-[13px] text-gold-deep bg-gold/15 rounded-lg px-3 py-2 mb-4">Updated by the provider · {current.changeNote}</p>
       )}
       {clash && (
-        <p className="text-[13px] text-[#9A5B1E] bg-[#FFF6E8] border border-[#E8C99A] rounded-lg px-3 py-2 mb-4">
+        <p className="text-[13px] text-gold-deep bg-warning-light border border-warning rounded-lg px-3 py-2 mb-4">
           Overlaps with {(clash.a.activityId === ev.activityId && clash.a.key === ev.key ? clash.b : clash.a).activity.title}.
         </p>
       )}
       {kids.length > 0 && (
-        <label className="flex items-center gap-2 text-[13px] text-[#5A7A8A] mb-4">
+        <label className="flex items-center gap-2 text-[13px] text-text-mid mb-4">
           This is for
           <select
             value={current?.kidId ?? ''}
             disabled={busy}
             onChange={(e) => onAssign(e.target.value || null)}
-            className="h-9 rounded-full border border-[#C5D8E8] px-3 text-[13px] text-[#1C3A4A] bg-white"
+            className="h-9 rounded-full border border-blue-grey-300 px-3 text-[13px] text-text-dark bg-white"
           >
             <option value="">Not assigned</option>
             {kids.map((k, i) => <option key={k.id} value={k.id}>{kidLabel(k, i)}</option>)}
@@ -597,21 +597,21 @@ function EventDetails({
       )}
       {others.length > 0 && (
         <div className="mb-4">
-          <p className="text-[12px] font-semibold uppercase tracking-wider text-[#7A9AAA] mb-1.5">Same class, other times</p>
+          <p className="text-[12px] font-semibold uppercase tracking-wider text-text-muted mb-1.5">Same class, other times</p>
           <div className="flex flex-wrap gap-2">
             {others.map((s) => (
-              <button key={s.key} type="button" disabled={busy} onClick={() => onSwitch(s.key)} className="h-9 px-3.5 rounded-full border border-[#C5D8E8] text-[#0D5C6E] text-[13px] font-semibold hover:bg-[#C5D8E8]/20 disabled:opacity-50">
+              <button key={s.key} type="button" disabled={busy} onClick={() => onSwitch(s.key)} className="h-9 px-3.5 rounded-full border border-blue-grey-300 text-teal-800 text-[13px] font-semibold hover:bg-blue-grey-300/20 disabled:opacity-50">
                 Switch to {sessionShort(s.item, today)}
               </button>
             ))}
           </div>
         </div>
       )}
-      <div className="flex flex-wrap gap-2 pt-2 border-t border-[#EFE7D4]">
+      <div className="flex flex-wrap gap-2 pt-2 border-t border-cream-700">
         {ev.activity.website && (
-          <a href={ev.activity.website} target="_blank" rel="noopener noreferrer" className="h-10 px-4 inline-flex items-center rounded-full border border-[#C5D8E8] text-[#0D5C6E] text-[13px] font-semibold">Their site →</a>
+          <a href={ev.activity.website} target="_blank" rel="noopener noreferrer" className="h-10 px-4 inline-flex items-center rounded-full border border-blue-grey-300 text-teal-800 text-[13px] font-semibold">Their site →</a>
         )}
-        <button type="button" disabled={busy} onClick={onRemove} className="h-10 px-4 rounded-full text-[#C0544A] text-[13px] font-semibold hover:bg-[#C0544A]/5 disabled:opacity-50">Remove from calendar</button>
+        <button type="button" disabled={busy} onClick={onRemove} className="h-10 px-4 rounded-full text-error text-[13px] font-semibold hover:bg-error/5 disabled:opacity-50">Remove from calendar</button>
       </div>
     </>
   );
@@ -623,18 +623,18 @@ function IdeaDetails({ idea, lane, kids, today, busy, onAdd }: { idea: Idea; lan
   return (
     <>
       <p className="text-[12px] font-semibold mb-1" style={{ color: t.color }}>An idea for {name} · {dayWord(idea.date, today)}</p>
-      <p className="font-['Cormorant_Garamond'] text-[26px] leading-tight text-[#1C3A4A] mb-1 pr-8">{idea.activity.title}</p>
-      <p className="text-[14px] text-[#3A5A6A] mb-1">{idea.session.text}</p>
-      <p className="text-[13px] text-[#7A9AAA] mb-4">{[idea.activity.provider, idea.activity.neighborhood].filter(Boolean).join(' · ')} · from your saved activities</p>
+      <p className="font-display text-[26px] leading-tight text-text-dark mb-1 pr-8">{idea.activity.title}</p>
+      <p className="text-[14px] text-text-mid mb-1">{idea.session.text}</p>
+      <p className="text-[13px] text-text-muted mb-4">{[idea.activity.provider, idea.activity.neighborhood].filter(Boolean).join(' · ')} · from your saved activities</p>
       <div className="flex flex-wrap gap-2">
-        <button type="button" disabled={busy} onClick={() => onAdd(lane === UNASSIGNED ? null : lane)} className="h-11 px-5 rounded-full bg-[#0D5C6E] text-white text-[14px] font-semibold hover:bg-[#1A7A8A] disabled:opacity-60">
+        <button type="button" disabled={busy} onClick={() => onAdd(lane === UNASSIGNED ? null : lane)} className="h-11 px-5 rounded-full bg-teal-800 text-white text-[14px] font-semibold hover:bg-teal-700 disabled:opacity-60">
           Add for {name}
         </button>
         {idea.activity.website && (
-          <a href={idea.activity.website} target="_blank" rel="noopener noreferrer" className="h-11 px-5 inline-flex items-center rounded-full border border-[#C5D8E8] text-[#0D5C6E] text-[14px] font-semibold">Their site →</a>
+          <a href={idea.activity.website} target="_blank" rel="noopener noreferrer" className="h-11 px-5 inline-flex items-center rounded-full border border-blue-grey-300 text-teal-800 text-[14px] font-semibold">Their site →</a>
         )}
       </div>
-      <p className="text-[12px] text-[#7A9AAA] mt-3">It goes on {name}’s calendar every time this session meets. You can remove it anytime.</p>
+      <p className="text-[12px] text-text-muted mt-3">It goes on {name}’s calendar every time this session meets. You can remove it anytime.</p>
     </>
   );
 }

@@ -26,18 +26,18 @@ export default function Solution() {
   ];
 
   return (
-    <section className="bg-[#0D5C6E] py-24 px-6 md:px-10 lg:px-16 relative overflow-hidden">
+    <section className="bg-teal-800 py-24 px-6 md:px-10 lg:px-16 relative overflow-hidden">
       <div className="max-w-[1280px] mx-auto relative z-10">
 
         {/* Eyebrow */}
-        <p className="text-xs font-bold uppercase tracking-widest text-[#C4A882] mb-4">
+        <p className="text-xs font-bold uppercase tracking-widest text-gold mb-4">
           How It Works
         </p>
 
         {/* Headline */}
-        <h2 className="font-['Cormorant_Garamond'] text-[clamp(34px,4vw,52px)] font-light leading-[1.15] tracking-tight text-white mb-4 max-w-[540px]">
+        <h2 className="font-display text-[clamp(34px,4vw,52px)] font-light leading-[1.15] tracking-tight text-white mb-4 max-w-[540px]">
           Less clicks.<br />
-          <em className="italic text-[#C4A882]">More living.</em>
+          <em className="italic text-gold">More living.</em>
         </h2>
 
         <p className="text-[17px] text-white/50 leading-relaxed max-w-[480px] mb-14">
@@ -55,13 +55,13 @@ export default function Solution() {
                 <IconChip name={step.icon} dark />
                 <span className="font-display text-[44px] font-medium leading-none text-white/15">{step.num}</span>
               </div>
-              <h3 className="font-['Cormorant_Garamond'] text-[20px] font-medium text-white/90 mb-3">
+              <h3 className="font-display text-[20px] font-medium text-white/90 mb-3">
                 {step.title}
               </h3>
               <p className="text-[14px] leading-[1.8] text-white/45 mb-4">
                 {step.body}
               </p>
-              <p className="text-[13px] italic text-blue-grey-300 font-['Cormorant_Garamond']">
+              <p className="text-[13px] italic text-blue-grey-300 font-display">
                 {step.honest}
               </p>
             </div>

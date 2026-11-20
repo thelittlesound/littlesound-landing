@@ -69,14 +69,14 @@ export default function About() {
     <main>
 
       {/* ── HERO ── */}
-      <section className="bg-[#0D5C6E] pt-32 pb-20 px-6 md:px-10 lg:px-16">
+      <section className="bg-teal-800 pt-32 pb-20 px-6 md:px-10 lg:px-16">
         <div className="max-w-[1280px] mx-auto max-w-[720px]">
           <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 mb-8">
-            <span className="text-xs font-bold uppercase tracking-widest text-[#C4A882]">Our Story</span>
+            <span className="text-xs font-bold uppercase tracking-widest text-gold">Our Story</span>
           </div>
-          <h1 className="font-['Cormorant_Garamond'] text-[clamp(40px,5vw,68px)] font-light leading-[1.1] tracking-tight text-white mb-6 max-w-[640px]">
+          <h1 className="font-display text-[clamp(40px,5vw,68px)] font-light leading-[1.1] tracking-tight text-white mb-6 max-w-[640px]">
             We&apos;re Seattle parents.<br />
-            <em className="italic text-[#C4A882]">We built this for us.</em>
+            <em className="italic text-gold">We built this for us.</em>
           </h1>
           <p className="text-white/70 text-lg leading-relaxed max-w-[520px]">
             Little Sound started with a Sunday afternoon, a lot of open tabs, and a growing feeling that there had to be a better way.
@@ -99,18 +99,18 @@ export default function About() {
                 sizes="(max-width: 1280px) 50vw, 640px"
               />
             </div>
-            <p className="text-[#7A9AAA] text-[13px] mt-3 pl-1">Kelly & Evan Sherman · Seattle</p>
+            <p className="text-text-muted text-[13px] mt-3 pl-1">Kelly & Evan Sherman · Seattle</p>
           </div>
 
           {/* Story */}
           <div className="pt-2">
-            <blockquote className="font-['Cormorant_Garamond'] text-[24px] font-light italic text-[#1C3A4A] leading-[1.55] mb-8 border-l-2 border-[#C4A882]/60 pl-6">
+            <blockquote className="font-display text-[24px] font-light italic text-text-dark leading-[1.55] mb-8 border-l-2 border-gold/60 pl-6">
               &ldquo;One Sunday, I spent four hours on six different websites trying to find a soccer camp that didn&apos;t conflict with spring break. That was the last time.&rdquo;
             </blockquote>
 
-            <div className="space-y-5 text-[16px] leading-[1.85] text-[#3A5A6A]">
+            <div className="space-y-5 text-[16px] leading-[1.85] text-text-mid">
               <p>
-                We&apos;re <strong className="text-[#1C3A4A] font-semibold">Kelly and Evan Sherman</strong> — parents of two, and longtime Seattle residents. Like most Seattle parents, we spend a surprising amount of time just trying to figure out what our kids can do.
+                We&apos;re <strong className="text-text-dark font-semibold">Kelly and Evan Sherman</strong> — parents of two, and longtime Seattle residents. Like most Seattle parents, we spend a surprising amount of time just trying to figure out what our kids can do.
               </p>
               <p>
                 It&apos;s not that the activities aren&apos;t out there. Seattle has an incredible ecosystem of camps, studios, sports leagues, and programs. The problem is finding them. Every provider has their own website. Registration opens on different dates. Pricing is buried. Age ranges are unclear. And by the time you&apos;ve done the research, the session is full.
@@ -119,19 +119,19 @@ export default function About() {
                 We built Little Sound to fix that — starting with the city we know best. One place to search, save and plan, across Seattle&apos;s camps, studios and teams. No more tab chaos.
               </p>
               <p>
-                We&apos;re not a big tech company. We&apos;re not backed by people who&apos;ve never packed a camp bag at 7am. <strong className="text-[#1C3A4A] font-semibold">We&apos;re parents who got fed up and decided to fix it.</strong>
+                We&apos;re not a big tech company. We&apos;re not backed by people who&apos;ve never packed a camp bag at 7am. <strong className="text-text-dark font-semibold">We&apos;re parents who got fed up and decided to fix it.</strong>
               </p>
             </div>
 
-            <div className="flex items-center gap-6 mt-10 pt-8 border-t border-[#E8DFC8]">
+            <div className="flex items-center gap-6 mt-10 pt-8 border-t border-cream-700">
               <div>
-                <p className="text-[#1C3A4A] font-semibold text-[15px]">Kelly Sherman</p>
-                <p className="text-[#7A9AAA] text-[13px]">Co-founder &amp; CEO</p>
+                <p className="text-text-dark font-semibold text-[15px]">Kelly Sherman</p>
+                <p className="text-text-muted text-[13px]">Co-founder &amp; CEO</p>
               </div>
-              <div className="w-px h-8 bg-[#E8DFC8]" />
+              <div className="w-px h-8 bg-cream-700" />
               <div>
-                <p className="text-[#1C3A4A] font-semibold text-[15px]">Evan Sherman</p>
-                <p className="text-[#7A9AAA] text-[13px]">Co-founder &amp; COO</p>
+                <p className="text-text-dark font-semibold text-[15px]">Evan Sherman</p>
+                <p className="text-text-muted text-[13px]">Co-founder &amp; COO</p>
               </div>
             </div>
           </div>
@@ -139,24 +139,24 @@ export default function About() {
       </section>
 
       {/* ── MISSION / VALUES ── */}
-      <section className="bg-[#F5EFE0] py-24 px-6 md:px-10 lg:px-16">
+      <section className="bg-cream-500 py-24 px-6 md:px-10 lg:px-16">
         <div className="max-w-[1280px] mx-auto">
           <div className="text-center mb-14">
-            <p className="text-xs font-bold uppercase tracking-widest text-[#0D5C6E] mb-4">What we believe</p>
-            <h2 className="font-['Cormorant_Garamond'] text-[clamp(32px,4vw,50px)] font-light leading-[1.15] tracking-tight text-[#1C3A4A] max-w-[560px] mx-auto">
+            <p className="text-xs font-bold uppercase tracking-widest text-teal-800 mb-4">What we believe</p>
+            <h2 className="font-display text-[clamp(32px,4vw,50px)] font-light leading-[1.15] tracking-tight text-text-dark max-w-[560px] mx-auto">
               Less searching. More living.<br />
-              <em className="italic text-[#0D5C6E]">Families first.</em>
+              <em className="italic text-teal-800">Families first.</em>
             </h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {VALUES.map((v) => (
-              <div key={v.title} className="bg-white rounded-[20px] p-9 border border-[#E8DFC8]">
+              <div key={v.title} className="bg-white rounded-[20px] p-9 border border-cream-700">
                 <IconChip name={v.icon} className="mb-5" />
-                <h3 className="font-['Cormorant_Garamond'] text-[22px] font-medium text-[#1C3A4A] mb-3">
+                <h3 className="font-display text-[22px] font-medium text-text-dark mb-3">
                   {v.title}
                 </h3>
-                <p className="text-[15px] text-[#3A5A6A] leading-relaxed">{v.body}</p>
+                <p className="text-[15px] text-text-mid leading-relaxed">{v.body}</p>
               </div>
             ))}
           </div>
@@ -167,10 +167,10 @@ export default function About() {
       <section className="bg-white py-24 px-6 md:px-10 lg:px-16">
         <div className="max-w-[1280px] mx-auto">
           <div className="mb-14">
-            <p className="text-xs font-bold uppercase tracking-widest text-[#0D5C6E] mb-4">Where we&apos;re headed</p>
-            <h2 className="font-['Cormorant_Garamond'] text-[clamp(32px,4vw,50px)] font-light leading-[1.15] tracking-tight text-[#1C3A4A] max-w-[480px]">
+            <p className="text-xs font-bold uppercase tracking-widest text-teal-800 mb-4">Where we&apos;re headed</p>
+            <h2 className="font-display text-[clamp(32px,4vw,50px)] font-light leading-[1.15] tracking-tight text-text-dark max-w-[480px]">
               Starting small.<br />
-              <em className="italic text-[#0D5C6E]">Building to last.</em>
+              <em className="italic text-teal-800">Building to last.</em>
             </h2>
           </div>
 
@@ -180,31 +180,31 @@ export default function About() {
                 key={phase.phase}
                 className={`rounded-[20px] p-9 border ${
                   phase.status === 'now'
-                    ? 'bg-[#0D5C6E] border-[#0D5C6E]'
-                    : 'bg-[#F5EFE0] border-[#E8DFC8]'
+                    ? 'bg-teal-800 border-teal-800'
+                    : 'bg-cream-500 border-cream-700'
                 }`}
               >
                 <div className="flex items-center justify-between mb-6">
-                  <span className={`text-[11px] font-bold uppercase tracking-widest ${phase.status === 'now' ? 'text-[#C4A882]' : 'text-[#7A9AAA]'}`}>
+                  <span className={`text-[11px] font-bold uppercase tracking-widest ${phase.status === 'now' ? 'text-gold' : 'text-text-muted'}`}>
                     {phase.phase}
                   </span>
                   {phase.status === 'now' && (
                     <span className="flex items-center gap-1.5 bg-white/10 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#C4A882] animate-pulse" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" />
                       Now
                     </span>
                   )}
                 </div>
-                <h3 className={`font-['Cormorant_Garamond'] text-[24px] font-medium mb-1 ${phase.status === 'now' ? 'text-white' : 'text-[#1C3A4A]'}`}>
+                <h3 className={`font-display text-[24px] font-medium mb-1 ${phase.status === 'now' ? 'text-white' : 'text-text-dark'}`}>
                   {phase.label}
                 </h3>
-                <p className={`text-[13px] mb-6 ${phase.status === 'now' ? 'text-white/50' : 'text-[#7A9AAA]'}`}>
+                <p className={`text-[13px] mb-6 ${phase.status === 'now' ? 'text-white/50' : 'text-text-muted'}`}>
                   {phase.timeframe}
                 </p>
                 <ul className="space-y-2.5">
                   {phase.items.map((item) => (
-                    <li key={item} className={`flex items-start gap-2.5 text-[14px] ${phase.status === 'now' ? 'text-white/75' : 'text-[#3A5A6A]'}`}>
-                      <span className={`mt-1 flex-shrink-0 ${phase.status === 'now' ? 'text-[#C4A882]' : 'text-[#0D5C6E]'}`}>✓</span>
+                    <li key={item} className={`flex items-start gap-2.5 text-[14px] ${phase.status === 'now' ? 'text-white/75' : 'text-text-mid'}`}>
+                      <span className={`mt-1 flex-shrink-0 ${phase.status === 'now' ? 'text-gold' : 'text-teal-800'}`}>✓</span>
                       {item}
                     </li>
                   ))}
@@ -216,14 +216,14 @@ export default function About() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="bg-[#0A4A5A] py-24 px-6 md:px-10 lg:px-16 text-center">
+      <section className="bg-teal-900 py-24 px-6 md:px-10 lg:px-16 text-center">
         <div className="max-w-[640px] mx-auto">
-          <p className="text-xs font-bold uppercase tracking-widest text-[#C4A882] mb-6">
+          <p className="text-xs font-bold uppercase tracking-widest text-gold mb-6">
             Come build with us
           </p>
-          <h2 className="font-['Cormorant_Garamond'] text-[clamp(34px,4vw,54px)] font-light leading-[1.15] tracking-tight text-white mb-5">
+          <h2 className="font-display text-[clamp(34px,4vw,54px)] font-light leading-[1.15] tracking-tight text-white mb-5">
             Seattle families deserve better.<br />
-            <em className="italic text-[#C4A882]">Let&apos;s fix it together.</em>
+            <em className="italic text-gold">Let&apos;s fix it together.</em>
           </h2>
           <p className="text-[17px] text-white/55 leading-relaxed mb-10">
             Create a free account and start searching, or reach out directly — we&apos;d love to hear from you.
@@ -231,7 +231,7 @@ export default function About() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/families/signup"
-              className="inline-flex items-center justify-center bg-[#C4A882] hover:bg-[#A8865A] text-white font-semibold rounded-full px-8 py-4 text-[15px] transition-all duration-200 hover:-translate-y-0.5"
+              className="inline-flex items-center justify-center bg-gold hover:bg-gold-dark text-white font-semibold rounded-full px-8 py-4 text-[15px] transition-all duration-200 hover:-translate-y-0.5"
             >
               Create your free account →
             </Link>

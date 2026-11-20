@@ -44,9 +44,9 @@ export interface ClaimRequest {
 }
 
 const STATUS_COPY = {
-  pending: { label: 'In review', color: 'bg-amber-100 text-amber-800' },
-  approved: { label: 'Live on Discover', color: 'bg-emerald-100 text-emerald-800' },
-  rejected: { label: 'Not approved', color: 'bg-red-100 text-red-700' },
+  pending: { label: 'In review', color: 'bg-warning-light text-gold-deep' },
+  approved: { label: 'Live on Discover', color: 'bg-success-light text-success-dark' },
+  rejected: { label: 'Not approved', color: 'bg-error-light text-error-dark' },
 };
 
 export default function ProviderDashboardClient({
@@ -70,26 +70,26 @@ export default function ProviderDashboardClient({
   }
 
   return (
-    <main className="min-h-screen bg-[#F5EFE0] px-4 py-16 pt-28">
+    <main className="min-h-screen bg-cream-500 px-4 py-16 pt-28">
       <div className="max-w-[720px] mx-auto">
 
         {/* Header */}
         <div className="flex items-start justify-between mb-8">
           <div>
-            <div className="inline-flex items-center gap-2 bg-[#0D5C6E]/8 border border-[#0D5C6E]/15 rounded-full px-4 py-1.5 mb-4">
-              <span className="text-xs font-bold uppercase tracking-widest text-[#0D5C6E]">Provider Dashboard</span>
+            <div className="inline-flex items-center gap-2 bg-teal-800/8 border border-teal-800/15 rounded-full px-4 py-1.5 mb-4">
+              <span className="text-xs font-bold uppercase tracking-widest text-teal-800">Provider Dashboard</span>
             </div>
-            <h1 className="font-['Cormorant_Garamond'] text-[clamp(28px,4vw,40px)] font-light leading-[1.1] tracking-tight text-[#1C3A4A]">
+            <h1 className="font-display text-[clamp(28px,4vw,40px)] font-light leading-[1.1] tracking-tight text-text-dark">
               {profile.business_name || 'Your listings'}
             </h1>
-            <p className="text-[#5A7A8A] text-[14px] mt-1">
+            <p className="text-text-mid text-[14px] mt-1">
               {profile.first_name} {profile.last_name} · {profile.email}
             </p>
           </div>
           <button
             onClick={handleSignOut}
             disabled={signingOut}
-            className="text-[13px] font-medium text-[#7A9AAA] hover:text-[#0D5C6E] transition-colors shrink-0"
+            className="text-[13px] font-medium text-text-muted hover:text-teal-800 transition-colors shrink-0"
           >
             {signingOut ? 'Signing out…' : 'Sign out'}
           </button>
@@ -99,13 +99,13 @@ export default function ProviderDashboardClient({
         <div className="flex flex-col sm:flex-row gap-3 mb-8">
           <Link
             href="/providers/listings/new"
-            className="inline-flex items-center justify-center h-12 rounded-full bg-[#0D5C6E] text-white font-semibold text-[15px] px-7 hover:bg-[#1A7A8A] hover:-translate-y-0.5 transition-all duration-200"
+            className="inline-flex items-center justify-center h-12 rounded-full bg-teal-800 text-white font-semibold text-[15px] px-7 hover:bg-teal-700 hover:-translate-y-0.5 transition-all duration-200"
           >
             + List another activity
           </Link>
           <Link
             href="/providers/claim"
-            className="inline-flex items-center justify-center h-12 rounded-full border-2 border-[#E8DFC8] bg-white text-[#0D5C6E] font-semibold text-[15px] px-7 hover:border-[#C5D8E8] transition-colors"
+            className="inline-flex items-center justify-center h-12 rounded-full border-2 border-cream-700 bg-white text-teal-800 font-semibold text-[15px] px-7 hover:border-blue-grey-300 transition-colors"
           >
             Claim an existing listing
           </Link>
@@ -115,28 +115,28 @@ export default function ProviderDashboardClient({
         {claims.length > 0 && (
           <div className="flex flex-col gap-3 mb-8">
             {claims.map((c) => (
-              <div key={c.id} className="bg-white/70 border border-[#E8DFC8] rounded-[18px] px-5 py-4">
+              <div key={c.id} className="bg-white/70 border border-cream-700 rounded-[18px] px-5 py-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="text-[12px] font-semibold uppercase tracking-wide text-[#7A9AAA] mb-0.5">Claim request</p>
-                    <p className="text-[15px] font-semibold text-[#1C3A4A]">{c.business_name ?? 'Listing claim'}</p>
-                    <p className="text-[13px] text-[#5A7A8A]">{c.titles.join(' · ')}</p>
+                    <p className="text-[12px] font-semibold uppercase tracking-wide text-text-muted mb-0.5">Claim request</p>
+                    <p className="text-[15px] font-semibold text-text-dark">{c.business_name ?? 'Listing claim'}</p>
+                    <p className="text-[13px] text-text-mid">{c.titles.join(' · ')}</p>
                   </div>
                   <span
                     className={`text-xs px-2.5 py-1 rounded-full font-medium shrink-0 ${
-                      c.status === 'pending' ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-700'
+                      c.status === 'pending' ? 'bg-warning-light text-gold-deep' : 'bg-error-light text-error-dark'
                     }`}
                   >
                     {c.status === 'pending' ? 'In review' : 'Not approved'}
                   </span>
                 </div>
                 {c.status === 'pending' ? (
-                  <p className="text-[12px] text-[#7A9AAA] mt-2">
+                  <p className="text-[12px] text-text-muted mt-2">
                     Submitted {new Date(c.created_at).toLocaleDateString()} — we&apos;ll email you once it&apos;s verified.
                   </p>
                 ) : (
                   c.admin_notes && (
-                    <p className="text-[13px] text-[#8A3A32] mt-2">Note from Little Sound: {c.admin_notes}</p>
+                    <p className="text-[13px] text-error-dark mt-2">Note from Little Sound: {c.admin_notes}</p>
                   )
                 )}
               </div>
@@ -147,18 +147,18 @@ export default function ProviderDashboardClient({
         {/* Listings */}
         {listings.length === 0 ? (
           <div className="bg-white rounded-[24px] shadow-[0_4px_32px_rgba(10,74,90,0.09)] p-10 text-center">
-            <p className="text-[#3A5A6A] text-[15px] leading-relaxed mb-6">
+            <p className="text-text-mid text-[15px] leading-relaxed mb-6">
               You haven&apos;t submitted a listing yet.
             </p>
             <Link
               href="/providers/listings/new"
-              className="inline-flex items-center justify-center h-12 rounded-full bg-[#0D5C6E] text-white font-semibold text-[15px] px-7 hover:bg-[#1A7A8A] transition-colors"
+              className="inline-flex items-center justify-center h-12 rounded-full bg-teal-800 text-white font-semibold text-[15px] px-7 hover:bg-teal-700 transition-colors"
             >
               Create your first listing →
             </Link>
-            <p className="text-[13px] text-[#7A9AAA] mt-5">
+            <p className="text-[13px] text-text-muted mt-5">
               Already on Little Sound?{' '}
-              <Link href="/providers/claim" className="text-[#1A7A8A] font-medium underline underline-offset-2">
+              <Link href="/providers/claim" className="text-teal-700 font-medium underline underline-offset-2">
                 Claim your listing
               </Link>{' '}
               instead.
@@ -174,7 +174,7 @@ export default function ProviderDashboardClient({
                   className="bg-white rounded-[20px] shadow-[0_2px_16px_rgba(10,74,90,0.06)] p-6"
                 >
                   <div className="flex items-start justify-between gap-3 mb-2">
-                    <h2 className="font-['Cormorant_Garamond'] text-[22px] font-light text-[#1C3A4A] leading-tight">
+                    <h2 className="font-display text-[22px] font-light text-text-dark leading-tight">
                       {listing.title}
                     </h2>
                     <div className="flex flex-col items-end gap-1 shrink-0">
@@ -182,39 +182,39 @@ export default function ProviderDashboardClient({
                         {status.label}
                       </span>
                       {listing.status === 'approved' && listing.reapproval_needed && (
-                        <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-amber-100 text-amber-800">
+                        <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-warning-light text-gold-deep">
                           Changes pending review
                         </span>
                       )}
                     </div>
                   </div>
-                  <p className="text-[13px] text-[#7A9AAA] mb-3">
+                  <p className="text-[13px] text-text-muted mb-3">
                     {[listing.category, listing.subcategory].filter(Boolean).join(' › ')}
                     {listing.neighborhood ? ` · ${listing.neighborhood}` : ''}
                     {listing.age_min != null ? ` · Ages ${listing.age_min}–${listing.age_max}` : ''}
                   </p>
                   {listing.price != null && (
-                    <p className="text-[14px] text-[#3A5A6A] mb-2">
+                    <p className="text-[14px] text-text-mid mb-2">
                       ${listing.price} / {listing.price_unit}
                     </p>
                   )}
                   {listing.status === 'rejected' && listing.admin_notes && (
-                    <div className="bg-[#C0544A]/8 border border-[#C0544A]/20 rounded-[10px] px-4 py-3 mt-3">
-                      <p className="text-[12px] font-semibold text-[#C0544A] uppercase tracking-wide mb-1">
+                    <div className="bg-error/8 border border-error/20 rounded-[10px] px-4 py-3 mt-3">
+                      <p className="text-[12px] font-semibold text-error uppercase tracking-wide mb-1">
                         Note from Little Sound
                       </p>
-                      <p className="text-[13px] text-[#8A3A32]">{listing.admin_notes}</p>
+                      <p className="text-[13px] text-error-dark">{listing.admin_notes}</p>
                     </div>
                   )}
-                  <div className="flex items-center justify-between gap-3 mt-4 pt-4 border-t border-[#E8DFC8]">
-                    <p className="text-[12px] text-[#B0C8D0]">
+                  <div className="flex items-center justify-between gap-3 mt-4 pt-4 border-t border-cream-700">
+                    <p className="text-[12px] text-blue-grey-300">
                       {listing.seed_id ? 'Claimed' : 'Submitted'} {new Date(listing.created_at).toLocaleDateString()}
                       {listing.edited_at ? ` · Edited ${new Date(listing.edited_at).toLocaleDateString()}` : ''}
                       {listing.reviewed_at ? ` · Reviewed ${new Date(listing.reviewed_at).toLocaleDateString()}` : ''}
                     </p>
                     <Link
                       href={`/providers/listings/${listing.id}/edit`}
-                      className="text-[13px] font-semibold text-[#1A7A8A] hover:text-[#0D5C6E] shrink-0"
+                      className="text-[13px] font-semibold text-teal-700 hover:text-teal-800 shrink-0"
                     >
                       Edit →
                     </Link>
@@ -225,10 +225,10 @@ export default function ProviderDashboardClient({
           </div>
         )}
 
-        <p className="text-center text-[13px] text-[#7A9AAA] mt-8">
+        <p className="text-center text-[13px] text-text-muted mt-8">
           Use “Edit” on any listing to update its details. Need something else — a change to your
           account, or to remove a listing? Email{' '}
-          <a href="mailto:hello@thelittlesound.com" className="text-[#1A7A8A] underline underline-offset-2">
+          <a href="mailto:hello@thelittlesound.com" className="text-teal-700 underline underline-offset-2">
             hello@thelittlesound.com
           </a>.
         </p>

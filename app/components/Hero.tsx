@@ -47,23 +47,23 @@ export default function Hero() {
   ];
 
   return (
-    <section className="min-h-screen bg-[#0D5C6E] pt-32 pb-16 px-6 md:px-10 lg:px-16 flex items-center">
+    <section className="min-h-screen bg-teal-800 pt-32 pb-16 px-6 md:px-10 lg:px-16 flex items-center">
       <div className="max-w-[1280px] mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 
         {/* Left — copy */}
         <div>
           {/* Eyebrow */}
           <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 mb-8">
-            <span className="w-2 h-2 rounded-full bg-[#C4A882] animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-gold animate-pulse" />
             <span className="text-xs font-semibold tracking-widest uppercase text-white/70">
               For Seattle families
             </span>
           </div>
 
           {/* Headline */}
-          <h1 className="font-['Cormorant_Garamond'] text-[clamp(44px,5.5vw,72px)] font-light leading-[1.1] tracking-tight text-white mb-6">
+          <h1 className="font-display text-[clamp(44px,5.5vw,72px)] font-light leading-[1.1] tracking-tight text-white mb-6">
             Seattle kids&apos; activities,<br />
-            <em className="italic text-[#C4A882]">in one place.</em>
+            <em className="italic text-gold">in one place.</em>
           </h1>
 
           {/* Subhead */}
@@ -72,18 +72,18 @@ export default function Hero() {
           </p>
 
           {/* Emotional stat hook */}
-          <div className="border-l-2 border-[#C4A882]/50 pl-4 mb-10 max-w-[420px]">
-            <p className="text-white/80 text-[15px] leading-relaxed font-['Cormorant_Garamond'] italic">
+          <div className="border-l-2 border-gold/50 pl-4 mb-10 max-w-[420px]">
+            <p className="text-white/80 text-[15px] leading-relaxed font-display italic">
               &ldquo;Parents spend way too many hours hunting for kids&apos; activities across dozens of sites. That time belongs to your family.&rdquo;
             </p>
-            <p className="text-[#C4A882] text-[12px] mt-2 font-semibold">&mdash; Kelly Sherman, Co-founder &amp; Seattle mom of two</p>
+            <p className="text-gold text-[12px] mt-2 font-semibold">&mdash; Kelly Sherman, Co-founder &amp; Seattle mom of two</p>
           </div>
 
           {/* Primary CTAs — same pattern as /for-families */}
           <div className="flex flex-col sm:flex-row flex-wrap gap-4 mb-4">
             <Link
               href="/families/signup"
-              className="inline-flex items-center justify-center gap-2 bg-[#C4A882] hover:bg-[#A8865A] text-white font-semibold rounded-full px-7 py-4 text-[15px] transition-all duration-200 hover:-translate-y-0.5"
+              className="inline-flex items-center justify-center gap-2 bg-gold hover:bg-gold-dark text-white font-semibold rounded-full px-7 py-4 text-[15px] transition-all duration-200 hover:-translate-y-0.5"
             >
               Create Your Account &rarr;
             </Link>
@@ -101,7 +101,7 @@ export default function Hero() {
           <div className="flex flex-wrap gap-5">
             {['Free to join', 'Hundreds of programs', 'No spam, ever'].map((item) => (
               <span key={item} className="flex items-center gap-1.5 text-white/55 text-[13px]">
-                <span className="text-[#C4A882] font-bold">✓</span>
+                <span className="text-gold font-bold">✓</span>
                 {item}
               </span>
             ))}
@@ -113,7 +113,7 @@ export default function Hero() {
           <div className="w-[420px] bg-white rounded-[24px] shadow-2xl overflow-hidden border border-white/10 transition-transform duration-500 hover:-translate-y-1">
 
             {/* Search bar header */}
-            <div className="bg-[#0A4A5A] px-5 pt-5 pb-4">
+            <div className="bg-teal-900 px-5 pt-5 pb-4">
               <div className="flex items-center gap-2 bg-white/10 rounded-xl px-3 py-2.5 mb-3">
                 <LineIcon name="search" size={14} color="rgba(255,255,255,0.5)" />
                 <span className="text-white/70 text-[12px]">age 9 in West Seattle under $300</span>
@@ -130,7 +130,7 @@ export default function Hero() {
                     key={f.label}
                     className={
                       f.active
-                        ? 'whitespace-nowrap text-[10px] font-semibold px-3 py-1.5 rounded-full flex-shrink-0 bg-[#C4A882] text-white'
+                        ? 'whitespace-nowrap text-[10px] font-semibold px-3 py-1.5 rounded-full flex-shrink-0 bg-gold text-white'
                         : 'whitespace-nowrap text-[10px] font-semibold px-3 py-1.5 rounded-full flex-shrink-0 bg-white/10 text-white/60'
                     }
                   >
@@ -141,11 +141,11 @@ export default function Hero() {
             </div>
 
             {/* Results meta */}
-            <div className="px-4 pt-3 pb-2 flex items-center justify-between border-b border-[#E8DFC8]">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-[#7A9AAA]">
+            <div className="px-4 pt-3 pb-2 flex items-center justify-between border-b border-cream-700">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">
                 Closest first
               </p>
-              <div className="flex items-center gap-1 text-[10px] text-[#1A7A8A] font-semibold">
+              <div className="flex items-center gap-1 text-[10px] text-teal-700 font-semibold">
                 Best match
               </div>
             </div>
@@ -155,23 +155,23 @@ export default function Hero() {
               {activities.map((item) => (
                 <div
                   key={item.name}
-                  className="flex items-center gap-3 bg-[#F5EFE0] border border-[#E8DFC8] rounded-[14px] px-3 py-3 cursor-pointer hover:border-[#1A7A8A]/30 transition-colors"
+                  className="flex items-center gap-3 bg-cream-500 border border-cream-700 rounded-[14px] px-3 py-3 cursor-pointer hover:border-teal-700/30 transition-colors"
                 >
-                  <div className="w-10 h-10 rounded-[10px] flex items-center justify-center flex-shrink-0 bg-white border border-[#E8DFC8]">
+                  <div className="w-10 h-10 rounded-[10px] flex items-center justify-center flex-shrink-0 bg-white border border-cream-700">
                     <LineIcon name={item.icon} size={20} color="#A8865A" />
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <p className="text-[12px] font-semibold text-[#1C3A4A] truncate">{item.name}</p>
-                    <p className="text-[10px] text-[#7A9AAA] truncate">{item.provider}</p>
-                    <p className="text-[10px] text-[#3A5A6A] mt-1">{item.ages} · {item.where}</p>
+                    <p className="text-[12px] font-semibold text-text-dark truncate">{item.name}</p>
+                    <p className="text-[10px] text-text-muted truncate">{item.provider}</p>
+                    <p className="text-[10px] text-text-mid mt-1">{item.ages} · {item.where}</p>
                   </div>
 
                   <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
                     <span className="text-[10px] font-semibold px-2 py-1 rounded-full whitespace-nowrap bg-teal-100 text-teal-800">
                       {item.tag}
                     </span>
-                    <span className="text-[11px] font-semibold text-[#1C3A4A]">
+                    <span className="text-[11px] font-semibold text-text-dark">
                       {item.cost}
                     </span>
                   </div>
@@ -183,7 +183,7 @@ export default function Hero() {
             <div className="px-4 pb-4">
               <a
                 href="/discover"
-                className="relative z-20 block bg-[#0D5C6E] hover:bg-[#1A7A8A] rounded-[12px] px-4 py-3 text-center transition-colors cursor-pointer"
+                className="relative z-20 block bg-teal-800 hover:bg-teal-700 rounded-[12px] px-4 py-3 text-center transition-colors cursor-pointer"
               >
                 <span className="text-white text-[12px] font-semibold">Browse all activities &rarr;</span>
               </a>

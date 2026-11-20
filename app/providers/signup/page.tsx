@@ -136,21 +136,21 @@ function ProviderSignupForm() {
 
   if (checkEmail) {
     return (
-      <main className="min-h-screen bg-[#F5EFE0] flex flex-col items-center px-4 py-16 pt-28">
+      <main className="min-h-screen bg-cream-500 flex flex-col items-center px-4 py-16 pt-28">
         <div className="bg-white rounded-[24px] shadow-[0_4px_32px_rgba(10,74,90,0.09)] w-full max-w-[480px] p-8 md:p-10 text-center">
-          <div className="w-14 h-14 rounded-full bg-[#0D5C6E]/8 flex items-center justify-center mx-auto mb-5">
+          <div className="w-14 h-14 rounded-full bg-teal-800/8 flex items-center justify-center mx-auto mb-5">
             <LineIcon name="mail" size={26} color="#A8865A" />
           </div>
-          <h1 className="font-['Cormorant_Garamond'] text-[28px] font-light text-[#1C3A4A] mb-3">
+          <h1 className="font-display text-[28px] font-light text-text-dark mb-3">
             Check your email
           </h1>
-          <p className="text-[#3A5A6A] text-[15px] leading-relaxed mb-6">
+          <p className="text-text-mid text-[15px] leading-relaxed mb-6">
             We sent a confirmation link to <strong>{form.email}</strong>. Click it to activate
             your account, then sign in to {isClaiming ? 'finish claiming your listing' : 'create your listing'}.
           </p>
           <Link
             href={loginHref}
-            className="inline-flex h-12 items-center justify-center rounded-full bg-[#0D5C6E] text-white font-semibold text-[15px] px-8 hover:bg-[#1A7A8A] transition-colors"
+            className="inline-flex h-12 items-center justify-center rounded-full bg-teal-800 text-white font-semibold text-[15px] px-8 hover:bg-teal-700 transition-colors"
           >
             Go to sign in
           </Link>
@@ -160,27 +160,27 @@ function ProviderSignupForm() {
   }
 
   return (
-    <main className="min-h-screen bg-[#F5EFE0] flex flex-col items-center px-4 py-16 pt-28">
+    <main className="min-h-screen bg-cream-500 flex flex-col items-center px-4 py-16 pt-28">
 
       {/* Header */}
       <div className="text-center mb-10">
-        <div className="inline-flex items-center gap-2 bg-[#0D5C6E]/8 border border-[#0D5C6E]/15 rounded-full px-4 py-1.5 mb-6">
-          <span className="text-xs font-bold uppercase tracking-widest text-[#0D5C6E]">Provider Portal</span>
+        <div className="inline-flex items-center gap-2 bg-teal-800/8 border border-teal-800/15 rounded-full px-4 py-1.5 mb-6">
+          <span className="text-xs font-bold uppercase tracking-widest text-teal-800">Provider Portal</span>
         </div>
-        <h1 className="font-['Cormorant_Garamond'] text-[clamp(32px,5vw,52px)] font-light leading-[1.1] tracking-tight text-[#1C3A4A] mb-4">
+        <h1 className="font-display text-[clamp(32px,5vw,52px)] font-light leading-[1.1] tracking-tight text-text-dark mb-4">
           {isClaiming ? (
             <>
               Claim your listing<br />
-              <em className="italic text-[#0D5C6E]">on Little Sound.</em>
+              <em className="italic text-teal-800">on Little Sound.</em>
             </>
           ) : (
             <>
               List your activities<br />
-              <em className="italic text-[#0D5C6E]">on Little Sound.</em>
+              <em className="italic text-teal-800">on Little Sound.</em>
             </>
           )}
         </h1>
-        <p className="text-[#3A5A6A] text-[16px] leading-relaxed max-w-[400px] mx-auto">
+        <p className="text-text-mid text-[16px] leading-relaxed max-w-[400px] mx-auto">
           {isClaiming
             ? 'Create your free provider account, then confirm the listing is yours. Using your business email speeds up verification.'
             : 'Reach Seattle families already searching for what you offer. Free to list.'}
@@ -239,7 +239,7 @@ function ProviderSignupForm() {
             />
           </div>
 
-          <div className="border-t border-[#E8DFC8]" />
+          <div className="border-t border-cream-700" />
 
           <Field
             label="Business or organization name"
@@ -252,13 +252,13 @@ function ProviderSignupForm() {
 
           {/* Category */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-[13px] font-medium text-[#0D5C6E]">Type of activity</label>
+            <label className="text-[13px] font-medium text-teal-800">Type of activity</label>
             <div className="relative">
               <select
                 value={form.category}
                 onChange={(e) => set('category', e.target.value)}
-                className={`w-full h-12 rounded-[12px] border-2 px-4 pr-10 text-[15px] font-['DM_Sans'] text-[#1C3A4A] bg-white appearance-none transition-colors focus:outline-none focus:border-[#0D5C6E] ${
-                  errors.category ? 'border-[#C0544A]' : 'border-[#E8DFC8]'
+                className={`w-full h-12 rounded-[12px] border-2 px-4 pr-10 text-[15px] font-body text-text-dark bg-white appearance-none transition-colors focus:outline-none focus:border-teal-800 ${
+                  errors.category ? 'border-error' : 'border-cream-700'
                 }`}
               >
                 <option value="">Select a category</option>
@@ -266,9 +266,9 @@ function ProviderSignupForm() {
                   <option key={c} value={c}>{c}</option>
                 ))}
               </select>
-              <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#0D5C6E] text-xs">▾</span>
+              <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-teal-800 text-xs">▾</span>
             </div>
-            {errors.category && <p className="text-[12px] text-[#C0544A]">{errors.category}</p>}
+            {errors.category && <p className="text-[12px] text-error">{errors.category}</p>}
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -297,21 +297,21 @@ function ProviderSignupForm() {
               type="checkbox"
               checked={form.agreeToTerms}
               onChange={(e) => set('agreeToTerms', e.target.checked)}
-              className="mt-0.5 w-4 h-4 flex-shrink-0 accent-[#0D5C6E] cursor-pointer"
+              className="mt-0.5 w-4 h-4 flex-shrink-0 accent-teal-800 cursor-pointer"
             />
-            <label htmlFor="terms" className="text-[13px] text-[#3A5A6A] leading-relaxed cursor-pointer">
+            <label htmlFor="terms" className="text-[13px] text-text-mid leading-relaxed cursor-pointer">
               I agree to Little Sound&apos;s{' '}
-              <Link href="/terms" className="text-[#1A7A8A] underline underline-offset-2">Terms of Service</Link>
+              <Link href="/terms" className="text-teal-700 underline underline-offset-2">Terms of Service</Link>
               {' '}and{' '}
-              <Link href="/privacy" className="text-[#1A7A8A] underline underline-offset-2">Privacy Policy</Link>
+              <Link href="/privacy" className="text-teal-700 underline underline-offset-2">Privacy Policy</Link>
             </label>
           </div>
           {errors.agreeToTerms && (
-            <p className="text-[12px] text-[#C0544A] -mt-3">{errors.agreeToTerms}</p>
+            <p className="text-[12px] text-error -mt-3">{errors.agreeToTerms}</p>
           )}
 
           {submitError && (
-            <p className="text-[13px] text-[#C0544A] bg-[#C0544A]/8 border border-[#C0544A]/20 rounded-[10px] px-4 py-3">
+            <p className="text-[13px] text-error bg-error/8 border border-error/20 rounded-[10px] px-4 py-3">
               {submitError}
             </p>
           )}
@@ -319,19 +319,19 @@ function ProviderSignupForm() {
           <button
             type="submit"
             disabled={submitting}
-            className={`h-[52px] rounded-full bg-[#0D5C6E] text-white font-semibold text-[15px] tracking-[0.01em] transition-all duration-200 mt-1 ${
+            className={`h-[52px] rounded-full bg-teal-800 text-white font-semibold text-[15px] tracking-[0.01em] transition-all duration-200 mt-1 ${
               submitting
                 ? 'opacity-60 cursor-not-allowed'
-                : 'hover:bg-[#1A7A8A] hover:-translate-y-0.5'
+                : 'hover:bg-teal-700 hover:-translate-y-0.5'
             }`}
           >
             {submitting ? 'Creating your account…' : 'Continue to create your listing →'}
           </button>
         </form>
 
-        <p className="text-center text-[13px] text-[#7A9AAA] mt-6">
+        <p className="text-center text-[13px] text-text-muted mt-6">
           Already have an account?{' '}
-          <Link href={loginHref} className="text-[#1A7A8A] underline underline-offset-2">
+          <Link href={loginHref} className="text-teal-700 underline underline-offset-2">
             Sign in
           </Link>
         </p>
@@ -340,8 +340,8 @@ function ProviderSignupForm() {
       {/* Trust bar */}
       <div className="flex flex-wrap gap-6 justify-center mt-8">
         {['Free to list', 'No upfront fees', 'Hundreds of programs listed'].map((item) => (
-          <span key={item} className="flex items-center gap-1.5 text-[12px] text-[#1A7A8A] font-medium">
-            <span className="text-[#C4A882] font-bold">✓</span>
+          <span key={item} className="flex items-center gap-1.5 text-[12px] text-teal-700 font-medium">
+            <span className="text-gold font-bold">✓</span>
             {item}
           </span>
         ))}
@@ -365,18 +365,18 @@ interface FieldProps {
 function Field({ label, type = 'text', value, onChange, error, placeholder, autoComplete }: FieldProps) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="text-[13px] font-medium text-[#0D5C6E]">{label}</label>
+      <label className="text-[13px] font-medium text-teal-800">{label}</label>
       <input
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         autoComplete={autoComplete}
-        className={`h-12 rounded-[12px] border-2 px-4 text-[15px] font-['DM_Sans'] text-[#1C3A4A] bg-white w-full transition-colors focus:outline-none focus:border-[#0D5C6E] ${
-          error ? 'border-[#C0544A]' : 'border-[#E8DFC8]'
+        className={`h-12 rounded-[12px] border-2 px-4 text-[15px] font-body text-text-dark bg-white w-full transition-colors focus:outline-none focus:border-teal-800 ${
+          error ? 'border-error' : 'border-cream-700'
         }`}
       />
-      {error && <p className="text-[12px] text-[#C0544A]">{error}</p>}
+      {error && <p className="text-[12px] text-error">{error}</p>}
     </div>
   );
 }

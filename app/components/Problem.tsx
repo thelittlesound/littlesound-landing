@@ -27,17 +27,17 @@ export default function Problem() {
       <div className="max-w-[1280px] mx-auto">
 
         {/* Eyebrow */}
-        <p className="text-xs font-bold uppercase tracking-widest text-[#1A7A8A] mb-4">
+        <p className="text-xs font-bold uppercase tracking-widest text-teal-700 mb-4">
           The Real Problem
         </p>
 
         {/* Headline */}
-        <h2 className="font-['Cormorant_Garamond'] text-[clamp(34px,4vw,52px)] font-light leading-[1.15] tracking-tight text-[#1C3A4A] mb-4 max-w-[640px]">
+        <h2 className="font-display text-[clamp(34px,4vw,52px)] font-light leading-[1.15] tracking-tight text-text-dark mb-4 max-w-[640px]">
           It shouldn't take<br />
-          <em className="italic text-[#1A7A8A]">this long.</em>
+          <em className="italic text-teal-700">this long.</em>
         </h2>
 
-        <p className="text-[17px] text-[#3A5A6A] leading-relaxed max-w-[520px] mb-14">
+        <p className="text-[17px] text-text-mid leading-relaxed max-w-[520px] mb-14">
           6 websites. 14 tabs. 3 group chats. And you still don't know if there's a spot left.
         </p>
 
@@ -46,22 +46,22 @@ export default function Problem() {
           {problems.map((p) => (
             <div
               key={p.title}
-              className="bg-[#F5EFE0] border border-[#E8DFC8] rounded-[20px] p-8 relative overflow-hidden"
+              className="bg-cream-500 border border-cream-700 rounded-[20px] p-8 relative overflow-hidden"
             >
               {/* Top accent bar */}
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#1A7A8A] to-[#2A9AAA]" />
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-teal-700 to-teal-600" />
 
               <IconChip name={p.icon} className="mb-5" />
 
-              <h3 className="font-['Cormorant_Garamond'] text-[19px] font-medium text-[#1C3A4A] mb-3">
+              <h3 className="font-display text-[19px] font-medium text-text-dark mb-3">
                 {p.title}
               </h3>
 
-              <p className="text-[14px] leading-[1.8] text-[#3A5A6A]">
+              <p className="text-[14px] leading-[1.8] text-text-mid">
                 {p.body}
               </p>
 
-              <p className="mt-4 pt-4 border-t border-[#E8DFC8] text-[13px] italic text-[#1A7A8A] font-['Cormorant_Garamond']">
+              <p className="mt-4 pt-4 border-t border-cream-700 text-[13px] italic text-teal-700 font-display">
                 {p.realTalk}
               </p>
             </div>

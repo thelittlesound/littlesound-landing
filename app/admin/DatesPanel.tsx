@@ -199,24 +199,24 @@ export default function DatesPanel({ onToast }: { onToast: (msg: string, ok: boo
     );
   }
 
-  const input = 'w-full border border-[#E8DFC8] rounded-lg px-2.5 py-1.5 text-sm outline-none focus:border-[#0D5C6E] bg-white';
+  const input = 'w-full border border-cream-700 rounded-lg px-2.5 py-1.5 text-sm outline-none focus:border-teal-800 bg-white';
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-6 flex flex-col md:flex-row gap-5">
       {/* ── Listing picker ─────────────────────────────────────────────── */}
       <div className="w-full md:w-80 shrink-0">
         {tableMissing && (
-          <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-3 text-sm text-red-700">
+          <div className="bg-error-light border border-error/30 rounded-xl px-4 py-3 mb-3 text-sm text-error-dark">
             The dates table doesn&apos;t exist yet. Run <code>supabase/activity-dates.sql</code> in Supabase.
           </div>
         )}
-        <div className="bg-white rounded-2xl border border-[#E8DFC8] px-4 py-3 mb-3">
-          <p className="text-sm text-[#1C3A4A]">
+        <div className="bg-white rounded-2xl border border-cream-700 px-4 py-3 mb-3">
+          <p className="text-sm text-text-dark">
             <strong>{withDates}</strong> of {listings.length} listings have dates
           </p>
-          <div className="h-1.5 bg-[#F5EFE0] rounded-full mt-2 overflow-hidden">
+          <div className="h-1.5 bg-cream-500 rounded-full mt-2 overflow-hidden">
             <div
-              className="h-full bg-[#0D5C6E] rounded-full"
+              className="h-full bg-teal-800 rounded-full"
               style={{ width: `${listings.length ? (withDates / listings.length) * 100 : 0}%` }}
             />
           </div>
@@ -227,7 +227,7 @@ export default function DatesPanel({ onToast }: { onToast: (msg: string, ok: boo
               key={k}
               onClick={() => setFilter(k)}
               className={`px-3 py-1 rounded-full text-xs transition-colors ${
-                filter === k ? 'bg-[#0D5C6E] text-white' : 'bg-white text-[#0D5C6E] border border-[#C5D8E8] hover:bg-[#C5D8E8]/20'
+                filter === k ? 'bg-teal-800 text-white' : 'bg-white text-teal-800 border border-blue-grey-300 hover:bg-blue-grey-300/20'
               }`}
             >
               {label}
@@ -239,10 +239,10 @@ export default function DatesPanel({ onToast }: { onToast: (msg: string, ok: boo
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search listings"
-          className="w-full border border-[#E8DFC8] rounded-full px-4 py-2 text-sm outline-none focus:border-[#0D5C6E] mb-2 bg-white"
+          className="w-full border border-cream-700 rounded-full px-4 py-2 text-sm outline-none focus:border-teal-800 mb-2 bg-white"
         />
         {loadingList ? (
-          <p className="text-[#7A9AAA] text-sm py-6 text-center">Loading…</p>
+          <p className="text-text-muted text-sm py-6 text-center">Loading…</p>
         ) : (
           <div className="space-y-1.5 max-h-[60vh] overflow-y-auto pr-1">
             {visible.map((l) => (
@@ -250,17 +250,17 @@ export default function DatesPanel({ onToast }: { onToast: (msg: string, ok: boo
                 key={l.activityId}
                 onClick={() => open(l)}
                 className={`w-full text-left bg-white rounded-xl border px-3 py-2.5 transition-colors ${
-                  selectedId === l.activityId ? 'border-[#0D5C6E]' : 'border-[#E8DFC8] hover:border-[#C5D8E8]'
+                  selectedId === l.activityId ? 'border-teal-800' : 'border-cream-700 hover:border-blue-grey-300'
                 }`}
               >
-                <p className="text-sm font-semibold text-[#1C3A4A] truncate">{l.title}</p>
-                <p className="text-xs text-[#7A9AAA] truncate">
+                <p className="text-sm font-semibold text-text-dark truncate">{l.title}</p>
+                <p className="text-xs text-text-muted truncate">
                   {l.business}
                   {l.dateCount > 0 ? ` · ${l.dateCount} date${l.dateCount === 1 ? '' : 's'}` : ''}
                 </p>
               </button>
             ))}
-            {visible.length === 0 && <p className="text-[#7A9AAA] text-sm py-6 text-center">Nothing here.</p>}
+            {visible.length === 0 && <p className="text-text-muted text-sm py-6 text-center">Nothing here.</p>}
           </div>
         )}
       </div>
@@ -268,26 +268,26 @@ export default function DatesPanel({ onToast }: { onToast: (msg: string, ok: boo
       {/* ── Editor ─────────────────────────────────────────────────────── */}
       <div className="flex-1 min-w-0">
         {!selected ? (
-          <div className="bg-white rounded-2xl border border-[#E8DFC8] p-8 text-center">
-            <p className="text-[#7A9AAA] text-sm">Pick a listing from the list to add or check its dates.</p>
+          <div className="bg-white rounded-2xl border border-cream-700 p-8 text-center">
+            <p className="text-text-muted text-sm">Pick a listing from the list to add or check its dates.</p>
           </div>
         ) : (
-          <div className="bg-white rounded-2xl border border-[#E8DFC8] p-5">
+          <div className="bg-white rounded-2xl border border-cream-700 p-5">
             <div className="mb-4">
-              <h2 className="font-['Cormorant_Garamond'] text-2xl font-light text-[#0D5C6E] leading-tight">{selected.title}</h2>
-              <p className="text-sm text-[#7A9AAA]">
+              <h2 className="font-display text-2xl font-light text-teal-800 leading-tight">{selected.title}</h2>
+              <p className="text-sm text-text-muted">
                 {selected.business}
                 {selected.website && (
                   <>
                     {' · '}
-                    <a href={selected.website} target="_blank" rel="noopener noreferrer" className="text-[#1A7A8A] underline">
+                    <a href={selected.website} target="_blank" rel="noopener noreferrer" className="text-teal-700 underline">
                       open their site ↗
                     </a>
                   </>
                 )}
               </p>
               {meta.approvedAt && savedRows.length > 0 && (
-                <p className="text-xs text-[#B0C8D0] mt-1">
+                <p className="text-xs text-blue-grey-300 mt-1">
                   {savedRows.length} saved · last approved {new Date(meta.approvedAt).toLocaleDateString()}
                   {meta.approvedBy ? ` by ${meta.approvedBy}` : ''}
                 </p>
@@ -295,8 +295,8 @@ export default function DatesPanel({ onToast }: { onToast: (msg: string, ok: boo
             </div>
 
             {/* Paste + extract */}
-            <div className="bg-[#F5EFE0] rounded-xl p-4 mb-4">
-              <p className="text-xs text-[#7A9AAA] uppercase tracking-wider mb-2">1 · Paste the schedule from their site</p>
+            <div className="bg-cream-500 rounded-xl p-4 mb-4">
+              <p className="text-xs text-text-muted uppercase tracking-wider mb-2">1 · Paste the schedule from their site</p>
               <input
                 value={sourceUrl}
                 onChange={(e) => setSourceUrl(e.target.value)}
@@ -311,45 +311,45 @@ export default function DatesPanel({ onToast }: { onToast: (msg: string, ok: boo
                 className={`${input} resize-y mb-2`}
               />
               {!aiConfigured && (
-                <p className="text-xs text-amber-800 mb-2">
+                <p className="text-xs text-gold-deep mb-2">
                   AI extraction isn&apos;t set up yet (no ANTHROPIC_API_KEY in Vercel). You can still add dates by hand below.
                 </p>
               )}
               <button
                 onClick={extract}
                 disabled={!aiConfigured || extracting || !pasted.trim()}
-                className="bg-[#0D5C6E] text-white rounded-full px-5 py-2 text-sm font-semibold hover:bg-[#1A7A8A] transition-colors disabled:opacity-50"
+                className="bg-teal-800 text-white rounded-full px-5 py-2 text-sm font-semibold hover:bg-teal-700 transition-colors disabled:opacity-50"
               >
                 {extracting ? 'Reading the page…' : 'Extract dates with AI'}
               </button>
               {aiConfigured && !pasted.trim() && !extracting && (
-                <p className="text-xs text-[#7A9AAA] mt-2">Paste the schedule text above to enable the button.</p>
+                <p className="text-xs text-text-muted mt-2">Paste the schedule text above to enable the button.</p>
               )}
             </div>
 
             {warnings.length > 0 && (
-              <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-4">
-                <p className="text-xs font-semibold text-amber-800 uppercase tracking-wider mb-1">Double-check</p>
+              <div className="bg-warning-light border border-warning/40 rounded-xl px-4 py-3 mb-4">
+                <p className="text-xs font-semibold text-gold-deep uppercase tracking-wider mb-1">Double-check</p>
                 <ul className="list-disc pl-4 space-y-0.5">
                   {warnings.map((w, i) => (
-                    <li key={i} className="text-sm text-amber-900">{w}</li>
+                    <li key={i} className="text-sm text-gold-deep">{w}</li>
                   ))}
                 </ul>
               </div>
             )}
 
             {/* Review rows */}
-            <p className="text-xs text-[#7A9AAA] uppercase tracking-wider mb-2">2 · Review — only saved dates reach families</p>
+            <p className="text-xs text-text-muted uppercase tracking-wider mb-2">2 · Review — only saved dates reach families</p>
             {loadingDates ? (
-              <p className="text-[#7A9AAA] text-sm py-4">Loading…</p>
+              <p className="text-text-muted text-sm py-4">Loading…</p>
             ) : rows.length === 0 ? (
-              <p className="text-sm text-[#7A9AAA] mb-3">No dates yet.</p>
+              <p className="text-sm text-text-muted mb-3">No dates yet.</p>
             ) : (
               <div className="space-y-3 mb-3">
                 {rows.map((r) => {
                   const isReg = r.kind === 'registration';
                   return (
-                    <div key={r.key} className="border border-[#E8DFC8] rounded-xl p-3">
+                    <div key={r.key} className="border border-cream-700 rounded-xl p-3">
                       <div className="flex flex-wrap gap-2 mb-2">
                         <select
                           value={r.kind}
@@ -367,46 +367,46 @@ export default function DatesPanel({ onToast }: { onToast: (msg: string, ok: boo
                         />
                         <button
                           onClick={() => setRows((prev) => prev.filter((x) => x.key !== r.key))}
-                          className="text-xs text-red-600 hover:underline px-1"
+                          className="text-xs text-error-dark hover:underline px-1"
                         >
                           Remove
                         </button>
                       </div>
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
-                        <label className="text-[11px] text-[#7A9AAA]">
+                        <label className="text-[11px] text-text-muted">
                           {isReg ? 'Opens' : 'Starts'}
                           <input type="date" value={r.start_date} onChange={(e) => update(r.key, { start_date: e.target.value })} className={input} />
                         </label>
-                        <label className="text-[11px] text-[#7A9AAA]">
+                        <label className="text-[11px] text-text-muted">
                           {isReg ? 'Open time' : 'Start time'}
                           <input type="time" value={r.start_time} onChange={(e) => update(r.key, { start_time: e.target.value })} className={input} />
                         </label>
-                        <label className="text-[11px] text-[#7A9AAA]">
+                        <label className="text-[11px] text-text-muted">
                           {isReg ? 'Closes' : 'Ends'}
                           <input type="date" value={r.end_date} onChange={(e) => update(r.key, { end_date: e.target.value })} className={input} />
                         </label>
-                        <label className="text-[11px] text-[#7A9AAA]">
+                        <label className="text-[11px] text-text-muted">
                           {isReg ? 'Close time' : 'End time'}
                           <input type="time" value={r.end_time} onChange={(e) => update(r.key, { end_time: e.target.value })} className={input} />
                         </label>
                       </div>
                       {!isReg && (
                         <div className="flex items-center gap-1 mb-2">
-                          <span className="text-[11px] text-[#7A9AAA] mr-1">Meets</span>
+                          <span className="text-[11px] text-text-muted mr-1">Meets</span>
                           {WEEKDAYS.map((d) => (
                             <button
                               key={d}
                               onClick={() => toggleDay(r.key, d)}
                               className={`w-8 h-7 rounded-md text-xs font-medium border ${
                                 r.days_of_week.includes(d)
-                                  ? 'bg-[#0D5C6E] border-[#0D5C6E] text-white'
-                                  : 'bg-white border-[#E8DFC8] text-[#3A5A6A]'
+                                  ? 'bg-teal-800 border-teal-800 text-white'
+                                  : 'bg-white border-cream-700 text-text-mid'
                               }`}
                             >
                               {DAY_LABEL[d]}
                             </button>
                           ))}
-                          <span className="text-[11px] text-[#B0C8D0] ml-1">(weekly classes: leave dates blank if it runs year-round)</span>
+                          <span className="text-[11px] text-blue-grey-300 ml-1">(weekly classes: leave dates blank if it runs year-round)</span>
                         </div>
                       )}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -414,7 +414,7 @@ export default function DatesPanel({ onToast }: { onToast: (msg: string, ok: boo
                         <input value={r.notes} onChange={(e) => update(r.key, { notes: e.target.value })} placeholder="Notes for parents (optional)" className={input} />
                       </div>
                       {r.source_excerpt && (
-                        <p className="text-xs text-[#7A9AAA] italic mt-2">From the page: “{r.source_excerpt}”</p>
+                        <p className="text-xs text-text-muted italic mt-2">From the page: “{r.source_excerpt}”</p>
                       )}
                     </div>
                   );
@@ -423,42 +423,42 @@ export default function DatesPanel({ onToast }: { onToast: (msg: string, ok: boo
             )}
 
             <div className="flex flex-wrap gap-2 mb-4">
-              <button onClick={() => setRows((p) => [...p, emptyRow('registration')])} className="text-sm text-[#1A7A8A] border border-[#C5D8E8] rounded-full px-3 py-1 hover:bg-[#C5D8E8]/20">
+              <button onClick={() => setRows((p) => [...p, emptyRow('registration')])} className="text-sm text-teal-700 border border-blue-grey-300 rounded-full px-3 py-1 hover:bg-blue-grey-300/20">
                 + Registration window
               </button>
-              <button onClick={() => setRows((p) => [...p, emptyRow('session')])} className="text-sm text-[#1A7A8A] border border-[#C5D8E8] rounded-full px-3 py-1 hover:bg-[#C5D8E8]/20">
+              <button onClick={() => setRows((p) => [...p, emptyRow('session')])} className="text-sm text-teal-700 border border-blue-grey-300 rounded-full px-3 py-1 hover:bg-blue-grey-300/20">
                 + Session
               </button>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2 pt-4 border-t border-[#E8DFC8]">
+            <div className="flex flex-wrap items-center gap-2 pt-4 border-t border-cream-700">
               <button
                 onClick={() => save(rows)}
                 disabled={saving || !dirty}
-                className="bg-[#0D5C6E] text-white rounded-full px-5 py-2 text-sm font-semibold hover:bg-[#1A7A8A] transition-colors disabled:opacity-50"
+                className="bg-teal-800 text-white rounded-full px-5 py-2 text-sm font-semibold hover:bg-teal-700 transition-colors disabled:opacity-50"
               >
                 {saving ? 'Saving…' : `Save ${rows.length} date${rows.length === 1 ? '' : 's'}`}
               </button>
               {dirty && (
                 <button
                   onClick={() => { setRows(savedRows.map((r) => ({ ...r }))); setWarnings([]); }}
-                  className="text-sm text-[#7A9AAA] hover:text-[#0D5C6E] px-2"
+                  className="text-sm text-text-muted hover:text-teal-800 px-2"
                 >
                   Discard changes
                 </button>
               )}
               {savedRows.length > 0 && (
                 confirmClear ? (
-                  <button onClick={() => save([])} disabled={saving} className="text-sm text-red-600 font-semibold px-2 ml-auto">
+                  <button onClick={() => save([])} disabled={saving} className="text-sm text-error-dark font-semibold px-2 ml-auto">
                     Confirm: remove all {savedRows.length} saved dates
                   </button>
                 ) : (
-                  <button onClick={() => setConfirmClear(true)} className="text-sm text-red-600 hover:underline px-2 ml-auto">
+                  <button onClick={() => setConfirmClear(true)} className="text-sm text-error-dark hover:underline px-2 ml-auto">
                     Clear all dates
                   </button>
                 )
               )}
-              <p className="w-full text-xs text-[#B0C8D0] mt-1">Saving replaces this listing&apos;s dates with exactly what&apos;s shown above.</p>
+              <p className="w-full text-xs text-blue-grey-300 mt-1">Saving replaces this listing&apos;s dates with exactly what&apos;s shown above.</p>
             </div>
           </div>
         )}

@@ -71,25 +71,25 @@ export default function ProviderResetPasswordPage() {
 
   if (linkStatus === 'checking') {
     return (
-      <main className="min-h-screen bg-[#F5EFE0] flex items-center justify-center px-4 py-16 pt-28">
-        <p className="text-[#7A9AAA] text-[14px]">Checking your link…</p>
+      <main className="min-h-screen bg-cream-500 flex items-center justify-center px-4 py-16 pt-28">
+        <p className="text-text-muted text-[14px]">Checking your link…</p>
       </main>
     );
   }
 
   if (linkStatus === 'invalid') {
     return (
-      <main className="min-h-screen bg-[#F5EFE0] flex flex-col items-center px-4 py-16 pt-28">
+      <main className="min-h-screen bg-cream-500 flex flex-col items-center px-4 py-16 pt-28">
         <div className="bg-white rounded-[24px] shadow-[0_4px_32px_rgba(10,74,90,0.09)] w-full max-w-[420px] p-8 md:p-10 text-center">
-          <h1 className="font-['Cormorant_Garamond'] text-[28px] font-light text-[#1C3A4A] mb-3">
+          <h1 className="font-display text-[28px] font-light text-text-dark mb-3">
             Link expired or invalid
           </h1>
-          <p className="text-[#3A5A6A] text-[15px] leading-relaxed mb-6">
+          <p className="text-text-mid text-[15px] leading-relaxed mb-6">
             This password reset link is no longer valid. Request a new one below.
           </p>
           <Link
             href="/providers/forgot-password"
-            className="inline-flex h-12 items-center justify-center rounded-full bg-[#0D5C6E] text-white font-semibold text-[15px] px-8 hover:bg-[#1A7A8A] transition-colors"
+            className="inline-flex h-12 items-center justify-center rounded-full bg-teal-800 text-white font-semibold text-[15px] px-8 hover:bg-teal-700 transition-colors"
           >
             Request a new link
           </Link>
@@ -100,12 +100,12 @@ export default function ProviderResetPasswordPage() {
 
   if (done) {
     return (
-      <main className="min-h-screen bg-[#F5EFE0] flex flex-col items-center px-4 py-16 pt-28">
+      <main className="min-h-screen bg-cream-500 flex flex-col items-center px-4 py-16 pt-28">
         <div className="bg-white rounded-[24px] shadow-[0_4px_32px_rgba(10,74,90,0.09)] w-full max-w-[420px] p-8 md:p-10 text-center">
-          <h1 className="font-['Cormorant_Garamond'] text-[28px] font-light text-[#1C3A4A] mb-3">
+          <h1 className="font-display text-[28px] font-light text-text-dark mb-3">
             Password updated
           </h1>
-          <p className="text-[#3A5A6A] text-[15px] leading-relaxed">
+          <p className="text-text-mid text-[15px] leading-relaxed">
             Taking you to your dashboard…
           </p>
         </div>
@@ -114,44 +114,44 @@ export default function ProviderResetPasswordPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#F5EFE0] flex flex-col items-center px-4 py-16 pt-28">
+    <main className="min-h-screen bg-cream-500 flex flex-col items-center px-4 py-16 pt-28">
       <div className="text-center mb-10">
-        <div className="inline-flex items-center gap-2 bg-[#0D5C6E]/8 border border-[#0D5C6E]/15 rounded-full px-4 py-1.5 mb-6">
-          <span className="text-xs font-bold uppercase tracking-widest text-[#0D5C6E]">Provider Portal</span>
+        <div className="inline-flex items-center gap-2 bg-teal-800/8 border border-teal-800/15 rounded-full px-4 py-1.5 mb-6">
+          <span className="text-xs font-bold uppercase tracking-widest text-teal-800">Provider Portal</span>
         </div>
-        <h1 className="font-['Cormorant_Garamond'] text-[clamp(32px,5vw,44px)] font-light leading-[1.1] tracking-tight text-[#1C3A4A] mb-4">
+        <h1 className="font-display text-[clamp(32px,5vw,44px)] font-light leading-[1.1] tracking-tight text-text-dark mb-4">
           Set a new<br />
-          <em className="italic text-[#0D5C6E]">password.</em>
+          <em className="italic text-teal-800">password.</em>
         </h1>
       </div>
 
       <div className="bg-white rounded-[24px] shadow-[0_4px_32px_rgba(10,74,90,0.09)] w-full max-w-[420px] p-8 md:p-10">
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           <div className="flex flex-col gap-1.5">
-            <label className="text-[13px] font-medium text-[#0D5C6E]">New password</label>
+            <label className="text-[13px] font-medium text-teal-800">New password</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="At least 8 characters"
               autoComplete="new-password"
-              className="h-12 rounded-[12px] border-2 border-[#E8DFC8] px-4 text-[15px] font-['DM_Sans'] text-[#1C3A4A] bg-white w-full transition-colors focus:outline-none focus:border-[#0D5C6E]"
+              className="h-12 rounded-[12px] border-2 border-cream-700 px-4 text-[15px] font-body text-text-dark bg-white w-full transition-colors focus:outline-none focus:border-teal-800"
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-[13px] font-medium text-[#0D5C6E]">Confirm new password</label>
+            <label className="text-[13px] font-medium text-teal-800">Confirm new password</label>
             <input
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               autoComplete="new-password"
-              className="h-12 rounded-[12px] border-2 border-[#E8DFC8] px-4 text-[15px] font-['DM_Sans'] text-[#1C3A4A] bg-white w-full transition-colors focus:outline-none focus:border-[#0D5C6E]"
+              className="h-12 rounded-[12px] border-2 border-cream-700 px-4 text-[15px] font-body text-text-dark bg-white w-full transition-colors focus:outline-none focus:border-teal-800"
             />
           </div>
 
           {error && (
-            <p className="text-[13px] text-[#C0544A] bg-[#C0544A]/8 border border-[#C0544A]/20 rounded-[10px] px-4 py-3">
+            <p className="text-[13px] text-error bg-error/8 border border-error/20 rounded-[10px] px-4 py-3">
               {error}
             </p>
           )}
@@ -159,8 +159,8 @@ export default function ProviderResetPasswordPage() {
           <button
             type="submit"
             disabled={submitting}
-            className={`h-[52px] rounded-full bg-[#0D5C6E] text-white font-semibold text-[15px] tracking-[0.01em] transition-all duration-200 mt-1 ${
-              submitting ? 'opacity-60 cursor-not-allowed' : 'hover:bg-[#1A7A8A] hover:-translate-y-0.5'
+            className={`h-[52px] rounded-full bg-teal-800 text-white font-semibold text-[15px] tracking-[0.01em] transition-all duration-200 mt-1 ${
+              submitting ? 'opacity-60 cursor-not-allowed' : 'hover:bg-teal-700 hover:-translate-y-0.5'
             }`}
           >
             {submitting ? 'Updating…' : 'Update password'}

@@ -138,22 +138,22 @@ function ActivityCard({
           </svg>
         </div>
         <div className="flex flex-col gap-[3px] min-w-0">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.07em] text-[#1A7A8A]">{kindLine}</span>
-          <h3 className="font-['Cormorant_Garamond'] text-[21px] font-medium leading-[1.15] text-[#1C3A4A]">{a.title}</h3>
-          <span className="text-[13px] text-[#4E6B78]">{a.provider}</span>
+          <span className="text-[11px] font-semibold uppercase tracking-[0.07em] text-teal-700">{kindLine}</span>
+          <h3 className="font-display text-[21px] font-medium leading-[1.15] text-text-dark">{a.title}</h3>
+          <span className="text-[13px] text-text-mid">{a.provider}</span>
         </div>
       </div>
-      <dl className="grid grid-cols-2 gap-x-3.5 gap-y-2.5 px-3.5 py-3 rounded-[14px] bg-[#F8F4EA]">
+      <dl className="grid grid-cols-2 gap-x-3.5 gap-y-2.5 px-3.5 py-3 rounded-[14px] bg-cream-300">
         {facts.map((f) => (
           <div key={f.k} className="flex flex-col gap-0.5 min-w-0">
-            <dt className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#5F7A86]">{f.k}</dt>
-            <dd className={`text-[13.5px] leading-snug ${f.warn ? 'text-[#8A5A1F]' : f.muted ? 'text-[#5F7A86]' : 'text-[#1C3A4A]'}`}>{f.v}</dd>
+            <dt className="text-[11px] font-semibold uppercase tracking-[0.06em] text-text-mid">{f.k}</dt>
+            <dd className={`text-[13.5px] leading-snug ${f.warn ? 'text-gold-deep' : f.muted ? 'text-text-mid' : 'text-text-dark'}`}>{f.v}</dd>
           </div>
         ))}
       </dl>
       {a.serves && (
-        <p className="text-[12.5px] leading-snug text-[#4E6B78] -mt-1">
-          <span className="font-semibold text-[#2E4A58]">Who can join:</span> {a.serves}
+        <p className="text-[12.5px] leading-snug text-text-mid -mt-1">
+          <span className="font-semibold text-text-dark">Who can join:</span> {a.serves}
         </p>
       )}
       <div className="flex gap-2 mt-auto">
@@ -161,8 +161,8 @@ function ActivityCard({
           type="button"
           onClick={() => onToggleSave(a)}
           aria-pressed={saved}
-          className={`flex-1 min-h-[44px] rounded-full text-[14px] font-semibold border-[1.5px] border-[#0D5C6E] transition-colors ${
-            saved ? 'bg-[#0D5C6E] text-white hover:bg-[#1A7A8A]' : 'bg-white text-[#0D5C6E] hover:bg-[#F5EFE0]'
+          className={`flex-1 min-h-[44px] rounded-full text-[14px] font-semibold border-[1.5px] border-teal-800 transition-colors ${
+            saved ? 'bg-teal-800 text-white hover:bg-teal-700' : 'bg-white text-teal-800 hover:bg-cream-500'
           }`}
         >
           {saved ? savedLabel : saveLabel}
@@ -171,7 +171,7 @@ function ActivityCard({
           href={a.website}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex-1 min-h-[44px] flex items-center justify-center rounded-full border-[1.5px] border-[#C5D8E8] text-[14px] font-medium text-[#0D5C6E] hover:border-[#0D5C6E] transition-colors"
+          className="flex-1 min-h-[44px] flex items-center justify-center rounded-full border-[1.5px] border-blue-grey-300 text-[14px] font-medium text-teal-800 hover:border-teal-800 transition-colors"
         >
           Their site
         </a>
@@ -579,14 +579,14 @@ export default function Discover() {
   const searchSummary = [catLabel, ...chips.map((c) => c.label)].filter(Boolean).join(' · ');
 
   return (
-    <main className="min-h-screen bg-[#F5EFE0]">
+    <main className="min-h-screen bg-cream-500">
 
       {saveNote && (
         <div
           role="status"
           aria-live="polite"
           className={`fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-6 sm:max-w-[400px] z-50 rounded-[16px] shadow-[0_12px_32px_rgba(10,74,90,0.25)] px-5 py-4 flex items-start gap-3 ${
-            saveNote.ok ? 'bg-[#0D5C6E] text-white' : 'bg-[#C0544A] text-white'
+            saveNote.ok ? 'bg-teal-800 text-white' : 'bg-error text-white'
           }`}
         >
           <p className="text-[14px] leading-snug flex-1">
@@ -604,16 +604,16 @@ export default function Discover() {
 
       {/* Slim bar once the hero has scrolled away */}
       {heroGone && (
-        <div className="fixed top-16 left-0 right-0 z-20 bg-[#0D5C6E]/95 backdrop-blur-sm shadow-[0_4px_16px_rgba(0,0,0,0.12)] px-4 md:px-10">
+        <div className="fixed top-16 left-0 right-0 z-20 bg-teal-800/95 backdrop-blur-sm shadow-[0_4px_16px_rgba(0,0,0,0.12)] px-4 md:px-10">
           <div className="max-w-[1200px] mx-auto min-h-[52px] flex items-center justify-between gap-3">
             <p className="text-[14px] text-white truncate">
               <span className="font-semibold">{results.length}</span> {results.length === 1 ? 'program' : 'programs'}
-              {searchSummary ? <span className="text-[#C5D8E8]"> · {searchSummary}</span> : null}
+              {searchSummary ? <span className="text-blue-grey-300"> · {searchSummary}</span> : null}
             </p>
             <button
               type="button"
               onClick={() => { window.scrollTo({ top: 0, behavior: 'smooth' }); setTimeout(() => searchRef.current?.focus(), 400); }}
-              className="shrink-0 min-h-[40px] px-4 rounded-full bg-white text-[#0D5C6E] text-[14px] font-semibold"
+              className="shrink-0 min-h-[40px] px-4 rounded-full bg-white text-teal-800 text-[14px] font-semibold"
             >
               Search
             </button>
@@ -622,16 +622,16 @@ export default function Discover() {
       )}
 
       {/* Hero: who it's for + the search */}
-      <section ref={heroRef} className="bg-[#0D5C6E] px-4 md:px-10 pt-24 pb-8">
+      <section ref={heroRef} className="bg-teal-800 px-4 md:px-10 pt-24 pb-8">
         <div className="max-w-[1200px] mx-auto flex flex-wrap items-end justify-between gap-x-10 gap-y-6">
           <div className="flex flex-col gap-3.5 flex-[1_1_380px] min-w-0">
-            <h1 className="font-['Cormorant_Garamond'] font-light text-[clamp(34px,4.4vw,50px)] leading-[1.05] text-white">
-              {forKid ? <>What&rsquo;s next for <em className="italic text-[#C4A882]">{forKid.name}?</em></> : <>Everything for your kids, <em className="italic text-[#C4A882]">in one place.</em></>}
+            <h1 className="font-display font-light text-[clamp(34px,4.4vw,50px)] leading-[1.05] text-white">
+              {forKid ? <>What&rsquo;s next for <em className="italic text-gold">{forKid.name}?</em></> : <>Everything for your kids, <em className="italic text-gold">in one place.</em></>}
             </h1>
             {kids.length > 0 && (
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2 flex-wrap" role="group" aria-label="Browsing for">
-                  <span className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#C5D8E8] mr-1">Browsing for</span>
+                  <span className="text-[12px] font-semibold uppercase tracking-[0.08em] text-blue-grey-300 mr-1">Browsing for</span>
                   {[null, ...kids].map((k) => {
                     const on = (k?.id ?? null) === (forKid?.id ?? null);
                     return (
@@ -641,7 +641,7 @@ export default function Discover() {
                         onClick={() => chooseKid(k?.id ?? null)}
                         aria-pressed={on}
                         className={`min-h-[40px] px-4 rounded-full text-[14px] font-medium border-[1.5px] transition-colors ${
-                          on ? 'bg-white text-[#0D5C6E] border-white' : 'bg-transparent text-white border-white/35 hover:border-white'
+                          on ? 'bg-white text-teal-800 border-white' : 'bg-transparent text-white border-white/35 hover:border-white'
                         }`}
                       >
                         {k ? `${k.name}${k.age != null ? ` · ${k.age}` : ''}` : 'Everyone'}
@@ -650,7 +650,7 @@ export default function Discover() {
                   })}
                 </div>
                 {forKid && category === 'All' && !text && (
-                  <p className="text-[13px] text-[#C5D8E8]">
+                  <p className="text-[13px] text-blue-grey-300">
                     {forKid.interests.length > 0 && useInterests ? (
                       <>
                         Matching {forKid.name}&rsquo;s interests{forKid.age != null ? `, age ${forKid.age}` : ''}.{' '}
@@ -687,7 +687,7 @@ export default function Discover() {
       </section>
 
       {/* Category tiles: one row on desktop (2 lines), two rows that swipe on a phone */}
-      <section className="px-4 md:px-10 pt-5 pb-1 border-b border-[#E3DAC5]">
+      <section className="px-4 md:px-10 pt-5 pb-1 border-b border-cream-700">
         <div
           ref={railRef}
           className="max-w-[1200px] mx-auto grid grid-flow-col grid-rows-2 auto-cols-[minmax(160px,1fr)] gap-2.5 overflow-x-auto pb-4 scrollbar-hide"
@@ -704,7 +704,7 @@ export default function Discover() {
                 onClick={() => chooseCategory(on ? 'All' : c.name)}
                 aria-pressed={on}
                 className={`min-h-[60px] px-3.5 py-2 rounded-[16px] border-[1.5px] flex items-center gap-2.5 text-left transition-colors ${
-                  on ? 'bg-[#0D5C6E] border-[#0D5C6E] text-white' : 'bg-white border-[#E3DAC5] text-[#1C3A4A] hover:border-[#1A7A8A]'
+                  on ? 'bg-teal-800 border-teal-800 text-white' : 'bg-white border-cream-700 text-text-dark hover:border-teal-700'
                 }`}
               >
                 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={on ? '#F5EFE0' : '#A8865A'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="shrink-0">
@@ -712,7 +712,7 @@ export default function Discover() {
                 </svg>
                 <span className="flex flex-col gap-px min-w-0">
                   <span className="text-[14px] font-semibold leading-tight">{c.label}</span>
-                  <span className={`text-[12px] leading-tight ${on ? 'text-[#D6E6EC]' : 'text-[#4E6B78]'}`}>
+                  <span className={`text-[12px] leading-tight ${on ? 'text-teal-100' : 'text-text-mid'}`}>
                     {n} {n === 1 ? 'program' : 'programs'}
                   </span>
                 </span>
@@ -727,17 +727,17 @@ export default function Discover() {
 
           <div className="flex flex-col gap-1">
             {category !== 'All' && (
-              <button type="button" onClick={() => chooseCategory('All')} className="self-start min-h-[32px] text-[13px] font-semibold text-[#1A7A8A] hover:text-[#0D5C6E]">
+              <button type="button" onClick={() => chooseCategory('All')} className="self-start min-h-[32px] text-[13px] font-semibold text-teal-700 hover:text-teal-800">
                 ← All categories
               </button>
             )}
-            <h2 className="font-['Cormorant_Garamond'] font-normal text-[clamp(32px,3.6vw,42px)] leading-[1.1] text-[#1C3A4A]">{heading}</h2>
-            {subline && <p className="text-[15px] leading-relaxed text-[#4E6B78]">{subline}</p>}
+            <h2 className="font-display font-normal text-[clamp(32px,3.6vw,42px)] leading-[1.1] text-text-dark">{heading}</h2>
+            {subline && <p className="text-[15px] leading-relaxed text-text-mid">{subline}</p>}
           </div>
 
           {withKinds && kindDef && (
             <div className="flex flex-col gap-2.5">
-              <span className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#4E6B78]">
+              <span className="text-[12px] font-semibold uppercase tracking-[0.08em] text-text-mid">
                 {kindDef.question.replace('{name}', forKid?.name ?? 'your child')}
               </span>
               {kindDef.mode === 'tiles' ? (
@@ -752,14 +752,14 @@ export default function Discover() {
                         onClick={() => { setKind(on ? null : k.key); setAct(null); }}
                         aria-pressed={on}
                         className={`min-h-[88px] px-3.5 py-3 rounded-[18px] border-[1.5px] text-left flex flex-col gap-1.5 transition-colors ${
-                          on ? 'bg-[#0D5C6E] border-[#0D5C6E] text-white' : 'bg-white border-[#E3DAC5] text-[#1C3A4A] hover:border-[#1A7A8A]'
+                          on ? 'bg-teal-800 border-teal-800 text-white' : 'bg-white border-cream-700 text-text-dark hover:border-teal-700'
                         } ${n === 0 && !on ? 'opacity-60' : ''}`}
                       >
                         <span className="flex justify-between items-baseline gap-2 w-full">
-                          <span className="font-['Cormorant_Garamond'] text-[22px] font-medium leading-[1.1]">{k.label}</span>
-                          <span className={`shrink-0 text-[13px] font-semibold px-2 py-0.5 rounded-full ${on ? 'bg-white/20 text-white' : 'bg-[#F5EFE0] text-[#0D5C6E]'}`}>{n}</span>
+                          <span className="font-display text-[22px] font-medium leading-[1.1]">{k.label}</span>
+                          <span className={`shrink-0 text-[13px] font-semibold px-2 py-0.5 rounded-full ${on ? 'bg-white/20 text-white' : 'bg-cream-500 text-teal-800'}`}>{n}</span>
                         </span>
-                        <span className={`text-[13px] leading-snug ${on ? 'text-[#E3EEF1]' : 'text-[#4E6B78]'}`}>{k.ex}</span>
+                        <span className={`text-[13px] leading-snug ${on ? 'text-teal-100' : 'text-text-mid'}`}>{k.ex}</span>
                       </button>
                     );
                   })}
@@ -775,10 +775,10 @@ export default function Discover() {
                         onClick={() => { setKind(on ? null : k.key); setAct(null); }}
                         aria-pressed={on}
                         className={`shrink-0 min-h-[40px] px-4 rounded-full border-[1.5px] text-[14px] font-medium whitespace-nowrap transition-colors ${
-                          on ? 'bg-[#0D5C6E] border-[#0D5C6E] text-white' : 'bg-white border-[#DCD2BC] text-[#2E4A58] hover:border-[#1A7A8A]'
+                          on ? 'bg-teal-800 border-teal-800 text-white' : 'bg-white border-cream-700 text-text-dark hover:border-teal-700'
                         }`}
                       >
-                        {k.label} <span className={on ? 'text-white/80' : 'text-[#5F7A86]'}>{kindCounts[k.key] ?? 0}</span>
+                        {k.label} <span className={on ? 'text-white/80' : 'text-text-mid'}>{kindCounts[k.key] ?? 0}</span>
                       </button>
                     );
                   })}
@@ -798,7 +798,7 @@ export default function Discover() {
                     onClick={() => { setTheme(t); setAct(null); }}
                     aria-pressed={on}
                     className={`shrink-0 min-h-[40px] px-4 rounded-full border-[1.5px] text-[14px] font-medium whitespace-nowrap transition-colors ${
-                      on ? 'bg-[#0D5C6E] border-[#0D5C6E] text-white' : 'bg-white border-[#DCD2BC] text-[#2E4A58] hover:border-[#1A7A8A]'
+                      on ? 'bg-teal-800 border-teal-800 text-white' : 'bg-white border-cream-700 text-text-dark hover:border-teal-700'
                     }`}
                   >
                     {t === 'All' ? 'Any theme' : themeLabel(t)}
@@ -812,22 +812,22 @@ export default function Discover() {
             <button
               type="button"
               onClick={() => { const c = category; chooseCategory('Camps'); setTheme(c); }}
-              className="self-start min-h-[44px] px-4 rounded-full bg-[#C4A882]/20 text-[13px] font-semibold text-[#6E5230] hover:bg-[#C4A882]/30 transition-colors"
+              className="self-start min-h-[44px] px-4 rounded-full bg-gold/20 text-[13px] font-semibold text-gold-deep hover:bg-gold/30 transition-colors"
             >
               {campsForSubject} {category === 'STEM' ? 'STEM' : category.toLowerCase()} {campsForSubject === 1 ? 'camp is' : 'camps are'} under Camps: see {campsForSubject === 1 ? 'it' : 'them'} →
             </button>
           )}
 
           {/* Refine: count, age, level, sort */}
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-[#E3DAC5]">
-            <p className="text-[15px] text-[#2E4A58]">
-              <span className="font-semibold text-[#1C3A4A]">{results.length}</span> {results.length === 1 ? 'program' : 'programs'}
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-cream-700">
+            <p className="text-[15px] text-text-dark">
+              <span className="font-semibold text-text-dark">{results.length}</span> {results.length === 1 ? 'program' : 'programs'}
               {pickedKind ? ` · ${pickedKind}` : ''}
               {forKid ? ` for ${forKid.name}` : ageExact != null ? ` for age ${ageExact}` : ''}
             </p>
             <div className="flex flex-wrap items-center gap-2">
               {kidAge == null && (
-                <div className="flex gap-1 p-1 rounded-full bg-white border border-[#E3DAC5]" role="group" aria-label="Age">
+                <div className="flex gap-1 p-1 rounded-full bg-white border border-cream-700" role="group" aria-label="Age">
                   {AGE_GROUPS.map((g) => (
                     <button
                       key={g.key}
@@ -835,7 +835,7 @@ export default function Discover() {
                       onClick={() => setAgeGroup(g)}
                       aria-pressed={ageGroup.key === g.key}
                       className={`min-h-[34px] px-3 rounded-full text-[13px] font-medium transition-colors ${
-                        ageGroup.key === g.key ? 'bg-[#0D5C6E] text-white' : 'text-[#2E4A58] hover:bg-[#F5EFE0]'
+                        ageGroup.key === g.key ? 'bg-teal-800 text-white' : 'text-text-dark hover:bg-cream-500'
                       }`}
                     >
                       {g.label}
@@ -844,7 +844,7 @@ export default function Discover() {
                 </div>
               )}
               {showLevels && (
-                <div className="flex gap-1 p-1 rounded-full bg-white border border-[#E3DAC5]" role="group" aria-label="Level">
+                <div className="flex gap-1 p-1 rounded-full bg-white border border-cream-700" role="group" aria-label="Level">
                   {([{ key: 'All', short: 'Any level' }, ...LEVELS] as { key: 'All' | 'rec' | 'club'; short: string }[]).map((l) => (
                     <button
                       key={l.key}
@@ -852,7 +852,7 @@ export default function Discover() {
                       onClick={() => setLevel(l.key)}
                       aria-pressed={level === l.key}
                       className={`min-h-[34px] px-3 rounded-full text-[13px] font-medium transition-colors ${
-                        level === l.key ? 'bg-[#0D5C6E] text-white' : 'text-[#2E4A58] hover:bg-[#F5EFE0]'
+                        level === l.key ? 'bg-teal-800 text-white' : 'text-text-dark hover:bg-cream-500'
                       }`}
                     >
                       {l.short}
@@ -860,12 +860,12 @@ export default function Discover() {
                   ))}
                 </div>
               )}
-              <label htmlFor="ls-sort" className="text-[13px] text-[#4E6B78]">Sort</label>
+              <label htmlFor="ls-sort" className="text-[13px] text-text-mid">Sort</label>
               <select
                 id="ls-sort"
                 value={sort}
                 onChange={(e) => setSort(e.target.value)}
-                className="min-h-[40px] px-3.5 rounded-full border border-[#E3DAC5] bg-white text-[14px] text-[#1C3A4A] cursor-pointer"
+                className="min-h-[40px] px-3.5 rounded-full border border-cream-700 bg-white text-[14px] text-text-dark cursor-pointer"
               >
                 {SORTS.map((s) => <option key={s.key} value={s.key}>{s.label}</option>)}
               </select>
@@ -874,11 +874,11 @@ export default function Discover() {
 
           {results.length === 0 ? (
             <div className="text-center py-14 px-6 rounded-[20px] bg-white">
-              <p className="font-['Cormorant_Garamond'] text-[28px] text-[#1C3A4A] mb-2">Nothing fits all of that yet.</p>
-              <p className="text-[15px] text-[#3A5A6A] mb-6">
+              <p className="font-display text-[28px] text-text-dark mb-2">Nothing fits all of that yet.</p>
+              <p className="text-[15px] text-text-mid mb-6">
                 {chips.length ? 'Remove a chip under the search box to widen it, or start over.' : 'We’re adding providers across Seattle every week.'}
               </p>
-              <button type="button" onClick={clearAll} className="min-h-[44px] px-6 rounded-full bg-[#0D5C6E] text-white text-[14px] font-semibold hover:bg-[#1A7A8A] transition-colors">
+              <button type="button" onClick={clearAll} className="min-h-[44px] px-6 rounded-full bg-teal-800 text-white text-[14px] font-semibold hover:bg-teal-700 transition-colors">
                 Start over
               </button>
             </div>
@@ -902,7 +902,7 @@ export default function Discover() {
             <button
               type="button"
               onClick={() => setShowFar(true)}
-              className="self-center min-h-[48px] px-6 rounded-full border-[1.5px] border-[#0D5C6E] text-[15px] font-semibold text-[#0D5C6E] hover:bg-white transition-colors"
+              className="self-center min-h-[48px] px-6 rounded-full border-[1.5px] border-teal-800 text-[15px] font-semibold text-teal-800 hover:bg-white transition-colors"
             >
               Show {farCount} farther away
             </button>
@@ -911,23 +911,23 @@ export default function Discover() {
       </section>
 
       {/* Provider CTA */}
-      <section className="bg-[#0D5C6E] px-6 md:px-10 lg:px-16 py-16">
+      <section className="bg-teal-800 px-6 md:px-10 lg:px-16 py-16">
         <div className="max-w-[720px] mx-auto text-center">
-          <h2 className="font-['Cormorant_Garamond'] text-[clamp(28px,3.5vw,40px)] font-light text-white mb-4">
+          <h2 className="font-display text-[clamp(28px,3.5vw,40px)] font-light text-white mb-4">
             Run a camp or class in Seattle?
           </h2>
-          <p className="text-[16px] text-[#D6EEF2] leading-relaxed mb-8">
+          <p className="text-[16px] text-teal-100 leading-relaxed mb-8">
             Families are searching for what you offer. Get your listing featured on Little Sound.
           </p>
           <a
             href="/providers/signup"
-            className="inline-block px-8 py-4 rounded-full bg-[#C4A882] text-[#1C3A4A] text-[15px] font-semibold hover:bg-[#A8865A] hover:text-white transition-colors"
+            className="inline-block px-8 py-4 rounded-full bg-gold text-text-dark text-[15px] font-semibold hover:bg-gold-dark hover:text-white transition-colors"
           >
             List your activity
           </a>
-          <p className="text-[14px] text-[#D6EEF2]/80 mt-6">
+          <p className="text-[14px] text-teal-100/80 mt-6">
             Already listed?{' '}
-            <a href="/providers/claim" className="text-white font-semibold underline underline-offset-2 hover:text-[#C4A882]">
+            <a href="/providers/claim" className="text-white font-semibold underline underline-offset-2 hover:text-gold">
               Claim your listing →
             </a>
           </p>

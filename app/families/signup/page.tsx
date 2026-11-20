@@ -159,21 +159,21 @@ export default function FamilySignupPage() {
 
   if (checkEmail) {
     return (
-      <main className="min-h-screen bg-[#F5EFE0] flex flex-col items-center px-4 py-16 pt-28">
+      <main className="min-h-screen bg-cream-500 flex flex-col items-center px-4 py-16 pt-28">
         <div className="bg-white rounded-[24px] shadow-[0_4px_32px_rgba(10,74,90,0.09)] w-full max-w-[480px] p-8 md:p-10 text-center">
-          <div className="w-14 h-14 rounded-full bg-[#0D5C6E]/8 flex items-center justify-center mx-auto mb-5">
+          <div className="w-14 h-14 rounded-full bg-teal-800/8 flex items-center justify-center mx-auto mb-5">
             <LineIcon name="mail" size={26} color="#A8865A" />
           </div>
-          <h1 className="font-['Cormorant_Garamond'] text-[28px] font-light text-[#1C3A4A] mb-3">
+          <h1 className="font-display text-[28px] font-light text-text-dark mb-3">
             Check your email
           </h1>
-          <p className="text-[#3A5A6A] text-[15px] leading-relaxed mb-6">
+          <p className="text-text-mid text-[15px] leading-relaxed mb-6">
             We sent a confirmation link to <strong>{form.email}</strong>. Click it to activate
             your account, then sign in to see your dashboard.
           </p>
           <Link
             href="/families/login"
-            className="inline-flex h-12 items-center justify-center rounded-full bg-[#0D5C6E] text-white font-semibold text-[15px] px-8 hover:bg-[#1A7A8A] transition-colors"
+            className="inline-flex h-12 items-center justify-center rounded-full bg-teal-800 text-white font-semibold text-[15px] px-8 hover:bg-teal-700 transition-colors"
           >
             Go to sign in
           </Link>
@@ -183,18 +183,18 @@ export default function FamilySignupPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#F5EFE0] flex flex-col items-center px-4 py-16 pt-28">
+    <main className="min-h-screen bg-cream-500 flex flex-col items-center px-4 py-16 pt-28">
 
       {/* Header */}
       <div className="text-center mb-8">
-        <div className="inline-flex items-center gap-2 bg-[#0D5C6E]/8 border border-[#0D5C6E]/15 rounded-full px-4 py-1.5 mb-6">
-          <span className="text-xs font-bold uppercase tracking-widest text-[#0D5C6E]">Family Portal</span>
+        <div className="inline-flex items-center gap-2 bg-teal-800/8 border border-teal-800/15 rounded-full px-4 py-1.5 mb-6">
+          <span className="text-xs font-bold uppercase tracking-widest text-teal-800">Family Portal</span>
         </div>
-        <h1 className="font-['Cormorant_Garamond'] text-[clamp(32px,5vw,52px)] font-light leading-[1.1] tracking-tight text-[#1C3A4A] mb-4">
+        <h1 className="font-display text-[clamp(32px,5vw,52px)] font-light leading-[1.1] tracking-tight text-text-dark mb-4">
           Create your<br />
-          <em className="italic text-[#0D5C6E]">Little Sound account.</em>
+          <em className="italic text-teal-800">Little Sound account.</em>
         </h1>
-        <p className="text-[#3A5A6A] text-[16px] leading-relaxed max-w-[400px] mx-auto">
+        <p className="text-text-mid text-[16px] leading-relaxed max-w-[400px] mx-auto">
           Save activities, plan your family&apos;s week, and see what fits each child. Free to join.
         </p>
       </div>
@@ -205,15 +205,15 @@ export default function FamilySignupPage() {
           <div key={label} className="flex items-center gap-2">
             <div
               className={`flex items-center justify-center w-7 h-7 rounded-full text-xs font-semibold transition-colors ${
-                i <= step ? 'bg-[#0D5C6E] text-white' : 'bg-white text-[#7A9AAA] border border-[#E8DFC8]'
+                i <= step ? 'bg-teal-800 text-white' : 'bg-white text-text-muted border border-cream-700'
               }`}
             >
               {i + 1}
             </div>
-            <span className={`text-[13px] font-medium ${i <= step ? 'text-[#0D5C6E]' : 'text-[#7A9AAA]'}`}>
+            <span className={`text-[13px] font-medium ${i <= step ? 'text-teal-800' : 'text-text-muted'}`}>
               {label}
             </span>
-            {i < STEPS.length - 1 && <div className="w-8 h-px bg-[#E8DFC8] mx-1" />}
+            {i < STEPS.length - 1 && <div className="w-8 h-px bg-cream-700 mx-1" />}
           </div>
         ))}
       </div>
@@ -270,7 +270,7 @@ export default function FamilySignupPage() {
 
             <button
               type="submit"
-              className="h-[52px] rounded-full bg-[#0D5C6E] text-white font-semibold text-[15px] tracking-[0.01em] transition-all duration-200 mt-1 hover:bg-[#1A7A8A] hover:-translate-y-0.5"
+              className="h-[52px] rounded-full bg-teal-800 text-white font-semibold text-[15px] tracking-[0.01em] transition-all duration-200 mt-1 hover:bg-teal-700 hover:-translate-y-0.5"
             >
               Continue →
             </button>
@@ -279,25 +279,25 @@ export default function FamilySignupPage() {
           <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
             {/* Neighborhood */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-[13px] font-medium text-[#0D5C6E]">Neighborhood (optional)</label>
+              <label className="text-[13px] font-medium text-teal-800">Neighborhood (optional)</label>
               <div className="relative">
                 <select
                   value={form.neighborhood}
                   onChange={(e) => set('neighborhood', e.target.value)}
-                  className="w-full h-12 rounded-[12px] border-2 border-[#E8DFC8] px-4 pr-10 text-[15px] font-['DM_Sans'] text-[#1C3A4A] bg-white appearance-none transition-colors focus:outline-none focus:border-[#0D5C6E]"
+                  className="w-full h-12 rounded-[12px] border-2 border-cream-700 px-4 pr-10 text-[15px] font-body text-text-dark bg-white appearance-none transition-colors focus:outline-none focus:border-teal-800"
                 >
                   <option value="">Select a neighborhood</option>
                   {NEIGHBORHOODS.map((n) => (
                     <option key={n} value={n}>{n}</option>
                   ))}
                 </select>
-                <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#0D5C6E] text-xs">▾</span>
+                <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-teal-800 text-xs">▾</span>
               </div>
             </div>
 
             {/* Kids' ages */}
             <div className="flex flex-col gap-2">
-              <label className="text-[13px] font-medium text-[#0D5C6E]">Kids' ages (optional)</label>
+              <label className="text-[13px] font-medium text-teal-800">Kids' ages (optional)</label>
               {form.kids.map((kid, i) => (
                 <div key={i} className="flex items-center gap-2">
                   <input
@@ -307,13 +307,13 @@ export default function FamilySignupPage() {
                     value={kid.age}
                     onChange={(e) => updateKidAge(i, e.target.value)}
                     placeholder={`Kid ${i + 1} age`}
-                    className="h-12 flex-1 rounded-[12px] border-2 border-[#E8DFC8] px-4 text-[15px] font-['DM_Sans'] text-[#1C3A4A] bg-white transition-colors focus:outline-none focus:border-[#0D5C6E]"
+                    className="h-12 flex-1 rounded-[12px] border-2 border-cream-700 px-4 text-[15px] font-body text-text-dark bg-white transition-colors focus:outline-none focus:border-teal-800"
                   />
                   {form.kids.length > 1 && (
                     <button
                       type="button"
                       onClick={() => removeKid(i)}
-                      className="text-[#7A9AAA] hover:text-[#C0544A] text-sm px-2"
+                      className="text-text-muted hover:text-error text-sm px-2"
                       aria-label="Remove"
                     >
                       ✕
@@ -324,7 +324,7 @@ export default function FamilySignupPage() {
               <button
                 type="button"
                 onClick={addKid}
-                className="self-start text-[13px] font-medium text-[#1A7A8A] hover:text-[#0D5C6E] mt-1"
+                className="self-start text-[13px] font-medium text-teal-700 hover:text-teal-800 mt-1"
               >
                 + Add another kid
               </button>
@@ -332,7 +332,7 @@ export default function FamilySignupPage() {
 
             {/* Interests */}
             <div className="flex flex-col gap-2">
-              <label className="text-[13px] font-medium text-[#0D5C6E]">
+              <label className="text-[13px] font-medium text-teal-800">
                 What are you interested in? (optional)
               </label>
               <div className="flex flex-wrap gap-2">
@@ -345,8 +345,8 @@ export default function FamilySignupPage() {
                       onClick={() => toggleInterest(interest)}
                       className={`px-3.5 py-1.5 rounded-full text-[13px] font-medium border-2 transition-colors ${
                         active
-                          ? 'bg-[#0D5C6E] border-[#0D5C6E] text-white'
-                          : 'bg-white border-[#E8DFC8] text-[#3A5A6A] hover:border-[#C5D8E8]'
+                          ? 'bg-teal-800 border-teal-800 text-white'
+                          : 'bg-white border-cream-700 text-text-mid hover:border-blue-grey-300'
                       }`}
                     >
                       {interest}
@@ -357,7 +357,7 @@ export default function FamilySignupPage() {
             </div>
 
             {submitError && (
-              <p className="text-[13px] text-[#C0544A] bg-[#C0544A]/8 border border-[#C0544A]/20 rounded-[10px] px-4 py-3">
+              <p className="text-[13px] text-error bg-error/8 border border-error/20 rounded-[10px] px-4 py-3">
                 {submitError}
               </p>
             )}
@@ -366,15 +366,15 @@ export default function FamilySignupPage() {
               <button
                 type="button"
                 onClick={() => setStep(0)}
-                className="h-[52px] rounded-full border-2 border-[#E8DFC8] text-[#3A5A6A] font-semibold text-[15px] px-6 hover:border-[#C5D8E8] transition-colors"
+                className="h-[52px] rounded-full border-2 border-cream-700 text-text-mid font-semibold text-[15px] px-6 hover:border-blue-grey-300 transition-colors"
               >
                 Back
               </button>
               <button
                 type="submit"
                 disabled={submitting}
-                className={`h-[52px] flex-1 rounded-full bg-[#0D5C6E] text-white font-semibold text-[15px] tracking-[0.01em] transition-all duration-200 ${
-                  submitting ? 'opacity-60 cursor-not-allowed' : 'hover:bg-[#1A7A8A] hover:-translate-y-0.5'
+                className={`h-[52px] flex-1 rounded-full bg-teal-800 text-white font-semibold text-[15px] tracking-[0.01em] transition-all duration-200 ${
+                  submitting ? 'opacity-60 cursor-not-allowed' : 'hover:bg-teal-700 hover:-translate-y-0.5'
                 }`}
               >
                 {submitting ? 'Creating your account…' : 'Create account'}
@@ -383,9 +383,9 @@ export default function FamilySignupPage() {
           </form>
         )}
 
-        <p className="text-center text-[13px] text-[#7A9AAA] mt-6">
+        <p className="text-center text-[13px] text-text-muted mt-6">
           Already have an account?{' '}
-          <Link href="/families/login" className="text-[#1A7A8A] underline underline-offset-2">
+          <Link href="/families/login" className="text-teal-700 underline underline-offset-2">
             Sign in
           </Link>
         </p>
@@ -409,18 +409,18 @@ interface FieldProps {
 function Field({ label, type = 'text', value, onChange, error, placeholder, autoComplete }: FieldProps) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="text-[13px] font-medium text-[#0D5C6E]">{label}</label>
+      <label className="text-[13px] font-medium text-teal-800">{label}</label>
       <input
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         autoComplete={autoComplete}
-        className={`h-12 rounded-[12px] border-2 px-4 text-[15px] font-['DM_Sans'] text-[#1C3A4A] bg-white w-full transition-colors focus:outline-none focus:border-[#0D5C6E] ${
-          error ? 'border-[#C0544A]' : 'border-[#E8DFC8]'
+        className={`h-12 rounded-[12px] border-2 px-4 text-[15px] font-body text-text-dark bg-white w-full transition-colors focus:outline-none focus:border-teal-800 ${
+          error ? 'border-error' : 'border-cream-700'
         }`}
       />
-      {error && <p className="text-[12px] text-[#C0544A]">{error}</p>}
+      {error && <p className="text-[12px] text-error">{error}</p>}
     </div>
   );
 }

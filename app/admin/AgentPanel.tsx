@@ -63,13 +63,13 @@ interface LogLine {
 }
 
 const STATUS_STYLE: Record<string, string> = {
-  published: 'bg-emerald-100 text-emerald-800',
-  review: 'bg-amber-100 text-amber-800',
-  unchanged: 'bg-[#C5D8E8]/50 text-[#0D5C6E]',
-  no_dates: 'bg-gray-100 text-gray-600',
-  unreadable: 'bg-red-50 text-red-700',
-  error: 'bg-red-100 text-red-700',
-  skipped: 'bg-gray-100 text-gray-600',
+  published: 'bg-success-light text-success-dark',
+  review: 'bg-warning-light text-gold-deep',
+  unchanged: 'bg-blue-grey-300/50 text-teal-800',
+  no_dates: 'bg-blue-grey-100 text-text-mid',
+  unreadable: 'bg-error-light text-error-dark',
+  error: 'bg-error-light text-error-dark',
+  skipped: 'bg-blue-grey-100 text-text-mid',
 };
 const STATUS_LABEL: Record<string, string> = {
   published: 'Published',
@@ -83,9 +83,9 @@ const STATUS_LABEL: Record<string, string> = {
 const CONCURRENCY = 2;
 
 function Pill({ status }: { status: string | null }) {
-  if (!status) return <span className="text-[11px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">Not checked</span>;
+  if (!status) return <span className="text-[11px] px-2 py-0.5 rounded-full bg-blue-grey-100 text-text-mid">Not checked</span>;
   return (
-    <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${STATUS_STYLE[status] ?? 'bg-gray-100 text-gray-600'}`}>
+    <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium whitespace-nowrap ${STATUS_STYLE[status] ?? 'bg-blue-grey-100 text-text-mid'}`}>
       {STATUS_LABEL[status] ?? status}
     </span>
   );
@@ -257,41 +257,41 @@ export default function AgentPanel({ onToast }: { onToast: (msg: string, ok: boo
   }
 
   if (!data) {
-    return <p className="text-[#7A9AAA] text-sm py-10 text-center">{loading ? 'Loading…' : 'Could not load the agent.'}</p>;
+    return <p className="text-text-muted text-sm py-10 text-center">{loading ? 'Loading…' : 'Could not load the agent.'}</p>;
   }
 
   const L = data.listings;
   const checked = L.filter((l) => l.lastCheckedAt).length;
   const withDates = L.filter((l) => l.dateCount > 0).length;
   const unreadable = L.filter((l) => l.lastStatus === 'unreadable' || l.lastStatus === 'error');
-  const card = 'bg-white rounded-2xl border border-[#E8DFC8] p-5';
+  const card = 'bg-white rounded-2xl border border-cream-700 p-5';
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-6 space-y-5">
       {/* Setup problems */}
       {data.tablesMissing && (
-        <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700">
+        <div className="bg-error-light border border-error/30 rounded-xl px-4 py-3 text-sm text-error-dark">
           The agent&apos;s tables don&apos;t exist yet. Run <code>supabase/date-agent.sql</code> in Supabase.
         </div>
       )}
       {!data.aiConfigured && (
-        <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700">
+        <div className="bg-error-light border border-error/30 rounded-xl px-4 py-3 text-sm text-error-dark">
           No ANTHROPIC_API_KEY in Vercel, so the agent can read sites but not extract dates.
         </div>
       )}
       {!data.scheduleConfigured && (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm text-amber-900">
+        <div className="bg-warning-light border border-warning/40 rounded-xl px-4 py-3 text-sm text-gold-deep">
           The daily automatic check is off: add a <code>CRON_SECRET</code> environment variable in Vercel (any long random text), then redeploy. Running from this page works either way.
         </div>
       )}
 
       {/* Overview + run */}
       <div className={card}>
-        <h2 className="font-['Cormorant_Garamond'] text-2xl font-light text-[#0D5C6E] mb-1">Date agent</h2>
-        <p className="text-sm text-[#3A5A6A] mb-4">
+        <h2 className="font-display text-2xl font-light text-teal-800 mb-1">Date agent</h2>
+        <p className="text-sm text-text-mid mb-4">
           Visits each listing&apos;s website, reads its schedule pages, and publishes dates it can verify word-for-word
           on the page. Anything uncertain lands in your inbox below. Re-checks automatically every day.
-          <span className="block text-xs text-[#7A9AAA] mt-1">
+          <span className="block text-xs text-text-muted mt-1">
             JavaScript reader (for sites that only load in a browser): {data.jsReader ? 'on' : 'off — add CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN in Vercel to turn it on'}
           </span>
         </p>
@@ -303,40 +303,40 @@ export default function AgentPanel({ onToast }: { onToast: (msg: string, ok: boo
             ['Suggestions', String(data.suggestions.length)],
             ['Couldn’t read', String(unreadable.length)],
           ].map(([k, v]) => (
-            <div key={k} className="bg-[#F5EFE0] rounded-xl px-3 py-2">
-              <p className="text-[11px] text-[#7A9AAA] uppercase tracking-wider">{k}</p>
-              <p className="text-lg font-semibold text-[#1C3A4A]">{v}</p>
+            <div key={k} className="bg-cream-500 rounded-xl px-3 py-2">
+              <p className="text-[11px] text-text-muted uppercase tracking-wider">{k}</p>
+              <p className="text-lg font-semibold text-text-dark">{v}</p>
             </div>
           ))}
         </div>
 
         {running ? (
           <div>
-            <div className="flex items-center justify-between text-sm text-[#3A5A6A] mb-1.5">
+            <div className="flex items-center justify-between text-sm text-text-mid mb-1.5">
               <span>
                 Checking {progress.done + 1 > progress.total ? progress.total : progress.done + 1} of {progress.total}
                 {progress.current ? ` · ${progress.current}` : ''}
               </span>
-              <button onClick={() => { stopRef.current = true; }} className="text-red-600 font-semibold">Stop</button>
+              <button onClick={() => { stopRef.current = true; }} className="text-error-dark font-semibold">Stop</button>
             </div>
-            <div className="h-2 bg-[#F5EFE0] rounded-full overflow-hidden">
-              <div className="h-full bg-[#0D5C6E] transition-all" style={{ width: `${(progress.done / Math.max(progress.total, 1)) * 100}%` }} />
+            <div className="h-2 bg-cream-500 rounded-full overflow-hidden">
+              <div className="h-full bg-teal-800 transition-all" style={{ width: `${(progress.done / Math.max(progress.total, 1)) * 100}%` }} />
             </div>
-            <p className="text-xs text-[#7A9AAA] mt-1.5">Keep this tab open while it runs (about 20–40 seconds per site that changed).</p>
+            <p className="text-xs text-text-muted mt-1.5">Keep this tab open while it runs (about 20–40 seconds per site that changed).</p>
           </div>
         ) : (
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => run('unchecked')}
               disabled={!data.aiConfigured || data.tablesMissing || checked === L.length}
-              className="bg-[#0D5C6E] text-white rounded-full px-5 py-2 text-sm font-semibold hover:bg-[#1A7A8A] disabled:opacity-50"
+              className="bg-teal-800 text-white rounded-full px-5 py-2 text-sm font-semibold hover:bg-teal-700 disabled:opacity-50"
             >
               Check unchecked listings ({L.length - checked})
             </button>
             <button
               onClick={() => run('all')}
               disabled={!data.aiConfigured || data.tablesMissing}
-              className="border border-[#C5D8E8] text-[#0D5C6E] rounded-full px-5 py-2 text-sm font-semibold hover:bg-[#C5D8E8]/20 disabled:opacity-50"
+              className="border border-blue-grey-300 text-teal-800 rounded-full px-5 py-2 text-sm font-semibold hover:bg-blue-grey-300/20 disabled:opacity-50"
             >
               Re-check all {L.length}
             </button>
@@ -344,26 +344,26 @@ export default function AgentPanel({ onToast }: { onToast: (msg: string, ok: boo
               <button
                 onClick={() => run('unreadable')}
                 disabled={!data.aiConfigured || data.tablesMissing}
-                className="border border-[#C5D8E8] text-[#0D5C6E] rounded-full px-5 py-2 text-sm font-semibold hover:bg-[#C5D8E8]/20 disabled:opacity-50"
+                className="border border-blue-grey-300 text-teal-800 rounded-full px-5 py-2 text-sm font-semibold hover:bg-blue-grey-300/20 disabled:opacity-50"
               >
                 Retry couldn&apos;t-read ({unreadable.length})
               </button>
             )}
-            <label className="basis-full flex items-center gap-2 text-xs text-[#7A9AAA] mt-1 cursor-pointer select-none">
-              <input type="checkbox" checked={forceAI} onChange={(e) => setForceAI(e.target.checked)} className="accent-[#0D5C6E]" />
+            <label className="basis-full flex items-center gap-2 text-xs text-text-muted mt-1 cursor-pointer select-none">
+              <input type="checkbox" checked={forceAI} onChange={(e) => setForceAI(e.target.checked)} className="accent-teal-800" />
               Ask Claude again even if a site hasn&apos;t changed (uses AI for every listing checked: roughly $0.05–0.10 each)
             </label>
           </div>
         )}
 
         {log.length > 0 && (
-          <ul className="mt-4 max-h-64 overflow-y-auto divide-y divide-[#E8DFC8] border border-[#E8DFC8] rounded-xl">
+          <ul className="mt-4 max-h-64 overflow-y-auto divide-y divide-cream-700 border border-cream-700 rounded-xl">
             {log.map((l, i) => (
               <li key={i} className="flex items-start gap-2 px-3 py-2 text-sm">
                 <Pill status={l.status} />
                 <span className="min-w-0">
-                  <span className="font-medium text-[#1C3A4A]">{l.title}</span>
-                  <span className="text-[#7A9AAA]"> — {l.message}</span>
+                  <span className="font-medium text-text-dark">{l.title}</span>
+                  <span className="text-text-muted"> — {l.message}</span>
                 </span>
               </li>
             ))}
@@ -373,43 +373,43 @@ export default function AgentPanel({ onToast }: { onToast: (msg: string, ok: boo
 
       {/* Review inbox */}
       <div className={card}>
-        <h3 className="text-sm font-semibold text-[#1C3A4A] mb-3">Needs your review ({data.drafts.length})</h3>
+        <h3 className="text-sm font-semibold text-text-dark mb-3">Needs your review ({data.drafts.length})</h3>
         {data.drafts.length === 0 ? (
-          <p className="text-sm text-[#7A9AAA]">Nothing waiting. Verified dates were published automatically.</p>
+          <p className="text-sm text-text-muted">Nothing waiting. Verified dates were published automatically.</p>
         ) : (
           <div className="space-y-3">
             {data.drafts.map((d) => (
-              <div key={d.id} className="border border-[#E8DFC8] rounded-xl p-4">
-                <p className="font-semibold text-[#1C3A4A]">{d.title}</p>
-                <p className="text-xs text-[#7A9AAA] mb-2">{d.business}</p>
-                {d.reason && <p className="text-sm text-amber-800 bg-amber-50 rounded-lg px-3 py-2 mb-2">{d.reason}</p>}
+              <div key={d.id} className="border border-cream-700 rounded-xl p-4">
+                <p className="font-semibold text-text-dark">{d.title}</p>
+                <p className="text-xs text-text-muted mb-2">{d.business}</p>
+                {d.reason && <p className="text-sm text-gold-deep bg-warning-light rounded-lg px-3 py-2 mb-2">{d.reason}</p>}
                 {(() => {
                   // The reason box already quotes the first doubt; don't repeat it.
                   const extra = d.warnings.filter((w) => !d.reason?.includes(w));
                   return extra.length > 0 ? (
-                    <ul className="list-disc pl-5 text-xs text-amber-900 mb-2">
+                    <ul className="list-disc pl-5 text-xs text-gold-deep mb-2">
                       {extra.map((w, i) => <li key={i}>{w}</li>)}
                     </ul>
                   ) : null;
                 })()}
                 <div className="grid sm:grid-cols-2 gap-3 text-sm mb-3">
                   <div>
-                    <p className="text-[11px] text-[#7A9AAA] uppercase tracking-wider mb-1">Agent found</p>
+                    <p className="text-[11px] text-text-muted uppercase tracking-wider mb-1">Agent found</p>
                     {d.items.length ? (
-                      <ul className="space-y-0.5">{d.items.map((i, k) => <li key={k} className="text-[#1C3A4A]">{describeItem(i, today)}</li>)}</ul>
-                    ) : <p className="text-[#7A9AAA]">No dates</p>}
+                      <ul className="space-y-0.5">{d.items.map((i, k) => <li key={k} className="text-text-dark">{describeItem(i, today)}</li>)}</ul>
+                    ) : <p className="text-text-muted">No dates</p>}
                   </div>
                   <div>
-                    <p className="text-[11px] text-[#7A9AAA] uppercase tracking-wider mb-1">Live now</p>
+                    <p className="text-[11px] text-text-muted uppercase tracking-wider mb-1">Live now</p>
                     {d.current.length ? (
-                      <ul className="space-y-0.5">{d.current.map((i, k) => <li key={k} className="text-[#3A5A6A]">{describeItem(i, today)}</li>)}</ul>
-                    ) : <p className="text-[#7A9AAA]">Nothing</p>}
+                      <ul className="space-y-0.5">{d.current.map((i, k) => <li key={k} className="text-text-mid">{describeItem(i, today)}</li>)}</ul>
+                    ) : <p className="text-text-muted">Nothing</p>}
                   </div>
                 </div>
-                <p className="text-xs text-[#7A9AAA] mb-3">
+                <p className="text-xs text-text-muted mb-3">
                   Read from:{' '}
                   {d.sourceUrls.map((u, i) => (
-                    <a key={u} href={u} target="_blank" rel="noopener noreferrer" className="text-[#1A7A8A] underline break-all">
+                    <a key={u} href={u} target="_blank" rel="noopener noreferrer" className="text-teal-700 underline break-all">
                       {i ? ', ' : ''}{u.replace(/^https?:\/\//, '')}
                     </a>
                   ))}
@@ -418,18 +418,18 @@ export default function AgentPanel({ onToast }: { onToast: (msg: string, ok: boo
                   <button
                     onClick={() => act('drafts', d.id, 'approve', `Published dates for ${d.title}`)}
                     disabled={!!acting || d.items.length === 0}
-                    className="bg-[#0D5C6E] text-white rounded-full px-4 py-1.5 text-sm font-semibold hover:bg-[#1A7A8A] disabled:opacity-50"
+                    className="bg-teal-800 text-white rounded-full px-4 py-1.5 text-sm font-semibold hover:bg-teal-700 disabled:opacity-50"
                   >
                     {acting === d.id + 'approve' ? '…' : 'Approve & publish'}
                   </button>
                   <button
                     onClick={() => act('drafts', d.id, 'dismiss', 'Dismissed')}
                     disabled={!!acting}
-                    className="border border-[#E8DFC8] text-[#3A5A6A] rounded-full px-4 py-1.5 text-sm hover:border-[#C5D8E8] disabled:opacity-50"
+                    className="border border-cream-700 text-text-mid rounded-full px-4 py-1.5 text-sm hover:border-blue-grey-300 disabled:opacity-50"
                   >
                     Dismiss
                   </button>
-                  <span className="text-xs text-[#B0C8D0]">To fix a date first, edit this listing in the Dates tab instead.</span>
+                  <span className="text-xs text-blue-grey-300">To fix a date first, edit this listing in the Dates tab instead.</span>
                 </div>
               </div>
             ))}
@@ -444,33 +444,33 @@ export default function AgentPanel({ onToast }: { onToast: (msg: string, ok: boo
       <div className={card}>
         <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
           <div>
-            <h3 className="text-sm font-semibold text-[#1C3A4A] mb-1">Suggested new listings ({data.suggestions.length})</h3>
+            <h3 className="text-sm font-semibold text-text-dark mb-1">Suggested new listings ({data.suggestions.length})</h3>
             <datalist id="ls-neighborhoods">
               {NEIGHBORHOOD_CHOICES.map((n) => <option key={n} value={n} />)}
             </datalist>
-            <p className="text-xs text-[#7A9AAA]">Kids&apos; programs the agents found (on provider sites, or by web search) that aren&apos;t on Little Sound yet. Adding one puts it on Discover (claimable by the provider later), and the date agent then reads its site for dates.</p>
+            <p className="text-xs text-text-muted">Kids&apos; programs the agents found (on provider sites, or by web search) that aren&apos;t on Little Sound yet. Adding one puts it on Discover (claimable by the provider later), and the date agent then reads its site for dates.</p>
           </div>
           {data.suggestions.length > 1 &&
             (bulk ? (
-              <p className="text-sm text-[#0D5C6E] font-medium">
+              <p className="text-sm text-teal-800 font-medium">
                 {bulk.action === 'add' ? 'Adding' : 'Clearing'} {bulk.done} of {bulk.total}…
               </p>
             ) : confirmBulk ? (
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-sm text-[#1C3A4A]">
+                <span className="text-sm text-text-dark">
                   {confirmBulk === 'add'
                     ? `Put all ${data.suggestions.length} on Discover?`
                     : `Clear all ${data.suggestions.length}? The agent can suggest real programs again next time it reads their sites.`}
                 </span>
                 <button
                   onClick={() => bulkSuggestions(confirmBulk)}
-                  className="bg-[#0D5C6E] text-white rounded-full px-4 py-1.5 text-sm font-semibold hover:bg-[#1A7A8A]"
+                  className="bg-teal-800 text-white rounded-full px-4 py-1.5 text-sm font-semibold hover:bg-teal-700"
                 >
                   {confirmBulk === 'add' ? 'Yes, add all' : 'Yes, clear all'}
                 </button>
                 <button
                   onClick={() => setConfirmBulk(null)}
-                  className="border border-[#E8DFC8] text-[#3A5A6A] rounded-full px-4 py-1.5 text-sm hover:border-[#C5D8E8]"
+                  className="border border-cream-700 text-text-mid rounded-full px-4 py-1.5 text-sm hover:border-blue-grey-300"
                 >
                   Cancel
                 </button>
@@ -480,14 +480,14 @@ export default function AgentPanel({ onToast }: { onToast: (msg: string, ok: boo
                 <button
                   onClick={() => setConfirmBulk('add')}
                   disabled={!!acting}
-                  className="bg-[#0D5C6E] text-white rounded-full px-4 py-1.5 text-sm font-semibold hover:bg-[#1A7A8A] disabled:opacity-50"
+                  className="bg-teal-800 text-white rounded-full px-4 py-1.5 text-sm font-semibold hover:bg-teal-700 disabled:opacity-50"
                 >
                   Add all {data.suggestions.length}
                 </button>
                 <button
                   onClick={() => setConfirmBulk('clear')}
                   disabled={!!acting}
-                  className="border border-[#E8DFC8] text-[#3A5A6A] rounded-full px-4 py-1.5 text-sm hover:border-[#C5D8E8] disabled:opacity-50"
+                  className="border border-cream-700 text-text-mid rounded-full px-4 py-1.5 text-sm hover:border-blue-grey-300 disabled:opacity-50"
                 >
                   Clear all
                 </button>
@@ -495,72 +495,72 @@ export default function AgentPanel({ onToast }: { onToast: (msg: string, ok: boo
             ))}
         </div>
         {data.suggestions.length === 0 ? (
-          <p className="text-sm text-[#7A9AAA]">None right now.</p>
+          <p className="text-sm text-text-muted">None right now.</p>
         ) : (
           <div className="grid sm:grid-cols-2 gap-3">
             {data.suggestions.map((s) => (
-              <div key={s.id} className="border border-[#E8DFC8] rounded-xl p-4">
-                <p className="font-semibold text-[#1C3A4A]">{s.title}</p>
-                <p className="text-xs text-[#7A9AAA] mb-2">
+              <div key={s.id} className="border border-cream-700 rounded-xl p-4">
+                <p className="font-semibold text-text-dark">{s.title}</p>
+                <p className="text-xs text-text-muted mb-2">
                   {[s.business, s.category, s.neighborhood].filter(Boolean).join(' · ')}
                   {s.age_min != null ? ` · Ages ${s.age_min}–${s.age_max ?? s.age_min}` : ''}
                   {s.price != null ? ` · $${s.price}${s.price_unit ? `/${s.price_unit}` : ''}` : ''}
                 </p>
                 {(s.found_on?.startsWith('search:') || s.level) && (
-                  <p className="text-[11px] text-[#0D5C6E] mb-1">
+                  <p className="text-[11px] text-teal-800 mb-1">
                     {[s.found_on?.startsWith('search:') ? 'Found by web search' : null, s.level === 'club' ? 'Club · tryouts' : s.level === 'rec' ? 'Rec · everyone plays' : null]
                       .filter(Boolean)
                       .join(' · ')}
                   </p>
                 )}
-                {s.description && <p className="text-sm text-[#3A5A6A] mb-2">{s.description}</p>}
-                {s.serves && <p className="text-xs text-[#3A5A6A] mb-2"><span className="font-semibold">Who can join:</span> {s.serves}</p>}
+                {s.description && <p className="text-sm text-text-mid mb-2">{s.description}</p>}
+                {s.serves && <p className="text-xs text-text-mid mb-2"><span className="font-semibold">Who can join:</span> {s.serves}</p>}
                 {s.source_url && s.source_url !== s.website && (
-                  <a href={s.source_url} target="_blank" rel="noopener noreferrer" className="text-xs text-[#1A7A8A] underline break-all block mb-1">
+                  <a href={s.source_url} target="_blank" rel="noopener noreferrer" className="text-xs text-teal-700 underline break-all block mb-1">
                     Facts from: {s.source_url.replace(/^https?:\/\//, '')}
                   </a>
                 )}
                 <div className="flex flex-wrap items-end gap-2 mb-2">
-                  <label className="flex flex-col gap-1 text-[11px] font-semibold text-[#3A5A6A]">
+                  <label className="flex flex-col gap-1 text-[11px] font-semibold text-text-mid">
                     Neighborhood
                     <input
                       list="ls-neighborhoods"
                       value={edits[s.id]?.neighborhood ?? s.neighborhood ?? ''}
                       onChange={(ev) => setEdit(s.id, 'neighborhood', ev.target.value)}
                       placeholder="Not confirmed"
-                      className={`w-44 rounded-lg border px-2 py-1 text-sm font-normal text-[#1C3A4A] ${(edits[s.id]?.neighborhood ?? s.neighborhood) ? 'border-[#E8DFC8]' : 'border-amber-400 bg-amber-50'}`}
+                      className={`w-44 rounded-lg border px-2 py-1 text-sm font-normal text-text-dark ${(edits[s.id]?.neighborhood ?? s.neighborhood) ? 'border-cream-700' : 'border-warning bg-warning-light'}`}
                     />
                   </label>
-                  <label className="flex flex-col gap-1 text-[11px] font-semibold text-[#3A5A6A]">
+                  <label className="flex flex-col gap-1 text-[11px] font-semibold text-text-mid">
                     Ages
                     <span className="flex items-center gap-1 font-normal">
                       <input
                         type="number" min={0} max={18} aria-label="Youngest age"
                         value={edits[s.id]?.age_min ?? (s.age_min ?? '')}
                         onChange={(ev) => setEdit(s.id, 'age_min', ev.target.value)}
-                        className="w-14 rounded-lg border border-[#E8DFC8] px-2 py-1 text-sm text-[#1C3A4A]"
+                        className="w-14 rounded-lg border border-cream-700 px-2 py-1 text-sm text-text-dark"
                       />
                       –
                       <input
                         type="number" min={0} max={18} aria-label="Oldest age"
                         value={edits[s.id]?.age_max ?? (s.age_max ?? '')}
                         onChange={(ev) => setEdit(s.id, 'age_max', ev.target.value)}
-                        className="w-14 rounded-lg border border-[#E8DFC8] px-2 py-1 text-sm text-[#1C3A4A]"
+                        className="w-14 rounded-lg border border-cream-700 px-2 py-1 text-sm text-text-dark"
                       />
                     </span>
                   </label>
                 </div>
                 {!(edits[s.id]?.neighborhood ?? s.neighborhood) && (
-                  <p className="text-xs text-amber-800 mb-2">Location not confirmed: set the neighborhood before adding.</p>
+                  <p className="text-xs text-gold-deep mb-2">Location not confirmed: set the neighborhood before adding.</p>
                 )}
                 {s.items.length > 0 && (
-                  <ul className="text-sm text-[#1C3A4A] mb-2 space-y-0.5">
+                  <ul className="text-sm text-text-dark mb-2 space-y-0.5">
                     {s.items.slice(0, 5).map((i, k) => <li key={k}>{describeItem(i, today)}</li>)}
-                    {s.items.length > 5 && <li className="text-[#7A9AAA]">+{s.items.length - 5} more</li>}
+                    {s.items.length > 5 && <li className="text-text-muted">+{s.items.length - 5} more</li>}
                   </ul>
                 )}
                 {s.website && (
-                  <a href={s.website} target="_blank" rel="noopener noreferrer" className="text-xs text-[#1A7A8A] underline break-all block mb-3">
+                  <a href={s.website} target="_blank" rel="noopener noreferrer" className="text-xs text-teal-700 underline break-all block mb-3">
                     {s.website.replace(/^https?:\/\//, '')}
                   </a>
                 )}
@@ -568,14 +568,14 @@ export default function AgentPanel({ onToast }: { onToast: (msg: string, ok: boo
                   <button
                     onClick={() => act('suggestions', s.id, 'add', `Added "${s.title}" to Discover`)}
                     disabled={!!acting || !!bulk}
-                    className="bg-[#0D5C6E] text-white rounded-full px-4 py-1.5 text-sm font-semibold hover:bg-[#1A7A8A] disabled:opacity-50"
+                    className="bg-teal-800 text-white rounded-full px-4 py-1.5 text-sm font-semibold hover:bg-teal-700 disabled:opacity-50"
                   >
                     {acting === s.id + 'add' ? '…' : 'Add listing'}
                   </button>
                   <button
                     onClick={() => act('suggestions', s.id, 'dismiss', 'Dismissed')}
                     disabled={!!acting || !!bulk}
-                    className="border border-[#E8DFC8] text-[#3A5A6A] rounded-full px-4 py-1.5 text-sm hover:border-[#C5D8E8] disabled:opacity-50"
+                    className="border border-cream-700 text-text-mid rounded-full px-4 py-1.5 text-sm hover:border-blue-grey-300 disabled:opacity-50"
                   >
                     Dismiss
                   </button>
@@ -589,16 +589,16 @@ export default function AgentPanel({ onToast }: { onToast: (msg: string, ok: boo
       {/* Couldn't read */}
       {unreadable.length > 0 && (
         <div className={card}>
-          <h3 className="text-sm font-semibold text-[#1C3A4A] mb-1">Couldn&apos;t read ({unreadable.length})</h3>
-          <p className="text-xs text-[#7A9AAA] mb-3">These are the only listings that need hands-on help: paste their schedule in the Dates tab.</p>
-          <ul className="divide-y divide-[#E8DFC8]">
+          <h3 className="text-sm font-semibold text-text-dark mb-1">Couldn&apos;t read ({unreadable.length})</h3>
+          <p className="text-xs text-text-muted mb-3">These are the only listings that need hands-on help: paste their schedule in the Dates tab.</p>
+          <ul className="divide-y divide-cream-700">
             {unreadable.map((l) => (
               <li key={l.activityId} className="py-2 flex items-start justify-between gap-3 text-sm">
                 <span className="min-w-0">
-                  <span className="font-medium text-[#1C3A4A]">{l.title}</span>
-                  <span className="text-[#7A9AAA]"> · {l.business} — {l.lastMessage}</span>
+                  <span className="font-medium text-text-dark">{l.title}</span>
+                  <span className="text-text-muted"> · {l.business} — {l.lastMessage}</span>
                 </span>
-                <button onClick={() => checkOne(l)} disabled={!!acting} className="text-xs text-[#1A7A8A] shrink-0 hover:underline disabled:opacity-50">
+                <button onClick={() => checkOne(l)} disabled={!!acting} className="text-xs text-teal-700 shrink-0 hover:underline disabled:opacity-50">
                   {acting === l.activityId ? 'Checking…' : 'Try again'}
                 </button>
               </li>
@@ -609,22 +609,22 @@ export default function AgentPanel({ onToast }: { onToast: (msg: string, ok: boo
 
       {/* All listings */}
       <div className={card}>
-        <button onClick={() => setShowAll((v) => !v)} className="text-sm font-semibold text-[#0D5C6E]">
+        <button onClick={() => setShowAll((v) => !v)} className="text-sm font-semibold text-teal-800">
           {showAll ? '▾' : '▸'} Every listing ({L.length})
         </button>
         {showAll && (
-          <ul className="mt-3 divide-y divide-[#E8DFC8]">
+          <ul className="mt-3 divide-y divide-cream-700">
             {[...L].sort((a, b) => a.business.localeCompare(b.business)).map((l) => (
               <li key={l.activityId} className="py-2 flex items-center gap-3 text-sm">
                 <Pill status={l.lastStatus} />
                 <span className="min-w-0 flex-1 truncate">
-                  <span className="text-[#1C3A4A]">{l.title}</span>
-                  <span className="text-[#7A9AAA]"> · {l.business}{l.dateCount ? ` · ${l.dateCount} dates` : ''}</span>
+                  <span className="text-text-dark">{l.title}</span>
+                  <span className="text-text-muted"> · {l.business}{l.dateCount ? ` · ${l.dateCount} dates` : ''}</span>
                 </span>
-                <span className="text-xs text-[#B0C8D0] hidden sm:inline">
+                <span className="text-xs text-blue-grey-300 hidden sm:inline">
                   {l.lastCheckedAt ? new Date(l.lastCheckedAt).toLocaleDateString() : ''}
                 </span>
-                <button onClick={() => checkOne(l)} disabled={!!acting || running} className="text-xs text-[#1A7A8A] hover:underline disabled:opacity-50">
+                <button onClick={() => checkOne(l)} disabled={!!acting || running} className="text-xs text-teal-700 hover:underline disabled:opacity-50">
                   {acting === l.activityId ? '…' : 'Check now'}
                 </button>
               </li>

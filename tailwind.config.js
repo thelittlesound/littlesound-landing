@@ -37,11 +37,13 @@ module.exports = {
         gold: {
           DEFAULT: '#C4A882',
           dark: '#A8865A',
+          deep: '#7A5A2E',   // tan text on cream/white (meets 4.5:1)
         },
         // Semantic
-        success: '#3A9E7A',
-        warning: '#D4A53A',
-        error: '#C0544A',
+        // Status: DEFAULT for fills/icons, dark for text, light for tinted pills
+        success: { DEFAULT: '#3A9E7A', dark: '#2E7D5B', light: '#E1F2E9' },
+        warning: { DEFAULT: '#D4A53A', dark: '#7A5A2E', light: '#FFF6E8' },
+        error: { DEFAULT: '#C0544A', dark: '#8A3A32', light: '#F8E4E1' },
       },
       fontFamily: {
         display: ['Cormorant Garamond', 'Georgia', 'serif'],
