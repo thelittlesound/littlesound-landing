@@ -125,7 +125,7 @@ function ActivityCard({
   const unknown = agesUnknown(a);
   const facts = [
     { k: 'When', v: dateLine || 'Schedule on their site', muted: !dateLine },
-    { k: 'Ages', v: unknown ? 'Not posted yet' : `${a.ageMin}–${a.ageMax}`, warn: unknown },
+    { k: 'Ages', v: unknown ? 'Check their site' : `${a.ageMin}–${a.ageMax}`, warn: unknown },
     { k: 'Where', v: where },
     { k: 'Cost', v: costText(a), muted: a.price == null },
   ];
