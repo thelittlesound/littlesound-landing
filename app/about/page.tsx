@@ -126,12 +126,12 @@ export default function About() {
             <div className="flex items-center gap-6 mt-10 pt-8 border-t border-[#E8DFC8]">
               <div>
                 <p className="text-[#1C3A4A] font-semibold text-[15px]">Kelly Sherman</p>
-                <p className="text-[#7A9AAA] text-[13px]">Founder & CEO</p>
+                <p className="text-[#7A9AAA] text-[13px]">Co-founder &amp; CEO</p>
               </div>
               <div className="w-px h-8 bg-[#E8DFC8]" />
               <div>
                 <p className="text-[#1C3A4A] font-semibold text-[15px]">Evan Sherman</p>
-                <p className="text-[#7A9AAA] text-[13px]">Co-Founder & Strategy</p>
+                <p className="text-[#7A9AAA] text-[13px]">Co-founder &amp; COO</p>
               </div>
             </div>
           </div>

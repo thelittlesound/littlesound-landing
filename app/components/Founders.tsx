@@ -47,12 +47,12 @@ export default function Founders() {
             <div className="flex items-center gap-6 mt-10 pt-8 border-t border-white/10">
               <div>
                 <p className="text-white font-semibold text-[15px]">Kelly Sherman</p>
-                <p className="text-white/45 text-[13px]">Founder & CEO</p>
+                <p className="text-white/45 text-[13px]">Co-founder &amp; CEO</p>
               </div>
               <div className="w-px h-8 bg-white/15" />
               <div>
                 <p className="text-white font-semibold text-[15px]">Evan Sherman</p>
-                <p className="text-white/45 text-[13px]">Co-Founder & Strategy</p>
+                <p className="text-white/45 text-[13px]">Co-founder &amp; COO</p>
               </div>
             </div>
           </div>
