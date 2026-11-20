@@ -33,7 +33,7 @@ export default function Founders() {
 
             <div className="space-y-4 text-[15px] leading-[1.8] text-white/60">
               <p>
-                We're <strong className="text-white/90 font-semibold">Kelly and Evan Sherman</strong> — parents to a 9-year-old and a 4-year-old, and longtime Seattle residents. We built Little Sound because we experienced this problem over and over, and couldn't find anything that actually worked the way families think.
+                We're <strong className="text-white/90 font-semibold">Kelly and Evan Sherman</strong> — parents of two, and longtime Seattle residents. We built Little Sound because we experienced this problem over and over, and couldn't find anything that actually worked the way families think.
               </p>
               <p>
                 We're not a big tech company. We're not backed by people who've never packed a camp bag at 7am. <strong className="text-white/90 font-semibold">We're parents who got fed up and decided to fix it.</strong>

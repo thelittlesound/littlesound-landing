@@ -57,7 +57,7 @@ const ROADMAP = [
     timeframe: '18–36 months',
     status: 'future',
     items: [
-      'Expand to Portland, Denver, Austin',
+      'Expand to more cities',
       'National provider network',
       'Family membership program',
     ],
@@ -110,7 +110,7 @@ export default function About() {
 
             <div className="space-y-5 text-[16px] leading-[1.85] text-[#3A5A6A]">
               <p>
-                We&apos;re <strong className="text-[#1C3A4A] font-semibold">Kelly and Evan Sherman</strong> — parents to a 9-year-old and a 4-year-old, and longtime Seattle residents. Like most Seattle parents, we spend a surprising amount of time just trying to figure out what our kids can do.
+                We&apos;re <strong className="text-[#1C3A4A] font-semibold">Kelly and Evan Sherman</strong> — parents of two, and longtime Seattle residents. Like most Seattle parents, we spend a surprising amount of time just trying to figure out what our kids can do.
               </p>
               <p>
                 It&apos;s not that the activities aren&apos;t out there. Seattle has an incredible ecosystem of camps, studios, sports leagues, and programs. The problem is finding them. Every provider has their own website. Registration opens on different dates. Pricing is buried. Age ranges are unclear. And by the time you&apos;ve done the research, the session is full.

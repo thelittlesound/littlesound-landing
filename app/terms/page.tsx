@@ -2,15 +2,17 @@ export default function TermsOfService() {
   return (
     <main style={{ maxWidth: "720px", margin: "0 auto", padding: "4rem 1.5rem", fontFamily: "'DM Sans', sans-serif", color: "#1C3A4A", lineHeight: "1.7" }}>
       <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 300, fontSize: "3rem", marginBottom: "0.5rem" }}>Terms of Service</h1>
-      <p style={{ color: "#7A9AAA", fontSize: "0.875rem", marginBottom: "3rem" }}>Last updated: August 2026</p>
+      <p style={{ color: "#7A9AAA", fontSize: "0.875rem", marginBottom: "3rem" }}>Last updated: November 2026</p>
  
-      <p>By joining the Little Sound waitlist, creating a family or provider account, or otherwise using our website at thelittlesound.com, you agree to these terms. Please read them — they're short and written in plain English.</p>
+      <p>By creating a family or provider account, or otherwise using our website at thelittlesound.com, you agree to these terms. Please read them — they're short and written in plain English.</p>
  
       <h2 style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: "1.25rem", marginTop: "2.5rem", marginBottom: "0.75rem" }}>Who We Are</h2>
-      <p>Little Sound is a family activity discovery and booking platform based in Seattle, Washington.</p>
+      <p>Little Sound is a family activity discovery and planning platform based in Seattle, Washington.</p>
  
-      <h2 style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: "1.25rem", marginTop: "2.5rem", marginBottom: "0.75rem" }}>The Waitlist</h2>
-      <p>By joining our waitlist, you're expressing interest in early access to Little Sound. This is not a purchase or a binding commitment on either side. We'll contact you when we're ready to onboard beta users. You can remove yourself at any time by unsubscribing from our emails.</p>
+      <h2 style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: "1.25rem", marginTop: "2.5rem", marginBottom: "0.75rem" }}>Accounts and Listings</h2>
+      <p>Family and provider accounts are free. Keep your login secure and the information you give us accurate.</p>
+      <p>Listings describe programs run by independent providers, with details taken from each provider's own site. Details can change, so confirm dates, ages, and prices with the provider before you sign up. You sign up and pay with the provider directly; Little Sound isn't part of that agreement.</p>
+      <p>If you joined our earlier email list, you can leave it at any time by unsubscribing from our emails.</p>
  
       <h2 style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: "1.25rem", marginTop: "2.5rem", marginBottom: "0.75rem" }}>Use of the Site</h2>
       <p>You agree to use thelittlesound.com for lawful purposes only. You may not:</p>
@@ -28,7 +30,7 @@ export default function TermsOfService() {
       <p>The site is provided "as is." We make no guarantees about availability, accuracy, or fitness for a particular purpose. We're a small startup doing our best — we appreciate your patience as we build.</p>
  
       <h2 style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: "1.25rem", marginTop: "2.5rem", marginBottom: "0.75rem" }}>Limitation of Liability</h2>
-      <p>To the fullest extent permitted by law, Little Sound is not liable for any indirect, incidental, or consequential damages arising from your use of this site or the waitlist.</p>
+      <p>To the fullest extent permitted by law, Little Sound is not liable for any indirect, incidental, or consequential damages arising from your use of this site.</p>
  
       <h2 style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: "1.25rem", marginTop: "2.5rem", marginBottom: "0.75rem" }}>Changes to These Terms</h2>
       <p>We may update these terms as the product evolves. We'll update the "last updated" date at the top and notify you of material changes by email.</p>
