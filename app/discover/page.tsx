@@ -12,6 +12,7 @@ import { browsableKids, fitsKid, type MatchKid } from '@/lib/kid-match';
 import { CAMP_THEMES, campTheme, themeLabel } from '@/lib/camps';
 import { KIND_DEFS, kindsOf, kindLabel, showKinds } from '@/lib/kinds';
 import { closeness, parse, placeLabel, type Place, type SearchQuery } from '@/lib/search';
+import { GOALS, picksFor, type Goal } from '@/lib/picks';
 import SearchBox from './SearchBox';
 
 type Activity = Omit<typeof staticActivities[0], 'price' | 'level' | 'serves' | 'theme' | 'subcategory'> & {
@@ -102,6 +103,7 @@ function ActivityCard({
   place,
   saveLabel,
   savedLabel,
+  why,
 }: {
   a: Activity;
   saved: boolean;
@@ -110,6 +112,8 @@ function ActivityCard({
   place: Place | null;
   saveLabel: string;
   savedLabel: string;
+  /** Child-first picks: true reasons it suits this child (lib/picks.ts). */
+  why?: string;
 }) {
   const kinds = kindsOf(a).slice(0, 3).map((k) => kindLabel(a.category, k));
   const theme = a.category === 'Camps' ? campTheme(a) : null;
@@ -144,6 +148,12 @@ function ActivityCard({
           <span className="text-[13px] text-text-mid">{a.provider}</span>
         </div>
       </div>
+      {why && (
+        <p className="text-[13.5px] leading-snug text-text-dark">
+          <span className="font-semibold text-teal-800">Why it fits: </span>
+          {why}
+        </p>
+      )}
       <dl className="grid grid-cols-2 gap-x-3.5 gap-y-2.5 px-3.5 py-3 rounded-[14px] bg-cream-300">
         {facts.map((f) => (
           <div key={f.k} className="flex flex-col gap-0.5 min-w-0">
@@ -206,6 +216,8 @@ export default function Discover() {
   const [kids, setKids] = useState<MatchKid[]>([]);
   const [forKidId, setForKidId] = useState<string | null>(null);
   const [useInterests, setUseInterests] = useState(true);
+  // Child-first picks: what the parent is looking for right now.
+  const [goal, setGoal] = useState<Goal>('team');
   const [savedFor, setSavedFor] = useState<Record<string, string | null>>({});
   const forKid = useMemo(() => kids.find((k) => k.id === forKidId) ?? null, [kids, forKidId]);
   const [saveNote, setSaveNote] = useState<{ ok: boolean; text: string } | null>(null);
@@ -454,6 +466,14 @@ export default function Discover() {
       .map((x) => x.a);
   }, [pool, kind, sort, dateLines, place]);
 
+  // Child-first picks use home (profile neighborhood) unless a place was searched.
+  const pickPlace: Place | null = place ?? (profileArea ? { area: profileArea, profile: true } : null);
+  const kidPicks = useMemo(
+    () => (forKid ? picksFor(forKid, goal, activities as any[], { place: pickPlace, dateLines }) : { picks: [], eligible: 0 }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [forKid, goal, activities, place, profileArea, dateLines]
+  );
+
   const farCount = useMemo(() => {
     if (!place || showFar) return 0;
     return activities.filter(
@@ -564,14 +584,28 @@ export default function Discover() {
   }
 
   const catLabel = category === 'All' ? null : CATEGORIES.find((c) => c.name === category)?.label ?? category;
-  const heading = text
+  // Child-first picks own the section heading when a child with an age is chosen.
+  const picksMode = !!forKid && forKid.age != null && category === 'All' && !text;
+  const goalWord = GOALS.find((g) => g.key === goal)!.label.toLowerCase();
+  const nPicks = kidPicks.picks.length;
+  const heading = picksMode
+    ? nPicks === 0
+      ? `No picks for ${forKid!.name} here yet`
+      : `${['One pick', 'Two picks', 'Three picks'][nPicks - 1]} for ${forKid!.name}`
+    : text
     ? `Results for “${text}”`
     : catLabel
       ? `${catLabel}${forKid ? ` for ${forKid.name}` : ''}`
       : forKid
         ? `Everything for ${forKid.name}`
         : 'Everything for your kids';
-  const subline = place
+  const subline = picksMode
+    ? nPicks === 0
+      ? `Nothing we know of fits ${goalWord} for a ${forKid!.age}-year-old yet. Try another goal, or browse everything below.`
+      : nPicks < 3
+        ? `Only ${nPicks} of the ${kidPicks.eligible} programs for a ${forKid!.age}-year-old fit ${goalWord} well. We’d rather show fewer than pad the list.`
+        : `From the ${kidPicks.eligible} programs that fit a ${forKid!.age}-year-old${pickPlace ? ` near ${pickPlace.area}` : ''}.`
+    : place
     ? `Closest to ${place.area} first, then nearby, then programs with several locations.`
     : category !== 'All'
       ? CATEGORY_LINES[category] ?? ''
@@ -817,6 +851,53 @@ export default function Discover() {
             >
               {campsForSubject} {category === 'STEM' ? 'STEM' : category.toLowerCase()} {campsForSubject === 1 ? 'camp is' : 'camps are'} under Camps: see {campsForSubject === 1 ? 'it' : 'them'} →
             </button>
+          )}
+
+          {/* Child-first picks (lib/picks.ts): a few good picks for the chosen child, then everything below. */}
+          {forKid && category === 'All' && !text && (
+            forKid.age == null ? (
+              <p className="text-[14px] text-text-mid">
+                Add {forKid.name}&rsquo;s age on <a href="/families/dashboard" className="font-semibold text-teal-700 underline underline-offset-2">your dashboard</a> to see picks made for {forKid.name}.
+              </p>
+            ) : (
+              <section aria-label={`Picks for ${forKid.name}`} className="flex flex-col gap-4 pb-2">
+                  <div className="flex flex-wrap gap-2" role="group" aria-label="Looking for">
+                    {GOALS.map((g) => (
+                      <button
+                        key={g.key}
+                        type="button"
+                        onClick={() => setGoal(g.key)}
+                        aria-pressed={goal === g.key}
+                        className={`min-h-[40px] px-4 rounded-full border-[1.5px] text-[14px] font-medium whitespace-nowrap transition-colors ${
+                          goal === g.key ? 'bg-teal-800 border-teal-800 text-white' : 'bg-white border-cream-700 text-text-dark hover:border-teal-700'
+                        }`}
+                      >
+                        {g.label}
+                      </button>
+                    ))}
+                  </div>
+                {kidPicks.picks.length > 0 && (
+                  <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-4">
+                    {kidPicks.picks.map((p) => (
+                      <ActivityCard
+                        key={`pick-${p.a.id}`}
+                        a={p.a}
+                        why={p.why}
+                        saved={savedIds.has(p.a.id)}
+                        onToggleSave={toggleSave}
+                        dateLine={dateLines[p.a.id]}
+                        place={place}
+                        {...labelsFor(p.a)}
+                      />
+                    ))}
+                  </div>
+                )}
+                <div className="flex flex-col gap-1 pt-4">
+                  <h2 className="font-display text-[clamp(24px,2.6vw,28px)] font-light text-text-dark">Everything for {forKid.name}</h2>
+                  <p className="text-[14px] text-text-mid">{`Every program that fits ${forKid.name}’s age${forKid.interests.length > 0 && useInterests ? ' and interests' : ''}${place ? `, closest to ${place.area} first` : ''}.`}</p>
+                </div>
+              </section>
+            )
           )}
 
           {/* Refine: count, age, level, sort */}
