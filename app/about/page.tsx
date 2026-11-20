@@ -22,7 +22,7 @@ const VALUES = [
   {
     icon: 'people',
     title: 'Build with the community',
-    body: 'The best ideas come from Seattle parents and providers — not from us. We talk to families and activity providers constantly, and what we build reflects what we hear.',
+    body: 'The best ideas come from Seattle parents and providers — not from us. We listen to families and providers, and what we build reflects what we hear.',
   },
 ];
 
