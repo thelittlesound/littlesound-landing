@@ -142,7 +142,7 @@ export default function SavedList({ saved, kids, dateLines, removingId, onRemove
                         </svg>
                       </button>
                     </div>
-                    <dl className="col-span-2 lg:col-span-1 lg:order-2 min-w-0 grid grid-cols-2 sm:grid-cols-4 gap-x-3 gap-y-2 px-3 py-2.5 rounded-[12px] bg-cream-300">
+                    <dl className="col-span-2 lg:col-span-1 lg:order-2 min-w-0 grid grid-cols-2 sm:grid-cols-[minmax(0,1.5fr)_minmax(0,0.7fr)_minmax(0,1.2fr)_minmax(0,1fr)] gap-x-3 gap-y-2 px-3 py-2.5 rounded-[12px] bg-cream-300">
                       {facts.map((f) => (
                         <div key={f.k} className="min-w-0">
                           <dt className="text-[10.5px] font-semibold uppercase tracking-[0.06em] text-text-mid">{f.k}</dt>
