@@ -13,7 +13,7 @@ export default function Solution() {
       num: '02',
       icon: 'sparkle',
       title: 'We Find the Best Options',
-      body: 'Results matched to each child\'s age and interests, with details straight from each provider\'s own site.',
+      body: 'A few picks for each child, matched to their age, interests and neighborhood, with details straight from each provider\'s own site.',
       honest: 'We read their sites so you don\'t have to.',
     },
     {
