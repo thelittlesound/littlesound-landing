@@ -348,8 +348,8 @@ export default function DashboardClient({
             panel sits beside the list from 1280px (below that it follows the
             list, so rows keep room for their facts) and goes full width above
             the list while editing. */}
-        <div className="flex flex-wrap items-start gap-6 mt-10">
-          <div className={`min-w-0 basis-full ${editing ? '' : 'xl:basis-auto xl:flex-[999_1_600px]'}`}>
+        <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_300px] items-start gap-6 mt-10">
+          <div className={`min-w-0 ${editing ? 'xl:col-span-2' : ''}`}>
             <SavedList
               saved={saved}
               kids={calendar?.kids ?? []}
@@ -377,7 +377,7 @@ export default function DashboardClient({
               }
             />
           </div>
-          <aside className={`min-w-0 flex flex-col gap-3 basis-full ${editing ? 'order-first' : 'xl:basis-auto xl:flex-[1_1_280px]'}`}>
+          <aside className={`min-w-0 flex flex-col gap-3 ${editing ? 'order-first xl:col-span-2' : ''}`}>
         {/* Profile card */}
         <div id="family-profile" className="scroll-mt-24 bg-white rounded-[20px] shadow-[0_4px_20px_rgba(10,74,90,0.07)] p-5">
           <div className="flex items-center justify-between mb-4">
