@@ -8,7 +8,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import staticActivities from '../data/activities.json';
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
-import { browsableKids, fitsKid, type MatchKid } from '@/lib/kid-match';
+import { browsableKids, fitsKid, namedCategories, type MatchKid } from '@/lib/kid-match';
 import { CAMP_THEMES, campTheme, themeLabel } from '@/lib/camps';
 import { KIND_DEFS, kindsOf, kindLabel, showKinds } from '@/lib/kinds';
 import { closeness, parse, placeLabel, type Place, type SearchQuery } from '@/lib/search';
@@ -614,6 +614,39 @@ export default function Discover() {
       ? CATEGORY_LINES[category] ?? ''
       : `${activities.length} camps, classes and teams across Seattle and the south end.`;
   const pickedKind = kind && category !== 'All' ? kindLabel(category, kind) : null;
+  // "Ella likes" tiles: only categories the parent named for this child.
+  const liked = forKid ? namedCategories(forKid) : new Set<string>();
+  const likedTiles = CATEGORIES.filter((c) => liked.has(c.name));
+  const otherTiles = likedTiles.length ? CATEGORIES.filter((c) => !liked.has(c.name)) : CATEGORIES;
+  const categoryTile = (c: (typeof CATEGORIES)[number], isLiked: boolean) => {
+    const on = category === c.name;
+    const n = counts[c.name] ?? 0;
+    return (
+      <button
+        key={c.name}
+        type="button"
+        onClick={() => chooseCategory(on ? 'All' : c.name)}
+        aria-pressed={on}
+        className={`min-h-[60px] px-3.5 py-2 rounded-[16px] border-[1.5px] flex items-center gap-2.5 text-left transition-colors ${
+          on
+            ? 'bg-teal-800 border-teal-800 text-white'
+            : isLiked
+              ? 'bg-cream-300 border-gold text-text-dark hover:border-teal-700'
+              : 'bg-white border-cream-700 text-text-dark hover:border-teal-700'
+        }`}
+      >
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={on ? '#F5EFE0' : '#A8865A'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="shrink-0">
+          <path d={c.icon} />
+        </svg>
+        <span className="flex flex-col gap-px min-w-0">
+          <span className="text-[14px] font-semibold leading-tight">{c.label}</span>
+          <span className={`text-[12px] leading-tight ${on ? 'text-teal-100' : 'text-text-mid'}`}>
+            {n} {n === 1 ? 'program' : 'programs'}
+          </span>
+        </span>
+      </button>
+    );
+  };
   const searchSummary = [catLabel, ...chips.map((c) => c.label)].filter(Boolean).join(' · ');
 
   return (
@@ -725,38 +758,36 @@ export default function Discover() {
       </section>
 
       {/* Category tiles: one row on desktop (2 lines), two rows that swipe on a phone */}
+      {/* Category tiles. With a child chosen who has interests: "Ella likes"
+          first, then "More for age 10" (approved 2026-11-20, canvas
+          https://claude.ai/artifact/X8FuQhq6aoecPA2mkUbDAH, option C). Counts
+          everywhere are what the tile opens. */}
       <section className="px-4 md:px-10 pt-5 pb-1 border-b border-cream-700">
-        <div
-          ref={railRef}
-          className="max-w-[1200px] mx-auto grid grid-flow-col grid-rows-2 auto-cols-[minmax(160px,1fr)] gap-2.5 overflow-x-auto pb-4 scrollbar-hide"
-          role="group"
-          aria-label="Category"
-        >
-          {CATEGORIES.map((c) => {
-            const on = category === c.name;
-            const n = counts[c.name] ?? 0;
-            return (
-              <button
-                key={c.name}
-                type="button"
-                onClick={() => chooseCategory(on ? 'All' : c.name)}
-                aria-pressed={on}
-                className={`min-h-[60px] px-3.5 py-2 rounded-[16px] border-[1.5px] flex items-center gap-2.5 text-left transition-colors ${
-                  on ? 'bg-teal-800 border-teal-800 text-white' : 'bg-white border-cream-700 text-text-dark hover:border-teal-700'
-                }`}
-              >
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={on ? '#F5EFE0' : '#A8865A'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="shrink-0">
-                  <path d={c.icon} />
+        <div className="max-w-[1200px] mx-auto flex flex-col gap-2.5">
+          {likedTiles.length > 0 && (
+            <>
+              <p className="flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-[0.08em] text-text-mid">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A8865A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M12 20s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 9c0 6-8 11-8 11z" />
                 </svg>
-                <span className="flex flex-col gap-px min-w-0">
-                  <span className="text-[14px] font-semibold leading-tight">{c.label}</span>
-                  <span className={`text-[12px] leading-tight ${on ? 'text-teal-100' : 'text-text-mid'}`}>
-                    {n} {n === 1 ? 'program' : 'programs'}
-                  </span>
-                </span>
-              </button>
-            );
-          })}
+                {forKid!.name} likes
+              </p>
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-2.5" role="group" aria-label={`${forKid!.name} likes`}>
+                {likedTiles.map((c) => categoryTile(c, true))}
+              </div>
+              <p className="mt-1.5 text-[12px] font-semibold uppercase tracking-[0.08em] text-text-mid">
+                More {forKid!.age != null ? `for age ${forKid!.age}` : `for ${forKid!.name}`}
+              </p>
+            </>
+          )}
+          <div
+            ref={railRef}
+            className="grid grid-flow-col grid-rows-2 auto-cols-[minmax(160px,1fr)] gap-2.5 overflow-x-auto pb-4 scrollbar-hide"
+            role="group"
+            aria-label="Category"
+          >
+            {otherTiles.map((c) => categoryTile(c, false))}
+          </div>
         </div>
       </section>
 

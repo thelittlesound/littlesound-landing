@@ -75,3 +75,28 @@ export function fitsKid(
 export function matchesInterest(a: { category: string | null | undefined; theme?: string | null }, cats: Set<string>): boolean {
   return cats.has(a.category ?? '') || (a.category === 'Camps' && !!a.theme && cats.has(a.theme));
 }
+
+/**
+ * Categories a parent actually NAMED for this child ("Ella likes"), used for
+ * labels. Narrower than categoriesFor(), which also matches related
+ * categories (Arts & Crafts → Cooking) and adds Early Childhood for little
+ * kids: fine for matching, but labeling those "Ella likes" would claim
+ * something the parent never said.
+ */
+const NAMED_CATEGORIES: Record<string, string[]> = {
+  'Camps': ['Camps'],
+  'Sports & Athletics': ['Sports'],
+  'Arts & Crafts': ['Arts'],
+  'Music & Dance': ['Music', 'Dance'],
+  'Academic & Tutoring': ['Academic'],
+  'Outdoor Adventure': ['Outdoor'],
+  'STEM & Tech': ['STEM'],
+  'Swim & Aquatics': ['Swimming'],
+  'Dance & Movement': ['Dance'],
+  'Theater & Performance': ['Theater'],
+};
+export function namedCategories(kid: Pick<MatchKid, 'interests'>): Set<string> {
+  const cats = new Set<string>();
+  for (const i of kid.interests) for (const c of NAMED_CATEGORIES[i] ?? []) cats.add(c);
+  return cats;
+}
