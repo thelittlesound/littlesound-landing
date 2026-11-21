@@ -411,18 +411,21 @@ export default function Discover() {
     return text.split(' ').every((w) => hay.includes(w));
   };
   // Everything except the category, kind, theme and level.
-  const baseFits = (a: Activity, allowFar: boolean) =>
+  // ignoreInterests: category tile counts show what each tile OPENS, and a
+  // child's interests only narrow the "All" view, so they must not zero out
+  // other categories' counts (2026-11-20: Swimming showed 0 for Ella).
+  const baseFits = (a: Activity, allowFar: boolean, ignoreInterests = false) =>
     ageFits(a) &&
     (!free || a.price === 0) &&
     (!under || (a.price != null && a.price <= under)) &&
     textFits(a) &&
     (allowFar || closeness(a.neighborhood, place).tier !== 3) &&
     // A child's interests only narrow the "All" view.
-    (!forKid || category !== 'All' || !useInterests || !!text || fitsKid(a, forKid, true));
+    (ignoreInterests || !forKid || category !== 'All' || !useInterests || !!text || fitsKid(a, forKid, true));
 
   const counts = useMemo(() => {
     const c: Record<string, number> = {};
-    for (const a of activities) if (baseFits(a, showFar)) c[a.category] = (c[a.category] ?? 0) + 1;
+    for (const a of activities) if (baseFits(a, showFar, true)) c[a.category] = (c[a.category] ?? 0) + 1;
     return c;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activities, kidAge, ageGroup, free, under, text, place, showFar, forKid, useInterests, category]);
