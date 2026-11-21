@@ -111,8 +111,9 @@ export default function SavedList({ saved, kids, dateLines, removingId, onRemove
                 ];
                 const picker = sessions(s);
                 return (
-                  <article key={s.activity_id} className={`flex flex-wrap items-center gap-x-[18px] gap-y-2.5 px-4 py-3.5 ${i ? 'border-t border-cream-700' : ''}`}>
-                    <div className="flex-[1_1_240px] min-w-0 flex flex-col gap-0.5">
+                  <article key={s.activity_id} className={`grid grid-cols-[minmax(0,1fr)_auto] lg:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)_auto] items-center gap-x-4 gap-y-2.5 px-4 py-3.5 ${i ? 'border-t border-cream-700' : ''}`}>
+                    {/* Narrow: title + actions on top, facts below. Wide: title · facts · actions in one line. */}
+                    <div className="min-w-0 flex flex-col gap-0.5 lg:order-1">
                       {color && (
                         <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.06em]" style={{ color }}>
                           <span className="w-[7px] h-[7px] rounded-full" style={{ background: color }} />
@@ -122,15 +123,7 @@ export default function SavedList({ saved, kids, dateLines, removingId, onRemove
                       <h4 className="font-display text-[20px] font-medium leading-[1.15] text-text-dark">{s.title}</h4>
                       {s.provider && <span className="text-[13px] text-text-mid">{s.provider}</span>}
                     </div>
-                    <dl className="flex-[2_1_330px] min-w-0 grid grid-cols-4 gap-x-3 gap-y-2 px-3 py-2.5 rounded-[12px] bg-cream-300">
-                      {facts.map((f) => (
-                        <div key={f.k} className="min-w-0">
-                          <dt className="text-[10.5px] font-semibold uppercase tracking-[0.06em] text-text-mid">{f.k}</dt>
-                          <dd className={`mt-0.5 text-[12.5px] leading-[1.3] ${f.warn ? 'text-gold-deep' : f.muted ? 'text-text-mid' : 'text-text-dark'}`}>{f.v}</dd>
-                        </div>
-                      ))}
-                    </dl>
-                    <div className="flex-none flex items-center gap-1 ml-auto">
+                    <div className="flex items-center gap-0.5 self-start lg:self-center lg:order-3">
                       {s.website && (
                         <a href={s.website} target="_blank" rel="noopener noreferrer" className="min-h-[44px] px-2.5 inline-flex items-center text-[13px] font-semibold text-teal-700 hover:text-teal-800">
                           Details ↗
@@ -149,7 +142,15 @@ export default function SavedList({ saved, kids, dateLines, removingId, onRemove
                         </svg>
                       </button>
                     </div>
-                    {picker && <div className="basis-full -mt-3">{picker}</div>}
+                    <dl className="col-span-2 lg:col-span-1 lg:order-2 min-w-0 grid grid-cols-4 gap-x-3 gap-y-2 px-3 py-2.5 rounded-[12px] bg-cream-300">
+                      {facts.map((f) => (
+                        <div key={f.k} className="min-w-0">
+                          <dt className="text-[10.5px] font-semibold uppercase tracking-[0.06em] text-text-mid">{f.k}</dt>
+                          <dd className={`mt-0.5 text-[12.5px] leading-[1.3] ${f.warn ? 'text-gold-deep' : f.muted ? 'text-text-mid' : 'text-text-dark'}`}>{f.v}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                    {picker && <div className="col-span-full -mt-3 lg:order-4">{picker}</div>}
                   </article>
                 );
               })}
