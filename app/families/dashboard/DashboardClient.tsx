@@ -345,9 +345,11 @@ export default function DashboardClient({
 
         {/* Saved activities + your family (approved 2026-11-20, canvas
             https://claude.ai/artifact/EUtavJuUysZ3SSMzXS88Ny). The family
-            panel sits beside the list and takes the full width while editing. */}
+            panel sits beside the list from 1280px (below that it follows the
+            list, so rows keep room for their facts) and goes full width above
+            the list while editing. */}
         <div className="flex flex-wrap items-start gap-6 mt-10">
-          <div className={`min-w-0 ${editing ? 'basis-full' : 'flex-[999_1_600px]'}`}>
+          <div className={`min-w-0 basis-full ${editing ? '' : 'xl:basis-auto xl:flex-[999_1_600px]'}`}>
             <SavedList
               saved={saved}
               kids={calendar?.kids ?? []}
@@ -375,7 +377,7 @@ export default function DashboardClient({
               }
             />
           </div>
-          <aside className={`min-w-0 flex flex-col gap-3 ${editing ? 'basis-full order-first' : 'flex-[1_1_280px]'}`}>
+          <aside className={`min-w-0 flex flex-col gap-3 basis-full ${editing ? 'order-first' : 'xl:basis-auto xl:flex-[1_1_280px]'}`}>
         {/* Profile card */}
         <div id="family-profile" className="scroll-mt-24 bg-white rounded-[20px] shadow-[0_4px_20px_rgba(10,74,90,0.07)] p-5">
           <div className="flex items-center justify-between mb-4">
