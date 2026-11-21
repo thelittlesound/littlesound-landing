@@ -189,7 +189,7 @@ export default function ForFamilies() {
               Activities for every interest.
             </h2>
             <p className="text-[17px] text-text-mid max-w-xl mx-auto mt-4">
-              From swimming to coding to theater, with more added every week.
+              From swimming to coding to theater, and we keep adding more.
             </p>
           </div>
 

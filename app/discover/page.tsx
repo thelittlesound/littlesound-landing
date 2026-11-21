@@ -975,7 +975,7 @@ export default function Discover() {
             <div className="text-center py-14 px-6 rounded-[20px] bg-white">
               <p className="font-display text-[28px] text-text-dark mb-2">Nothing fits all of that yet.</p>
               <p className="text-[15px] text-text-mid mb-6">
-                {chips.length ? 'Remove a chip under the search box to widen it, or start over.' : 'We’re adding providers across Seattle every week.'}
+                {chips.length ? 'Remove a chip under the search box to widen it, or start over.' : 'We keep adding providers across Seattle.'}
               </p>
               <button type="button" onClick={clearAll} className="min-h-[44px] px-6 rounded-full bg-teal-800 text-white text-[14px] font-semibold hover:bg-teal-700 transition-colors">
                 Start over
