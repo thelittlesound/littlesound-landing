@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
+import { normalizeInterests } from '@/lib/categories';
 
 interface Kid {
   age: number;
@@ -81,7 +82,7 @@ export async function POST(request: NextRequest) {
       email,
       neighborhood: neighborhood || null,
       kids: Array.isArray(kids) ? kids.filter((k) => Number.isFinite(k.age)) : [],
-      preferences: Array.isArray(preferences) ? preferences : [],
+      preferences: normalizeInterests(preferences),
     });
 
     if (profileError) {

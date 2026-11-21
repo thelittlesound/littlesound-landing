@@ -5,7 +5,7 @@ import { getDatesByActivity } from '@/lib/activity-dates-server';
 import { seattleToday } from '@/lib/activity-dates';
 import { getCatalog } from '@/lib/catalog-server';
 import { getKids, getPicks } from '@/lib/family-calendar-server';
-import { INTERESTS } from '@/lib/family-profile';
+import { normalizeInterests } from '@/lib/categories';
 import { kidLabel } from '@/lib/calendar-grid';
 import { plusDays } from '@/lib/ics';
 import { summerIdeas, summerWeeks, weekCells, type SummerKid, type SummerPlanRow } from '@/lib/summer';
@@ -34,7 +34,7 @@ async function summerKids(userId: string): Promise<SummerKid[]> {
   const raw = (Array.isArray(data?.kids) ? data!.kids : []) as { id?: string; interests?: unknown }[];
   return kids.map((k, i) => {
     const r = raw.find((x) => x && x.id === k.id);
-    const interests = Array.isArray(r?.interests) ? (r!.interests as unknown[]).filter((x): x is string => typeof x === 'string' && INTERESTS.includes(x)) : [];
+    const interests = normalizeInterests(r?.interests);
     return { id: k.id, name: kidLabel(k, i), age: k.age, interests };
   });
 }

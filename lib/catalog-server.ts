@@ -5,21 +5,7 @@
 import seedData from '@/app/data/activities.json';
 import { supabaseAdmin } from '@/lib/supabase';
 import { campTheme } from '@/lib/camps';
-
-// Map provider form categories → Discover page categories
-const CATEGORY_MAP: Record<string, string> = {
-  'Camps':               'Camps',
-  'Sports & Athletics':  'Sports',
-  'Arts & Crafts':       'Arts',
-  'Music & Dance':       'Music',
-  'Academic & Tutoring': 'Academic',
-  'Outdoor Adventure':   'Outdoor',
-  'STEM & Tech':         'STEM',
-  'Swim & Aquatics':     'Swimming',
-  'Dance & Movement':    'Dance',
-  'Theater & Performance': 'Theater',
-  'Other':               'Arts', // fallback
-};
+import { normalizeCategory } from '@/lib/categories';
 
 export interface ProviderActivity {
   id: string;
@@ -78,7 +64,7 @@ export async function getProviderActivities(): Promise<{ activities: ProviderAct
 
   // Map Supabase submission shape → activity card shape
   const activities: ProviderActivity[] = (data || []).map((s) => {
-    const category = CATEGORY_MAP[s.category ?? ''] ?? s.category ?? 'Other';
+    const category = normalizeCategory(s.category); // older rows may hold the pre-11-20 form labels
     return {
     // A claimed seed listing keeps its original Discover id ("42"), so it
     // replaces the static card in place and families' saved hearts still match.

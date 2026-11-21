@@ -4,12 +4,9 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { IconChip } from '@/app/components/LineIcon';
+import CategoryPicker from '@/app/components/CategoryPicker';
+import { formCategory } from '@/lib/categories';
 
-const CATEGORIES = [
-  'Camps', 'Sports & Athletics', 'Arts & Crafts', 'Music & Dance',
-  'Academic & Tutoring', 'Outdoor Adventure', 'STEM & Tech',
-  'Swim & Aquatics', 'Dance & Movement', 'Theater & Performance', 'Other',
-];
 
 const PRICE_UNITS = ['session', 'class', 'week', 'month', 'camp', 'season', 'year'];
 
@@ -77,7 +74,6 @@ export default function ListingForm({
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<ListingFormState>({
     title: '',
-    category: defaultCategory,
     subcategory: '',
     description: '',
     ageMin: '',
@@ -88,6 +84,8 @@ export default function ListingForm({
     website: '',
     phone: '',
     ...initial,
+    // Discover's 14 since 11-20: an old label opens on its first subject; "Other" asks for a pick.
+    category: formCategory(initial?.category ?? defaultCategory),
   });
   const [errors, setErrors] = useState<Errors>({});
   const [submitting, setSubmitting] = useState(false);
@@ -103,7 +101,7 @@ export default function ListingForm({
     const e: Errors = {};
     if (s === 0) {
       if (!form.title.trim()) e.title = 'Required';
-      if (!form.category) e.category = 'Select a category';
+      if (!form.category) e.category = 'Pick a category';
       if (form.description.trim().length < 20) e.description = 'At least 20 characters';
     }
     if (s === 1) {
@@ -293,13 +291,12 @@ function StepDetails({ form, set, errors }: { form: ListingFormState; set: (f: k
         placeholder="e.g. Summer Art Intensive, Soccer Skills Camp"
       />
 
-      <SelectField
-        label="Category"
+      <CategoryPicker
+        label="What kind of program is it?"
         value={form.category}
         onChange={(v) => set('category', v)}
-        options={withCurrent(CATEGORIES, form.category)}
-        placeholder="Select a category"
         error={errors.category}
+        hint="Families find it under this on Discover. Mainly a camp? Choose Camps. Doesn't fit neatly? Pick the closest, and say more in the description."
       />
 
       <Field

@@ -4,16 +4,8 @@ import Link from 'next/link';
 import Footer from '../components/Footer';
 import CTA from '../components/CTA';
 import { useCatalogStats } from '../components/useCatalogStats';
-import { IconChip } from '../components/LineIcon';
-
-const CATEGORY_TILES = [
-  { icon: 'Sports', name: 'Sports & Fitness',  filter: 'Sports' },
-  { icon: 'Arts', name: 'Arts & Crafts',     filter: 'Arts' },
-  { icon: 'Swimming', name: 'Swimming',          filter: 'Swimming' },
-  { icon: 'Camps', name: 'Camps & Outdoors', filter: 'Outdoor' },
-  { icon: 'STEM', name: 'STEM & Academics',  filter: 'STEM' },
-  { icon: 'Music', name: 'Music & Dance',     filter: 'Music' },
-];
+import { IconChip, LineIcon } from '../components/LineIcon';
+import { CATEGORY_NAMES } from '@/lib/categories';
 
 const BENEFITS = [
   {
@@ -201,19 +193,26 @@ export default function ForFamilies() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-10">
-            {CATEGORY_TILES.map((cat) => (
-              <Link
-                key={cat.name}
-                href={`/discover?category=${encodeURIComponent(cat.filter)}`}
-                className="bg-cream-500 border border-cream-700 rounded-[20px] p-6 text-center hover:bg-cream-700 hover:border-teal-800/20 transition-all duration-200 group no-underline"
-              >
-                <div className="mb-3 flex justify-center group-hover:scale-110 transition-transform duration-200">
-                  <IconChip name={cat.icon} />
-                </div>
-                <p className="text-[13px] font-semibold text-text-dark">{cat.name}</p>
-              </Link>
-            ))}
+          {/* Discover's 14 tiles with live counts (2026-11-20): each opens exactly what it says. */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-2.5 mb-10">
+            {CATEGORY_NAMES.map((c) => {
+              const n = stats.byCategory?.[c] ?? 0;
+              return (
+                <Link
+                  key={c}
+                  href={`/discover?category=${encodeURIComponent(c)}`}
+                  className="min-h-[60px] px-3.5 py-2 rounded-[16px] border-[1.5px] border-cream-700 bg-white text-text-dark flex items-center gap-2.5 no-underline transition-colors hover:border-teal-700"
+                >
+                  <LineIcon name={c} size={26} color="#A8865A" className="shrink-0" />
+                  <span className="flex flex-col gap-px min-w-0">
+                    <span className="text-[14px] font-semibold leading-tight">{c}</span>
+                    <span className="text-[12px] leading-tight text-text-mid min-h-[15px]">
+                      {stats.byCategory ? `${n} ${n === 1 ? 'program' : 'programs'}` : ''}
+                    </span>
+                  </span>
+                </Link>
+              );
+            })}
           </div>
 
           <div className="text-center">

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { safeNext } from '@/lib/safe-next';
+import { isCategory } from '@/lib/categories';
 
 const BREVO_API_KEY = process.env.BREVO_API_KEY;
 const BREVO_API_URL = 'https://api.brevo.com/v3';
@@ -95,7 +96,7 @@ export async function POST(request: NextRequest) {
       last_name: lastName,
       email,
       business_name: businessName,
-      category: category || null,
+      category: isCategory(category) ? category : null, // Discover's 14 since 11-20
       website: website || null,
       phone: phone || null,
     });

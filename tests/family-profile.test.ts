@@ -8,16 +8,16 @@ const r1 = good(cleanProfile({
   first_name: '  Evan ',
   neighborhood: 'Ballard',
   kids: [
-    { id: 'k_abcd1234', name: 'Maya', age: '9', interests: ['Swim & Aquatics', 'STEM & Tech', 'STEM & Tech', 'Hacking'] },
+    { id: 'k_abcd1234', name: 'Maya', age: '9', interests: ['Swimming', 'STEM', 'STEM', 'Hacking'] },
     { id: 'k_efgh5678', name: 'Leo', age: 4, interests: ['Camps'] },
   ],
 }));
 ok(!!r1, 'valid profile accepted');
 ok(r1?.first_name === 'Evan', 'first name trimmed');
 ok(r1?.kids[0].age === 9 && r1?.kids[1].age === 4, 'ages as numbers (string "9" too)');
-ok(JSON.stringify(r1?.kids[0].interests) === JSON.stringify(['Swim & Aquatics', 'STEM & Tech']), 'per-kid interests: duplicates and unknown ones dropped');
+ok(JSON.stringify(r1?.kids[0].interests) === JSON.stringify(['Swimming', 'STEM']), 'per-kid interests: duplicates and unknown ones dropped');
 ok(JSON.stringify(r1?.kids[1].interests) === JSON.stringify(['Camps']), 'each kid keeps their own interests');
-ok(JSON.stringify(r1?.preferences) === JSON.stringify(['Camps', 'STEM & Tech', 'Swim & Aquatics']), 'preferences = all kids together, in list order');
+ok(JSON.stringify(r1?.preferences) === JSON.stringify(['Camps', 'Swimming', 'STEM']), 'preferences = all kids together, in list order');
 ok(r1?.kids[0].id === 'k_abcd1234', 'kid ids kept (calendar items point at them)');
 
 const r2 = good(cleanProfile({ first_name: '', neighborhood: 'Atlantis', kids: [{ id: 'k_abcd1234', name: '', age: '', interests: [] }] }));
@@ -35,7 +35,9 @@ ok('error' in cleanProfile({ kids: [{ id: 'k_abcd1234', name: 'A' }, { id: 'k_ab
 ok('error' in cleanProfile({ kids: 'nope' }), 'kids must be a list');
 ok('error' in cleanProfile({ kids: Array.from({ length: MAX_KIDS + 1 }, (_, i) => ({ id: `k_kid0000${i}`, name: 'x' })) }), 'too many kids rejected');
 ok(good(cleanProfile({ kids: [{ id: 'k_abcd1234', name: 'x'.repeat(60) }] }))?.kids[0].name?.length === 40, 'long names trimmed to 40');
-ok(INTERESTS.length === 10, 'interest list unchanged');
+ok(INTERESTS.length === 14 && INTERESTS.includes('Early Childhood'), 'interests = Discover\'s 14, Early Childhood included');
+const r4 = good(cleanProfile({ kids: [{ id: 'k_abcd1234', name: 'Old', interests: ['Music & Dance', 'Sports & Athletics', 'Dance'] }] }));
+ok(JSON.stringify(r4?.kids[0].interests) === JSON.stringify(['Sports', 'Music', 'Dance']), 'old labels saved before 11-20 come back in today\'s names (no Martial Arts added)');
 
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fail) process.exit(1);

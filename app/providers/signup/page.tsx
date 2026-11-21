@@ -5,20 +5,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { safeNext } from '@/lib/safe-next';
 import { LineIcon } from '@/app/components/LineIcon';
-
-const CATEGORIES = [
-  'Camps',
-  'Sports & Athletics',
-  'Arts & Crafts',
-  'Music & Dance',
-  'Academic & Tutoring',
-  'Outdoor Adventure',
-  'STEM & Tech',
-  'Swim & Aquatics',
-  'Dance & Movement',
-  'Theater & Performance',
-  'Other',
-];
+import CategoryPicker from '@/app/components/CategoryPicker';
 
 interface FormState {
   firstName: string;
@@ -84,7 +71,7 @@ function ProviderSignupForm() {
     if (!form.password || form.password.length < 8) e.password = 'At least 8 characters';
     if (form.confirmPassword !== form.password) e.confirmPassword = "Passwords don't match";
     if (!form.businessName.trim()) e.businessName = 'Required';
-    if (!form.category) e.category = 'Select a category';
+    if (!form.category) e.category = 'Pick a category';
     if (!form.agreeToTerms) e.agreeToTerms = 'You must agree to continue';
     return e;
   }
@@ -250,26 +237,14 @@ function ProviderSignupForm() {
             autoComplete="organization"
           />
 
-          {/* Category */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[13px] font-medium text-teal-800">Type of activity</label>
-            <div className="relative">
-              <select
-                value={form.category}
-                onChange={(e) => set('category', e.target.value)}
-                className={`w-full h-12 rounded-[12px] border-2 px-4 pr-10 text-[15px] font-body text-text-dark bg-white appearance-none transition-colors focus:outline-none focus:border-teal-800 ${
-                  errors.category ? 'border-error' : 'border-cream-700'
-                }`}
-              >
-                <option value="">Select a category</option>
-                {CATEGORIES.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
-              <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-teal-800 text-xs">▾</span>
-            </div>
-            {errors.category && <p className="text-[12px] text-error">{errors.category}</p>}
-          </div>
+          {/* Category: Discover's 14 (2026-11-20) */}
+          <CategoryPicker
+            label="What do you mainly offer?"
+            value={form.category}
+            onChange={(v) => set('category', v)}
+            error={errors.category}
+            hint="Pick the closest. You choose a category for each listing too."
+          />
 
           <div className="grid grid-cols-2 gap-3">
             <Field

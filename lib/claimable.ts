@@ -183,24 +183,6 @@ export async function resolveListings(ids: string[]): Promise<Map<string, Resolv
   return result;
 }
 
-// Discover categories → the provider form's categories, so a claimed seed
-// listing opens in the edit form with its category already selected (the
-// inverse of CATEGORY_MAP in app/api/activities/route.ts). Categories the form
-// doesn't offer (Martial Arts, Early Childhood, Cooking, Language) are kept
-// as-is; the edit form preserves them.
-const FORM_CATEGORY: Record<string, string> = {
-  Camps: 'Camps',
-  Sports: 'Sports & Athletics',
-  Arts: 'Arts & Crafts',
-  Music: 'Music & Dance',
-  Academic: 'Academic & Tutoring',
-  Outdoor: 'Outdoor Adventure',
-  STEM: 'STEM & Tech',
-  Swimming: 'Swim & Aquatics',
-  Dance: 'Dance & Movement',
-  Theater: 'Theater & Performance',
-};
-
 /** The `submissions` row created when a seed listing's claim is approved. */
 export function seedToSubmissionRow(
   seed: Seed,
@@ -214,7 +196,7 @@ export function seedToSubmissionRow(
     contact_email: owner.contactEmail,
     phone: owner.phone,
     title: seed.title,
-    category: FORM_CATEGORY[seed.category] ?? seed.category,
+    category: seed.category, // the provider form uses Discover's names since 11-20
     subcategory: seed.subcategory ?? null,
     description: seed.description ?? null,
     age_min: seed.ageMin ?? null,

@@ -4,16 +4,14 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { LineIcon } from './LineIcon';
 import { useCatalogStats } from './useCatalogStats';
+import { CATEGORY_NAMES } from '@/lib/categories';
 
 // Home "Explore" section (approved 2026-11-19, canvas
 // https://claude.ai/artifact/9226rxPE8rPpGGU14ZbT8g): Discover's 14
 // categories, icons and tile style, with live counts from /api/stats.
 // Same order as Discover's tile row. Each tile opens Discover on that
 // category, carrying the chosen age.
-const CATEGORIES = [
-  'Sports', 'Camps', 'Swimming', 'Arts', 'Martial Arts', 'Music', 'Outdoor',
-  'Theater', 'Dance', 'Early Childhood', 'Language', 'STEM', 'Cooking', 'Academic',
-];
+const CATEGORIES = CATEGORY_NAMES;
 
 const AGE_FILTERS = [
   { label: '2–4', key: '2-4' },

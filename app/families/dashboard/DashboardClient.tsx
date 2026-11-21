@@ -9,6 +9,8 @@ import { KID_ID_RE, kidColor, kidLabel, newKidId, type Kid as CalendarKid } from
 import type { DateItem } from '@/lib/activity-dates';
 
 import { INTERESTS, NEIGHBORHOODS } from '@/lib/family-profile';
+import { normalizeInterests } from '@/lib/categories';
+import { LineIcon } from '@/app/components/LineIcon';
 
 interface Kid {
   age?: number;
@@ -84,7 +86,7 @@ export default function DashboardClient({
           id: k.id && KID_ID_RE.test(k.id) ? k.id : newKidId(),
           name: k.name ?? '',
           age: String(k.age ?? ''),
-          interests: k.interests ?? (profile.kids.length === 1 ? profile.preferences : []),
+          interests: normalizeInterests(k.interests ?? (profile.kids.length === 1 ? profile.preferences : [])),
         }))
       : [{ id: newKidId(), name: '', age: '', interests: [] as string[] }],
   });
@@ -382,7 +384,7 @@ export default function DashboardClient({
                 {profile.kids.length ? (
                   <div className="flex flex-col gap-3">
                     {profile.kids.map((k, i) => {
-                      const interests = k.interests ?? (profile.kids.length === 1 ? profile.preferences : []);
+                      const interests = normalizeInterests(k.interests ?? (profile.kids.length === 1 ? profile.preferences : []));
                       return (
                         <div key={k.id ?? i}>
                           <p className="text-[15px] text-text-dark">
@@ -444,6 +446,7 @@ export default function DashboardClient({
                 <div>
                   <p className="text-[13px] font-medium text-teal-800">Kids</p>
                   <p className="text-[12px] text-text-muted">First names label and color your Family Rhythm; interests help us suggest the right things for each child.</p>
+                  <p className="text-[12px] text-text-mid mt-1">Interests now match Discover&apos;s categories. Martial Arts, Early Childhood, Language and Cooking have their own choices.</p>
                 </div>
                 {form.kids.map((kid, i) => (
                   <div key={kid.id} className="rounded-[16px] border-2 border-cream-700 p-4">
@@ -488,10 +491,11 @@ export default function DashboardClient({
                             type="button"
                             aria-pressed={active}
                             onClick={() => toggleKidInterest(i, interest)}
-                            className={`px-3 py-1.5 rounded-full text-[12.5px] font-medium border-2 transition-colors ${
+                            className={`min-h-[36px] px-3 py-1.5 rounded-full text-[12.5px] font-medium border-2 transition-colors inline-flex items-center gap-1.5 ${
                               active ? 'bg-teal-800 border-teal-800 text-white' : 'bg-white border-cream-700 text-text-mid hover:border-blue-grey-300'
                             }`}
                           >
+                            <LineIcon name={interest} size={16} color={active ? '#F5EFE0' : '#A8865A'} className="shrink-0" />
                             {interest}
                           </button>
                         );

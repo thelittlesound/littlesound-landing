@@ -2,6 +2,8 @@
 // gets saved. Pure and client-safe (the dashboard and /api/families/profile
 // both use it, so the form and the server agree).
 
+import { CATEGORY_NAMES, normalizeInterests } from '@/lib/categories';
+
 export const NEIGHBORHOODS = [
   'Ballard', 'Beacon Hill', 'Capitol Hill', 'Central District', 'Columbia City',
   'Eastlake', 'First Hill', 'Fremont', 'Green Lake', 'Greenwood',
@@ -12,11 +14,8 @@ export const NEIGHBORHOODS = [
   'West Seattle', 'White Center', 'Citywide',
 ];
 
-export const INTERESTS = [
-  'Camps', 'Sports & Athletics', 'Arts & Crafts', 'Music & Dance',
-  'Academic & Tutoring', 'Outdoor Adventure', 'STEM & Tech',
-  'Swim & Aquatics', 'Dance & Movement', 'Theater & Performance',
-];
+/** A child's interests are Discover's 14 categories (lib/categories.ts). */
+export const INTERESTS = CATEGORY_NAMES;
 
 const KID_ID_RE = /^k_[a-z0-9]{4,16}$/; // same format as lib/calendar-grid.ts
 export const MAX_KIDS = 8;
@@ -55,7 +54,7 @@ export function cleanProfile(raw: unknown): CleanProfile | { error: string } {
     if (hasAge && (!Number.isInteger(age) || age < 0 || age > 18)) {
       return { error: `Kid ${i + 1}: age should be a whole number from 0 to 18.` };
     }
-    const interests = Array.isArray(kid.interests) ? [...new Set(kid.interests.filter((x): x is string => typeof x === 'string' && INTERESTS.includes(x)))] : [];
+    const interests = normalizeInterests(kid.interests); // old labels saved before 11-20 come back in today's names
     if (!name && !hasAge && !interests.length) continue; // an empty row
     const id = typeof kid.id === 'string' && KID_ID_RE.test(kid.id) && !seen.has(kid.id) ? kid.id : null;
     if (!id) return { error: 'Something was off with the kids list. Please refresh and try again.' };

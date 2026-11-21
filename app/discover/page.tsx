@@ -14,6 +14,8 @@ import { KIND_DEFS, kindsOf, kindLabel, showKinds } from '@/lib/kinds';
 import { closeness, parse, placeLabel, type Place, type SearchQuery } from '@/lib/search';
 import { GOALS, picksFor, type Goal } from '@/lib/picks';
 import SearchBox from './SearchBox';
+import { CATEGORY_NAMES } from '@/lib/categories';
+import { ICONS } from '@/app/components/LineIcon';
 
 type Activity = Omit<typeof staticActivities[0], 'price' | 'level' | 'serves' | 'theme' | 'subcategory'> & {
   /** null when the provider doesn't post a fee. */
@@ -34,23 +36,7 @@ const LEVELS: { key: 'rec' | 'club'; label: string; short: string }[] = [
 ];
 
 // Tiles, biggest first. Each has a thin line icon (24×24 stroke paths).
-const CATEGORIES: { name: string; label: string; icon: string }[] = [
-  { name: 'Sports', label: 'Sports', icon: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18M3.6 9.5c5 1.6 11.8 1.6 16.8 0M3.6 14.5c5-1.6 11.8-1.6 16.8 0' },
-  { name: 'Camps', label: 'Camps', icon: 'M3 20L12 4l9 16zM12 4v16M9 20l3-5 3 5' },
-  { name: 'Swimming', label: 'Swimming', icon: 'M2 9c2.5-2 4.5-2 7 0s4.5 2 7 0 4-2 6 0M2 15c2.5-2 4.5-2 7 0s4.5 2 7 0 4-2 6 0' },
-  { name: 'Arts', label: 'Arts', icon: 'M12 3a9 9 0 0 0 0 18c1.5 0 2-1 2-2s-1-2 0-3 3 0 4-1 3-2 3-4c0-4.4-4-8-9-8zM7.5 11h.01M10 7.5h.01M14.5 7.5h.01' },
-  { name: 'Martial Arts', label: 'Martial Arts', icon: 'M3 10h18v3H3zM10 13l-2 7M14 13l2 7M10 9.5h4v4h-4z' },
-  { name: 'Music', label: 'Music', icon: 'M9 18V5l11-2v13M9 18a3 3 0 1 1-6 0a3 3 0 1 1 6 0M20 16a3 3 0 1 1-6 0a3 3 0 1 1 6 0' },
-  { name: 'Outdoor', label: 'Outdoor', icon: 'M12 3l-6 9h4l-4 6h12l-4-6h4zM12 18v3' },
-  { name: 'Theater', label: 'Theater', icon: 'M4 4h10v6a5 5 0 0 1-10 0zM7 8h.01M11 8h.01M7 11c1 1 3 1 4 0M15 9h5v5a5 5 0 0 1-8 4' },
-  { name: 'Dance', label: 'Dance', icon: 'M12 3l2.2 5.5L20 9l-4.5 3.8L17 19l-5-3-5 3 1.5-6.2L4 9l5.8-.5z' },
-  { name: 'Early Childhood', label: 'Early Childhood', icon: 'M12 21v-9M12 12c0-4-3-6-7-6 0 4 3 6 7 6zM12 10c0-3 2-5 6-5 0 3-2 5-6 5z' },
-  { name: 'Language', label: 'Language', icon: 'M4 5h16v10H9l-5 4zM8 9h8M8 12h5' },
-  { name: 'STEM', label: 'STEM', icon: 'M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3M7.5 15h9' },
-  { name: 'Cooking', label: 'Cooking', icon: 'M4 10h16v6a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4zM2 10h20M9 6.5c0-1 1-1 1-2.5M14 6.5c0-1 1-1 1-2.5' },
-  { name: 'Academic', label: 'Academic', icon: 'M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 21V5M8 7h7' },
-];
-const CATEGORY_NAMES = CATEGORIES.map((c) => c.name);
+const CATEGORIES: { name: string; label: string; icon: string }[] = CATEGORY_NAMES.map((name) => ({ name, label: name, icon: ICONS[name] }));
 const iconFor = (cat: string) => CATEGORIES.find((c) => c.name === cat)?.icon ?? CATEGORIES[0].icon;
 const TINTS: Record<string, string> = {
   Sports: '#E3EFE6', Camps: '#E8EFE4', Swimming: '#E4ECF3', Arts: '#EFE6F0', 'Martial Arts': '#EAE7F0', Music: '#F3EBDD', Outdoor: '#E3EFE6',

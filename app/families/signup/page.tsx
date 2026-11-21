@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { LineIcon } from '@/app/components/LineIcon';
+import { CATEGORY_NAMES } from '@/lib/categories';
 
 const NEIGHBORHOODS = [
   'Ballard', 'Beacon Hill', 'Capitol Hill', 'Central District', 'Columbia City',
@@ -15,11 +16,8 @@ const NEIGHBORHOODS = [
   'West Seattle', 'White Center', 'Citywide',
 ];
 
-const INTERESTS = [
-  'Camps', 'Sports & Athletics', 'Arts & Crafts', 'Music & Dance',
-  'Academic & Tutoring', 'Outdoor Adventure', 'STEM & Tech',
-  'Swim & Aquatics', 'Dance & Movement', 'Theater & Performance',
-];
+// Discover's 14 categories (lib/categories.ts, 2026-11-20).
+const INTERESTS = CATEGORY_NAMES;
 
 const STEPS = ['Your account', 'Your family'];
 
@@ -343,12 +341,14 @@ export default function FamilySignupPage() {
                       key={interest}
                       type="button"
                       onClick={() => toggleInterest(interest)}
-                      className={`px-3.5 py-1.5 rounded-full text-[13px] font-medium border-2 transition-colors ${
+                      aria-pressed={active}
+                      className={`min-h-[40px] px-3.5 py-1.5 rounded-full text-[13px] font-medium border-2 transition-colors inline-flex items-center gap-1.5 ${
                         active
                           ? 'bg-teal-800 border-teal-800 text-white'
                           : 'bg-white border-cream-700 text-text-mid hover:border-blue-grey-300'
                       }`}
                     >
+                      <LineIcon name={interest} size={16} color={active ? '#F5EFE0' : '#A8865A'} className="shrink-0" />
                       {interest}
                     </button>
                   );

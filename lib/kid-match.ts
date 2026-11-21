@@ -2,23 +2,12 @@
 // chosen for them in the family profile. Pure and client-safe (Discover and
 // the dashboard both use it).
 
-import { INTERESTS } from '@/lib/family-profile';
+import { CATEGORY_NAMES, normalizeInterests } from '@/lib/categories';
 
 const KID_ID_RE = /^k_[a-z0-9]{4,16}$/; // same format as lib/calendar-grid.ts
 
-/** Profile interests → the Discover categories they cover. */
-export const INTEREST_CATEGORIES: Record<string, string[]> = {
-  'Camps': ['Camps'],
-  'Sports & Athletics': ['Sports', 'Martial Arts'],
-  'Arts & Crafts': ['Arts', 'Cooking'],
-  'Music & Dance': ['Music', 'Dance'],
-  'Academic & Tutoring': ['Academic', 'Language'],
-  'Outdoor Adventure': ['Outdoor'],
-  'STEM & Tech': ['STEM'],
-  'Swim & Aquatics': ['Swimming'],
-  'Dance & Movement': ['Dance'],
-  'Theater & Performance': ['Theater'],
-};
+/** Every child interest is one of Discover's categories (lib/categories.ts). */
+export const INTERESTS = CATEGORY_NAMES;
 
 export interface MatchKid {
   id: string;
@@ -39,16 +28,15 @@ export function browsableKids(raw: unknown): MatchKid[] {
     if (!id || !name || out.some((x) => x.id === id)) continue;
     const ageN = Number(k.age);
     const age = k.age != null && String(k.age).trim() !== '' && Number.isInteger(ageN) ? ageN : null;
-    const interests = Array.isArray(k.interests) ? k.interests.filter((x): x is string => typeof x === 'string' && INTERESTS.includes(x)) : [];
+    const interests = normalizeInterests(k.interests);
     out.push({ id, name, age, interests });
   }
   return out;
 }
 
-/** The Discover categories a child's interests point to (empty: no preference). Little ones also get Early Childhood. */
+/** The Discover categories a child's interests point to (empty: no preference). Little ones also get Early Childhood, picked or not (Evan, 2026-11-20). */
 export function categoriesFor(kid: Pick<MatchKid, 'age' | 'interests'>): Set<string> {
-  const cats = new Set<string>();
-  for (const i of kid.interests) for (const c of INTEREST_CATEGORIES[i] ?? []) cats.add(c);
+  const cats = new Set(normalizeInterests(kid.interests));
   if (cats.size && kid.age != null && kid.age <= 5) cats.add('Early Childhood');
   return cats;
 }
@@ -78,25 +66,10 @@ export function matchesInterest(a: { category: string | null | undefined; theme?
 
 /**
  * Categories a parent actually NAMED for this child ("Ella likes"), used for
- * labels. Narrower than categoriesFor(), which also matches related
- * categories (Arts & Crafts → Cooking) and adds Early Childhood for little
- * kids: fine for matching, but labeling those "Ella likes" would claim
+ * labels. Narrower than categoriesFor(), which also adds Early Childhood for
+ * little kids: fine for matching, but labeling it "Jack likes" would claim
  * something the parent never said.
  */
-const NAMED_CATEGORIES: Record<string, string[]> = {
-  'Camps': ['Camps'],
-  'Sports & Athletics': ['Sports'],
-  'Arts & Crafts': ['Arts'],
-  'Music & Dance': ['Music', 'Dance'],
-  'Academic & Tutoring': ['Academic'],
-  'Outdoor Adventure': ['Outdoor'],
-  'STEM & Tech': ['STEM'],
-  'Swim & Aquatics': ['Swimming'],
-  'Dance & Movement': ['Dance'],
-  'Theater & Performance': ['Theater'],
-};
 export function namedCategories(kid: Pick<MatchKid, 'interests'>): Set<string> {
-  const cats = new Set<string>();
-  for (const i of kid.interests) for (const c of NAMED_CATEGORIES[i] ?? []) cats.add(c);
-  return cats;
+  return new Set(normalizeInterests(kid.interests));
 }
