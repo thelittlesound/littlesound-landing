@@ -10,6 +10,7 @@ import type { DateItem } from '@/lib/activity-dates';
 
 import { INTERESTS, NEIGHBORHOODS } from '@/lib/family-profile';
 import { normalizeInterests } from '@/lib/categories';
+import SavedList from './SavedList';
 import { LineIcon } from '@/app/components/LineIcon';
 
 interface Kid {
@@ -339,35 +340,52 @@ export default function DashboardClient({
                 {calError}
               </p>
             )}
-            <div className="bg-white rounded-[20px] shadow-[0_4px_24px_rgba(10,74,90,0.06)] px-5 py-4 mt-6">
-              <button
-                type="button"
-                onClick={() => setShowSync((v) => !v)}
-                aria-expanded={showSync}
-                className="text-[14px] font-semibold text-teal-700 hover:text-teal-800"
-              >
-                {showSync ? '▾' : '▸'} Sync to your phone &amp; email alerts
-              </button>
-              {showSync && (
-                <div className="mt-3">
-                  <CalendarPanel feedUrl={calendar.feedUrl} emailAlerts={calendar.emailAlerts} />
-                </div>
-              )}
-            </div>
           </>
         )}
 
-        <div className="max-w-[760px] mx-auto mt-10">
+        {/* Saved activities + your family (approved 2026-11-20, canvas
+            https://claude.ai/artifact/EUtavJuUysZ3SSMzXS88Ny). The family
+            panel sits beside the list and takes the full width while editing. */}
+        <div className="flex flex-wrap items-start gap-6 mt-10">
+          <div className={`min-w-0 ${editing ? 'basis-full' : 'flex-[999_1_600px]'}`}>
+            <SavedList
+              saved={saved}
+              kids={calendar?.kids ?? []}
+              dateLines={dateLines}
+              removingId={removingId}
+              onRemove={handleRemoveSaved}
+              sessions={(s) =>
+                calendar && ((calendar.sessions[s.activity_id] ?? []).length || picks.some((p) => p.activityId === s.activity_id && p.status === 'gone')) ? (
+                  <SessionPicker
+                    activity={{
+                      activityId: s.activity_id,
+                      title: s.title ?? 'Activity',
+                      provider: s.provider,
+                      website: s.website,
+                      neighborhood: s.neighborhood,
+                    }}
+                    sessions={calendar.sessions[s.activity_id] ?? []}
+                    picks={picks.filter((p) => p.activityId === s.activity_id)}
+                    today={calendar.today}
+                    busy={calBusy}
+                    kidName={forKidOf(s)?.label}
+                    onToggle={(key, isPicked) => pickAction(s.activity_id, key, isPicked ? 'remove' : 'add', isPicked ? null : forKidOf(s)?.id ?? null)}
+                  />
+                ) : null
+              }
+            />
+          </div>
+          <aside className={`min-w-0 flex flex-col gap-3 ${editing ? 'basis-full order-first' : 'flex-[1_1_280px]'}`}>
         {/* Profile card */}
-        <div id="family-profile" className="scroll-mt-24 bg-white rounded-[24px] shadow-[0_4px_32px_rgba(10,74,90,0.09)] p-8 md:p-10 mb-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="font-display text-2xl font-light text-text-dark">
-              Your family profile
+        <div id="family-profile" className="scroll-mt-24 bg-white rounded-[20px] shadow-[0_4px_20px_rgba(10,74,90,0.07)] p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-display text-[24px] font-normal text-text-dark">
+              Your family
             </h2>
             {!editing && (
               <button
                 onClick={() => setEditing(true)}
-                className="text-[13px] font-semibold text-teal-700 hover:text-teal-800"
+                className="min-h-[36px] px-3.5 rounded-pill border-[1.5px] border-cream-700 bg-white text-[13px] font-semibold text-teal-700 hover:border-teal-700"
               >
                 Edit
               </button>
@@ -375,40 +393,43 @@ export default function DashboardClient({
           </div>
 
           {!editing ? (
-            <div className="flex flex-col gap-4">
-              <ReadRow label="Your name" value={[profile.first_name, profile.last_name].filter(Boolean).join(' ') || '—'} />
-              <ReadRow label="Email" value={profile.email} />
-              <ReadRow label="Neighborhood" value={profile.neighborhood || '—'} />
-              <div>
-                <p className="text-[13px] font-medium text-teal-800 mb-1.5">Kids</p>
-                {profile.kids.length ? (
-                  <div className="flex flex-col gap-3">
-                    {profile.kids.map((k, i) => {
-                      const interests = normalizeInterests(k.interests ?? (profile.kids.length === 1 ? profile.preferences : []));
-                      return (
-                        <div key={k.id ?? i}>
-                          <p className="text-[15px] text-text-dark">
-                            {k.name || `Kid ${i + 1}`}
-                            {k.age != null && <span className="text-text-muted"> · {k.age}</span>}
-                          </p>
-                          {interests.length > 0 && (
-                            <div className="flex flex-wrap gap-1.5 mt-1">
-                              {interests.map((p) => (
-                                <span key={p} className="px-2.5 py-0.5 rounded-full text-[12px] font-medium bg-blue-grey-300/40 text-teal-800">{p}</span>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <p className="text-[15px] text-text-dark">—</p>
-                )}
-                {profile.kids.length > 1 && profile.preferences.length > 0 && !profile.kids.some((k) => k.interests?.length) && (
-                  <p className="text-[12px] text-text-muted mt-2">Family interests from signup: {profile.preferences.join(', ')}. Click Edit to choose them for each child.</p>
-                )}
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-0.5">
+                <p className="text-[14px] text-text-dark flex items-center gap-1.5">
+                  <LineIcon name="pin" size={16} color="#A8865A" className="shrink-0" />
+                  {[[profile.first_name, profile.last_name].filter(Boolean).join(' '), profile.neighborhood].filter(Boolean).join(' · ') || 'Add your name and neighborhood'}
+                </p>
+                <p className="text-[12.5px] text-text-mid pl-[22px] break-all">{profile.email}</p>
               </div>
+              {profile.kids.map((k, i) => {
+                const interests = normalizeInterests(k.interests ?? (profile.kids.length === 1 ? profile.preferences : []));
+                const color = calendar ? kidColor(calendar.kids, k.id) : '#0D5C6E';
+                const name = k.name || `Kid ${i + 1}`;
+                return (
+                  <div key={k.id ?? i} className="flex gap-2.5 items-start pt-3 border-t border-cream-700">
+                    <span className="shrink-0 w-[34px] h-[34px] rounded-full text-white text-[14px] font-semibold inline-flex items-center justify-center" style={{ background: color }}>
+                      {name.charAt(0).toUpperCase()}
+                    </span>
+                    <div className="flex flex-col gap-1.5 min-w-0">
+                      <p className="text-[14.5px] font-semibold text-text-dark">
+                        {name}
+                        {k.age != null && <span className="font-normal text-text-mid"> · {k.age}</span>}
+                      </p>
+                      {interests.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          {interests.map((p) => (
+                            <span key={p} className="px-2 py-0.5 rounded-full text-[11.5px] font-medium bg-blue-grey-300/40 text-teal-800">{p}</span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+              {profile.kids.length === 0 && <p className="text-[14px] text-text-mid">Add your kids to get picks matched to each of them.</p>}
+              {profile.kids.length > 1 && profile.preferences.length > 0 && !profile.kids.some((k) => k.interests?.length) && (
+                <p className="text-[12px] text-text-muted">Family interests from signup: {normalizeInterests(profile.preferences).join(', ')}. Tap Edit to choose them for each child.</p>
+              )}
             </div>
           ) : (
             <div className="flex flex-col gap-5">
@@ -542,129 +563,28 @@ export default function DashboardClient({
             </div>
           )}
         </div>
-
-        {/* Saved activities */}
-        <div className="bg-white rounded-[24px] shadow-[0_4px_32px_rgba(10,74,90,0.09)] p-8 md:p-10 mb-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="font-display text-2xl font-light text-text-dark">
-              Saved activities
-            </h2>
-            {saved.length > 0 && (
-              <span className="text-[13px] text-text-muted">{saved.length} saved</span>
-            )}
-          </div>
-
-          {saved.length === 0 ? (
-            <div className="text-center py-6">
-              <p className="text-[15px] text-text-mid mb-4">
-                You haven&apos;t saved anything yet. Tap the heart on any activity to keep it here.
-              </p>
-              <a
-                href="/discover"
-                className="inline-flex items-center justify-center h-11 rounded-full bg-teal-800 text-white font-semibold text-[14px] px-6 hover:bg-teal-700 transition-colors"
+            {calendar && (
+            <div className="bg-white rounded-[16px] shadow-[0_4px_20px_rgba(10,74,90,0.07)] px-4 py-3.5">
+              <button
+                type="button"
+                onClick={() => setShowSync((v) => !v)}
+                aria-expanded={showSync}
+                className="min-h-[36px] w-full flex items-center gap-2.5 text-left text-[14px] font-semibold text-text-dark hover:text-teal-800"
               >
-                Browse activities →
-              </a>
-            </div>
-          ) : (
-            <>
-            <div className="flex flex-col gap-3">
-              {saved.map((s) => (
-                <div
-                  key={s.activity_id}
-                  className="border border-cream-700 rounded-[16px] p-4"
-                >
-                  {forKidOf(s) && (
-                    <p className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide mb-1" style={{ color: kidColor(calendar!.kids, s.kid_id) }}>
-                      <span className="w-2 h-2 rounded-full" style={{ background: kidColor(calendar!.kids, s.kid_id) }} />
-                      For {forKidOf(s)!.label}
-                    </p>
-                  )}
-                  <h3 className="font-display text-[20px] font-medium text-text-dark leading-snug">
-                    {s.title}
-                  </h3>
-                  {s.provider && (
-                    <p className="text-[13px] text-teal-700 font-medium">{s.provider}</p>
-                  )}
-                  <p className="text-[12px] text-text-muted mt-1">
-                    {[s.category, s.neighborhood].filter(Boolean).join(' · ')}
-                    {s.age_min != null ? ` · Ages ${s.age_min}–${s.age_max}` : ''}
-                    {s.price != null ? ` · $${s.price}${s.price_unit ? `/${s.price_unit}` : ''}` : ''}
-                  </p>
-                  {dateLines[s.activity_id] && (
-                    <p className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-gold-deep bg-gold/15 rounded-full px-3 py-1 mt-2">
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#A8865A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <rect x="3" y="5" width="18" height="16" rx="2" />
-                        <path d="M16 3v4M8 3v4M3 10h18" />
-                      </svg>
-                      {dateLines[s.activity_id]}
-                    </p>
-                  )}
-                  {calendar && (
-                    <SessionPicker
-                      activity={{
-                        activityId: s.activity_id,
-                        title: s.title ?? 'Activity',
-                        provider: s.provider,
-                        website: s.website,
-                        neighborhood: s.neighborhood,
-                      }}
-                      sessions={calendar.sessions[s.activity_id] ?? []}
-                      picks={picks.filter((p) => p.activityId === s.activity_id)}
-                      today={calendar.today}
-                      busy={calBusy}
-                      kidName={forKidOf(s)?.label}
-                      onToggle={(key, isPicked) => pickAction(s.activity_id, key, isPicked ? 'remove' : 'add', isPicked ? null : forKidOf(s)?.id ?? null)}
-                    />
-                  )}
-                  <div className="flex items-center gap-4 mt-3">
-                    {s.website && (
-                      <a
-                        href={s.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[13px] font-semibold text-teal-700 hover:text-teal-800"
-                      >
-                        View details →
-                      </a>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveSaved(s.activity_id)}
-                      disabled={removingId === s.activity_id}
-                      className="text-[13px] font-medium text-text-muted hover:text-error transition-colors disabled:opacity-50"
-                    >
-                      {removingId === s.activity_id ? 'Removing…' : 'Remove'}
-                    </button>
-                  </div>
+                <LineIcon name="fresh" size={20} color="#A8865A" className="shrink-0" />
+                <span className="flex-1">Sync to your phone &amp; email alerts</span>
+                <span className="text-teal-700" aria-hidden="true">{showSync ? '▾' : '▸'}</span>
+              </button>
+              {showSync && (
+                <div className="mt-3">
+                  <CalendarPanel feedUrl={calendar.feedUrl} emailAlerts={calendar.emailAlerts} />
                 </div>
-              ))}
+              )}
             </div>
-            </>
-          )}
-        </div>
-
-        {/* Booking history — booking is out of Phase 1 scope, so there's no
-            feature (or data) behind this yet. Honest placeholder, not a fake. */}
-        <div className="bg-white/60 border border-cream-700 rounded-[20px] p-6">
-          <h2 className="font-display text-xl font-light text-text-dark mb-1">
-            Booking history
-          </h2>
-          <p className="text-[14px] text-text-mid">
-            Once you can book activities through Little Sound, your bookings will show up here.
-          </p>
-        </div>
+            )}
+          </aside>
         </div>
       </div>
     </main>
-  );
-}
-
-function ReadRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <p className="text-[13px] font-medium text-teal-800 mb-0.5">{label}</p>
-      <p className="text-[15px] text-text-dark">{value}</p>
-    </div>
   );
 }

@@ -9,6 +9,12 @@ export const CATEGORY_NAMES = [
   'Theater', 'Dance', 'Early Childhood', 'Language', 'STEM', 'Cooking', 'Academic',
 ];
 
+/** Soft tile colors behind each category's line icon (Discover cards, dashboard groups). */
+export const CATEGORY_TINTS: Record<string, string> = {
+  Sports: '#E3EFE6', Camps: '#E8EFE4', Swimming: '#E4ECF3', Arts: '#EFE6F0', 'Martial Arts': '#EAE7F0', Music: '#F3EBDD', Outdoor: '#E3EFE6',
+  Theater: '#F3E7DC', Dance: '#F3E4E4', 'Early Childhood': '#F2EFD9', Language: '#E0F0E9', STEM: '#E1EEF3', Cooking: '#F5E8D6', Academic: '#E5E8F3',
+};
+
 /**
  * The older 10-label list (provider forms and family interests before
  * 2026-11-20) → today's names. Only what the label actually said: "Sports &

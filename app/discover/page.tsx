@@ -14,7 +14,7 @@ import { KIND_DEFS, kindsOf, kindLabel, showKinds } from '@/lib/kinds';
 import { closeness, parse, placeLabel, type Place, type SearchQuery } from '@/lib/search';
 import { GOALS, picksFor, type Goal } from '@/lib/picks';
 import SearchBox from './SearchBox';
-import { CATEGORY_NAMES } from '@/lib/categories';
+import { CATEGORY_NAMES, CATEGORY_TINTS } from '@/lib/categories';
 import { ICONS } from '@/app/components/LineIcon';
 
 type Activity = Omit<typeof staticActivities[0], 'price' | 'level' | 'serves' | 'theme' | 'subcategory'> & {
@@ -38,10 +38,7 @@ const LEVELS: { key: 'rec' | 'club'; label: string; short: string }[] = [
 // Tiles, biggest first. Each has a thin line icon (24×24 stroke paths).
 const CATEGORIES: { name: string; label: string; icon: string }[] = CATEGORY_NAMES.map((name) => ({ name, label: name, icon: ICONS[name] }));
 const iconFor = (cat: string) => CATEGORIES.find((c) => c.name === cat)?.icon ?? CATEGORIES[0].icon;
-const TINTS: Record<string, string> = {
-  Sports: '#E3EFE6', Camps: '#E8EFE4', Swimming: '#E4ECF3', Arts: '#EFE6F0', 'Martial Arts': '#EAE7F0', Music: '#F3EBDD', Outdoor: '#E3EFE6',
-  Theater: '#F3E7DC', Dance: '#F3E4E4', 'Early Childhood': '#F2EFD9', Language: '#E0F0E9', STEM: '#E1EEF3', Cooking: '#F5E8D6', Academic: '#E5E8F3',
-};
+const TINTS = CATEGORY_TINTS;
 const CATEGORY_LINES: Record<string, string> = {
   Sports: 'Rec leagues, club teams and clinics.',
   Camps: 'Summer weeks and school-break days, from sailing to science.',
