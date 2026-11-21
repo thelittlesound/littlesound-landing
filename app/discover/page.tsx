@@ -591,7 +591,7 @@ export default function Discover() {
   const heading = picksMode
     ? nPicks === 0
       ? `No picks for ${forKid!.name} here yet`
-      : `${['One pick', 'Two picks', 'Three picks'][nPicks - 1]} for ${forKid!.name}`
+      : `Picks for ${forKid!.name}`
     : text
     ? `Results for “${text}”`
     : catLabel
